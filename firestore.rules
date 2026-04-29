@@ -1,0 +1,52 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && (
+          request.auth.token.email == 'abuali882005@gmail.com'
+          || request.auth.token.email == 'info@esnad.com.lb'
+        );
+    }
+
+    function isOwnDocument(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /publications/{publicationId} {
+      allow read: if isAdmin()
+        || resource.data.get('status', '') == 'published'
+        || resource.data.get('workflow_stage', '') == 'published';
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /user_libraries/{userId} {
+      allow read, write: if isOwnDocument(userId) || isAdmin();
+    }
+
+    match /purchase_records/{recordId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /contact_messages/{messageId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /subscribers/{subscriberId} {
+      allow read, update, delete: if isAdmin();
+      allow create: if true;
+    }
+
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

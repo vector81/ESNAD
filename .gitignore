@@ -1,0 +1,39 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Env files — never commit
+.env
+.env.*
+!.env.example
+
+# Firebase secrets / exports — never commit
+service-account.json
+firebase-admin-user.json
+firebase-auth-export.json
+firebase-debug.log*
+firebase-debug.*.log*
+.firebase/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.vercel

@@ -1,0 +1,51 @@
+import { mkdir, writeFile } from 'node:fs/promises'
+import { dirname, resolve } from 'node:path'
+
+const targetPath = resolve('dist/public/vercel.json')
+const config = {
+  rewrites: [
+    {
+      source: '/assets/:path*',
+      destination: '/assets/:path*',
+    },
+    {
+      source: '/favicon.svg',
+      destination: '/favicon.svg',
+    },
+    {
+      source: '/logo.png',
+      destination: '/logo.png',
+    },
+    {
+      source: '/robots.txt',
+      destination: '/robots.txt',
+    },
+    {
+      source: '/sitemap.xml',
+      destination: '/sitemap.xml',
+    },
+    {
+      source: '/library/:slug',
+      destination: '/api/publication-shell?slug=:slug&section=library&lang=ar',
+    },
+    {
+      source: '/books/:slug',
+      destination: '/api/publication-shell?slug=:slug&section=books&lang=ar',
+    },
+    {
+      source: '/en/library/:slug',
+      destination: '/api/publication-shell?slug=:slug&section=library&lang=en',
+    },
+    {
+      source: '/en/books/:slug',
+      destination: '/api/publication-shell?slug=:slug&section=books&lang=en',
+    },
+    {
+      source: '/(.*)',
+      destination: '/index.html',
+    },
+  ],
+}
+
+await mkdir(dirname(targetPath), { recursive: true })
+await writeFile(targetPath, `${JSON.stringify(config, null, 2)}\n`, 'utf8')
