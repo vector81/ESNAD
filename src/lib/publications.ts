@@ -102,8 +102,11 @@ export function getCoverObjectPosition(
 }
 
 export function getShareSlug(publication: Publication) {
-  const latin = slugifyLatin(publication.title_en || publication.title_ar || publication.slug)
-  return latin || publication.slug
+  // Prefer the editor-set slug (Arabic, by design for an Arabic publication).
+  // Browsers and Vercel handle Unicode in URL paths fine; share links auto-encode.
+  // Fall back to a Latin transliteration only if no slug was ever set on the doc.
+  if (publication.slug) return publication.slug
+  return slugifyLatin(publication.title_en || publication.title_ar || '') || publication.id
 }
 
 function normalizeTags(value: string[] | string | undefined) {
@@ -152,6 +155,8 @@ function normalizePublication(id: string, raw: Partial<PublicationInput>): Publi
     topic_en: raw.topic_en?.trim() || '',
     title_ar: raw.title_ar?.trim() || 'إصدار بلا عنوان',
     title_en: raw.title_en?.trim() || raw.title_ar?.trim() || 'Untitled publication',
+    headline_ar: raw.headline_ar?.trim() || '',
+    headline_en: raw.headline_en?.trim() || '',
     abstract_ar: raw.abstract_ar?.trim() || '',
     abstract_en: raw.abstract_en?.trim() || raw.abstract_ar?.trim() || '',
     description_ar: raw.description_ar?.trim() || '',
@@ -301,6 +306,23 @@ export const PUBLICATION_KINDS: PublicationKind[] = ['article', 'research-paper'
 
 export function getPublicationTitle(publication: Publication, language: AppLanguage) {
   return language === 'ar' ? publication.title_ar : publication.title_en || publication.title_ar
+}
+
+// Short headline for cards, social previews, browser tabs. Falls back to the
+// full title when no headline has been set on the doc.
+export function getPublicationHeadline(publication: Publication, language: AppLanguage) {
+  if (language === 'ar') {
+    return publication.headline_ar?.trim()
+      || publication.headline_en?.trim()
+      || publication.title_ar
+      || publication.title_en
+      || ''
+  }
+  return publication.headline_en?.trim()
+    || publication.headline_ar?.trim()
+    || publication.title_en
+    || publication.title_ar
+    || ''
 }
 
 export function getPublicationAbstract(publication: Publication, language: AppLanguage) {

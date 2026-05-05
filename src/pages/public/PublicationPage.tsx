@@ -7,6 +7,7 @@ import { auth, isFirebaseConfigured } from '../../lib/firebase'
 import { grantPurchasedItem, toggleSavedItem } from '../../lib/library'
 import { buildLocalizedPath } from '../../lib/navigation'
 import { createCheckoutSession } from '../../lib/payments'
+import { optimizeCloudinaryUrl } from '../../lib/cloudinary'
 import { renderPmJson } from '../../reader/lib/render-pm-json'
 import {
   formatCurrency,
@@ -403,7 +404,8 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
           {publication.cover_image ? (
             <img
               alt={getPublicationTitle(publication, language)}
-              src={publication.cover_image}
+              src={optimizeCloudinaryUrl(publication.cover_image, { width: 1200 })}
+              decoding="async"
               style={{ objectPosition: getCoverObjectPosition(publication) }}
             />
           ) : null}

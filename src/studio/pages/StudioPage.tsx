@@ -153,6 +153,10 @@ export function StudioPage() {
   const lastChapterIdRef = useRef<string | null>(null)
   useEffect(() => {
     if (!editor) return
+    // Wait for the freshly fetched publication to land before syncing the editor.
+    // Otherwise we'd push the *previous* article's content into a new article slot,
+    // and a subsequent save would overwrite the new doc with the old body.
+    if (isLoading) return
     const target = currentChapter?.content_json ?? publication.content_json ?? { type: 'doc', content: [{ type: 'paragraph' }] }
     const shouldSync = id !== lastLoadedIdRef.current || currentChapterId !== lastChapterIdRef.current
     if (shouldSync) {
@@ -160,7 +164,7 @@ export function StudioPage() {
       lastChapterIdRef.current = currentChapterId
       editor.commands.setContent(target)
     }
-  }, [editor, id, currentChapterId, currentChapter?.content_json, publication.content_json])
+  }, [editor, id, currentChapterId, isLoading, currentChapter?.content_json, publication.content_json])
 
   const handleChange = useCallback((updates: Partial<PublicationInput>) => {
     setPublication((current) => ({ ...current, ...updates }))

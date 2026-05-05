@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { PublicSiteShell } from '../../components/public/PublicSiteShell'
 import { db, isFirebaseConfigured } from '../../lib/firebase'
+import { optimizeCloudinaryUrl } from '../../lib/cloudinary'
 import { buildLocalizedPath, buildPublicationPath } from '../../lib/navigation'
 import {
   PUBLICATION_CATEGORIES,
@@ -152,7 +153,9 @@ export function ResearchHomePage({ language }: { language: AppLanguage }) {
               {heroFeature.cover_image ? (
                 <img
                   alt={getPublicationTitle(heroFeature, language)}
-                  src={heroFeature.cover_image}
+                  src={optimizeCloudinaryUrl(heroFeature.cover_image, { width: 1600 })}
+                  decoding="async"
+                  fetchPriority="high"
                   style={{ objectPosition: getCoverObjectPosition(heroFeature) }}
                 />
               ) : (
@@ -213,7 +216,9 @@ export function ResearchHomePage({ language }: { language: AppLanguage }) {
                 {publication.cover_image ? (
                   <img
                     alt={getPublicationTitle(publication, language)}
-                    src={publication.cover_image}
+                    src={optimizeCloudinaryUrl(publication.cover_image, { width: 800 })}
+                    loading="lazy"
+                    decoding="async"
                     style={{ objectPosition: getCoverObjectPosition(publication) }}
                   />
                 ) : (
@@ -240,7 +245,9 @@ export function ResearchHomePage({ language }: { language: AppLanguage }) {
               {spotlight.cover_image ? (
                 <img
                   alt={getPublicationTitle(spotlight, language)}
-                  src={spotlight.cover_image}
+                  src={optimizeCloudinaryUrl(spotlight.cover_image, { width: 1200 })}
+                  loading="lazy"
+                  decoding="async"
                   style={{ objectPosition: getCoverObjectPosition(spotlight) }}
                 />
               ) : null}

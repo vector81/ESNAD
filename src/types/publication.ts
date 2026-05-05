@@ -54,6 +54,10 @@ export interface Publication {
   topic_en: string
   title_ar: string
   title_en: string
+  // Short headline (≤80 chars) used for cards, social previews, browser title.
+  // Falls back to the full title when empty.
+  headline_ar: string
+  headline_en: string
   abstract_ar: string
   abstract_en: string
   description_ar: string
@@ -109,6 +113,8 @@ export const EMPTY_PUBLICATION_INPUT: PublicationInput = {
   topic_en: '',
   title_ar: '',
   title_en: '',
+  headline_ar: '',
+  headline_en: '',
   abstract_ar: '',
   abstract_en: '',
   description_ar: '',

@@ -161,12 +161,45 @@ function getTitle(pub, language) {
     : pub.title_ar || pub.title_en || DEFAULT_SITE_TITLE
 }
 
-function getAbstract(pub, language) {
-  const value =
+// Short headline for share cards / browser tabs. Falls back to the full title
+// when the editor hasn't set a headline. This is what controls how the article
+// looks on WhatsApp / Twitter / Facebook previews.
+function getHeadline(pub, language) {
+  const trimmed = (v) => (typeof v === 'string' ? v.trim() : '')
+  const candidates =
     language === 'en'
-      ? pub.abstract_en || pub.abstract_ar || pub.description_en || pub.description_ar || ''
-      : pub.abstract_ar || pub.abstract_en || pub.description_ar || pub.description_en || ''
+      ? [pub.headline_en, pub.headline_ar, pub.title_en, pub.title_ar]
+      : [pub.headline_ar, pub.headline_en, pub.title_ar, pub.title_en]
+  return candidates.map(trimmed).find(Boolean) || DEFAULT_SITE_TITLE
+}
+
+function extractContentText(node) {
+  if (!node || typeof node !== 'object') return ''
+  if (typeof node.text === 'string') return node.text
+  if (Array.isArray(node.content)) return node.content.map(extractContentText).join(' ')
+  return ''
+}
+
+function getAbstract(pub, language) {
+  const fields =
+    language === 'en'
+      ? [pub.abstract_en, pub.abstract_ar, pub.description_en, pub.description_ar]
+      : [pub.abstract_ar, pub.abstract_en, pub.description_ar, pub.description_en]
+  let value = fields.find((v) => v && String(v).trim()) || ''
+  // Last-resort fallback so WhatsApp/Twitter previews never show the generic site
+  // description on a real article: pull a snippet from the body.
+  if (!value && pub.content_json) value = extractContentText(pub.content_json)
   return String(value).replace(/\s+/g, ' ').trim().slice(0, 200)
+}
+
+// WhatsApp's preview crawler skips images larger than ~2 MB and is happiest
+// at <300 KB. Cloudinary-hosted assets get an inline transform that delivers
+// an optimized JPEG sized for OG cards.
+function optimizeOgImage(url) {
+  if (!url) return ''
+  if (!/res\.cloudinary\.com\/.+?\/image\/upload\//.test(url)) return url
+  if (/\/image\/upload\/[^/]*[fq]_[^/]*\//.test(url)) return url
+  return url.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_1200,c_limit/')
 }
 
 function buildAbsoluteUrl(path = '/') {
@@ -250,9 +283,13 @@ export default async function handler(request, response) {
     response.status(200).send(
       renderHtml({
         lang: language,
-        title: getTitle(pub, language),
+        // Headline (short) for browser tab + share cards; falls back to full
+        // title when the editor hasn't set one. The article page itself still
+        // renders the long academic title in its h1 — only outbound metadata
+        // uses the headline.
+        title: getHeadline(pub, language) || getTitle(pub, language),
         description: getAbstract(pub, language),
-        image: pub.cover_image || '',
+        image: optimizeOgImage(pub.cover_image || ''),
         url: buildAbsoluteUrl(fallbackPath),
         ogType: 'article',
       }),

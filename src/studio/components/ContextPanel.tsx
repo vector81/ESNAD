@@ -153,6 +153,13 @@ export function ContextPanel({
                 onChange={(e) => onChange({ title_ar: e.target.value })}
                 placeholder="العنوان بالعربية *"
               />
+              <input
+                className="editor-input"
+                maxLength={120}
+                value={publication.headline_ar}
+                onChange={(e) => onChange({ headline_ar: e.target.value })}
+                placeholder="عنوان مختصر للبطاقات والمشاركة (≤80 حرفًا)"
+              />
               <textarea
                 className="editor-textarea"
                 rows={3}

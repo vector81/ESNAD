@@ -183,6 +183,31 @@ export function AdminArticleEditorPage() {
           </div>
 
           <div className="editor-fieldset">
+            <label className="editor-label">عنوان مختصر (للبطاقات والمشاركة) — يُفضّل أقل من 80 حرفًا</label>
+            <input
+              className="editor-input"
+              maxLength={120}
+              value={form.headline_ar}
+              onChange={(e) => updateField('headline_ar', e.target.value)}
+              placeholder="مثال: لبنان لا يصافح قاتله"
+            />
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+              يظهر في بطاقات الموقع وروابط المشاركة على واتساب وتويتر وفيسبوك. اتركه فارغًا لاستخدام العنوان الكامل.
+            </p>
+          </div>
+          <div className="editor-fieldset">
+            <label className="editor-label">Short headline (English)</label>
+            <input
+              dir="ltr"
+              className="editor-input"
+              maxLength={120}
+              value={form.headline_en}
+              onChange={(e) => updateField('headline_en', e.target.value)}
+              placeholder="e.g. Lebanon does not shake its killer's hand"
+            />
+          </div>
+
+          <div className="editor-fieldset">
             <label className="editor-label">الملخص بالعربية</label>
             <textarea
               className="editor-textarea"

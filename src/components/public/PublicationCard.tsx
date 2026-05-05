@@ -5,9 +5,11 @@ import {
   getPublicationAbstract,
   getPublicationAuthor,
   getPublicationCategoryLabel,
+  getPublicationHeadline,
   getPublicationTitle,
   getShareSlug,
 } from '../../lib/publications'
+import { optimizeCloudinaryUrl } from '../../lib/cloudinary'
 import type { AppLanguage, Publication } from '../../types/publication'
 
 function getPublicationPath(publication: Publication, language: AppLanguage) {
@@ -34,7 +36,9 @@ export function PublicationCard({
           {publication.cover_image ? (
             <img
               alt={getPublicationTitle(publication, language)}
-              src={publication.cover_image}
+              src={optimizeCloudinaryUrl(publication.cover_image, { width: 800 })}
+              loading="lazy"
+              decoding="async"
               style={{ objectPosition: getCoverObjectPosition(publication) }}
             />
           ) : (
@@ -59,7 +63,7 @@ export function PublicationCard({
             <span>{getPublicationAuthor(publication, language)}</span>
             <span>{publishedDate}</span>
           </div>
-          <h3 className="card__title">{getPublicationTitle(publication, language)}</h3>
+          <h3 className="card__title">{getPublicationHeadline(publication, language)}</h3>
           <p className="card__text">{getPublicationAbstract(publication, language)}</p>
           <div className="card__meta">
             <span className="badge badge--accent">{getPublicationCategoryLabel(publication.category, language)}</span>
