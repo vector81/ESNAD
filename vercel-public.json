@@ -2,6 +2,23 @@
   "framework": "vite",
   "buildCommand": "npm run build:public",
   "outputDirectory": "dist/public",
+  "redirects": [
+    {
+      "source": "/llm.txt",
+      "destination": "/llms.txt",
+      "statusCode": 301
+    },
+    {
+      "source": "/llms.text",
+      "destination": "/llms.txt",
+      "statusCode": 301
+    },
+    {
+      "source": "/llm.text",
+      "destination": "/llms.txt",
+      "statusCode": 301
+    }
+  ],
   "rewrites": [
     {
       "source": "/assets/:path*",
@@ -20,8 +37,12 @@
       "destination": "/robots.txt"
     },
     {
+      "source": "/llms.txt",
+      "destination": "/llms.txt"
+    },
+    {
       "source": "/sitemap.xml",
-      "destination": "/sitemap.xml"
+      "destination": "/api/sitemap"
     },
     {
       "source": "/library/:slug",

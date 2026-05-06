@@ -89,22 +89,24 @@ function buildPublishedFilter(extraFilter, publishedField) {
 }
 
 async function findBySlugField(projectId, apiKey, slug) {
-  const slugFilter = {
-    fieldFilter: {
-      field: { fieldPath: 'slug' },
-      op: 'EQUAL',
-      value: { stringValue: slug },
-    },
-  }
-  for (const publishedField of ['status', 'workflow_stage']) {
-    const docs = await firestoreQuery(projectId, apiKey, {
-      structuredQuery: {
-        from: [{ collectionId: 'publications' }],
-        where: buildPublishedFilter(slugFilter, publishedField),
-        limit: 1,
+  for (const slugField of ['slug', 'slug_ar', 'slugAr', 'slug_latin', 'slugLatin', 'slug_en', 'slugEn']) {
+    const slugFilter = {
+      fieldFilter: {
+        field: { fieldPath: slugField },
+        op: 'EQUAL',
+        value: { stringValue: slug },
       },
-    })
-    if (docs[0]) return docs[0]
+    }
+    for (const publishedField of ['status', 'workflow_stage']) {
+      const docs = await firestoreQuery(projectId, apiKey, {
+        structuredQuery: {
+          from: [{ collectionId: 'publications' }],
+          where: buildPublishedFilter(slugFilter, publishedField),
+          limit: 1,
+        },
+      })
+      if (docs[0]) return docs[0]
+    }
   }
   return null
 }
@@ -135,8 +137,14 @@ async function findByTitleSlug(projectId, apiKey, slug) {
   const docs = await listPublished(projectId, apiKey)
   return (
     docs.find((pub) => {
-      const fromTitle = slugifyLatin(pub.title_en || pub.title_ar || pub.slug || '')
-      return fromTitle === slug
+      const latinCandidates = [
+        pub.slug_latin,
+        pub.slugLatin,
+        pub.slug_en,
+        pub.slugEn,
+        slugifyLatin(pub.title_en || pub.title_ar || pub.slug || ''),
+      ]
+      return latinCandidates.map((item) => String(item || '').trim()).includes(slug)
     }) ?? null
   )
 }

@@ -144,6 +144,13 @@ function normalizePublication(id: string, raw: Partial<PublicationInput>): Publi
   return {
     id,
     slug: raw.slug?.trim() || slugify(raw.title_en || raw.title_ar || id),
+    slug_ar: raw.slug_ar?.trim() || raw.slugAr?.trim() || raw.slug?.trim() || '',
+    slug_latin:
+      raw.slug_latin?.trim()
+      || raw.slugLatin?.trim()
+      || raw.slug_en?.trim()
+      || raw.slugEn?.trim()
+      || slugifyLatin(raw.title_en || raw.title_ar || raw.slug || id),
     kind,
     type,
     status: raw.status === 'published' || workflowStage === 'published' ? 'published' : 'draft',
@@ -366,7 +373,18 @@ export async function listPublications(filters: PublicationFilters = {}) {
 
 export async function getPublicationBySlug(slug: string) {
   const matchSlug = (item: Publication) =>
-    item.slug === slug || slugifyLatin(item.title_en || item.title_ar || item.slug) === slug
+    [
+      item.slug,
+      item.slug_ar,
+      item.slugAr,
+      item.slug_latin,
+      item.slugLatin,
+      item.slug_en,
+      item.slugEn,
+      slugifyLatin(item.title_en || item.title_ar || item.slug),
+    ]
+      .map((candidate) => candidate?.trim())
+      .includes(slug)
 
   if (!db || !isFirebaseConfigured) {
     return readLocalPublications().find(matchSlug) ?? null
@@ -374,15 +392,19 @@ export async function getPublicationBySlug(slug: string) {
   try {
     // Query Firestore directly by slug field — avoids fetching all publications
     // and eliminates stale-cache cross-contamination between articles.
-    const [bySlugStatus, bySlugWorkflow] = await Promise.all([
-      getDocs(query(collection(db, 'publications'), where('slug', '==', slug), where('status', '==', 'published'))),
-      getDocs(query(collection(db, 'publications'), where('slug', '==', slug), where('workflow_stage', '==', 'published'))),
-    ])
+    for (const slugField of ['slug', 'slug_ar', 'slugAr', 'slug_latin', 'slugLatin', 'slug_en', 'slugEn']) {
+      const [bySlugStatus, bySlugWorkflow] = await Promise.all([
+        getDocs(query(collection(db, 'publications'), where(slugField, '==', slug), where('status', '==', 'published'))),
+        getDocs(
+          query(collection(db, 'publications'), where(slugField, '==', slug), where('workflow_stage', '==', 'published')),
+        ),
+      ])
 
-    for (const snapshot of [bySlugStatus, bySlugWorkflow]) {
-      if (!snapshot.empty) {
-        const d = snapshot.docs[0]
-        return normalizePublication(d.id, d.data() as PublicationInput)
+      for (const snapshot of [bySlugStatus, bySlugWorkflow]) {
+        if (!snapshot.empty) {
+          const d = snapshot.docs[0]
+          return normalizePublication(d.id, d.data() as PublicationInput)
+        }
       }
     }
 

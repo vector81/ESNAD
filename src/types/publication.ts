@@ -41,6 +41,12 @@ export interface TocItem {
 export interface Publication {
   id: string
   slug: string
+  slug_ar?: string
+  slug_latin?: string
+  slugAr?: string
+  slugLatin?: string
+  slug_en?: string
+  slugEn?: string
   // Legacy 'kind' is preserved for backward compatibility
   kind: PublicationKind
   // New 'type' drives studio behavior (article vs book)

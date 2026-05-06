@@ -3,6 +3,23 @@ import { dirname, resolve } from 'node:path'
 
 const targetPath = resolve('dist/public/vercel.json')
 const config = {
+  redirects: [
+    {
+      source: '/llm.txt',
+      destination: '/llms.txt',
+      statusCode: 301,
+    },
+    {
+      source: '/llms.text',
+      destination: '/llms.txt',
+      statusCode: 301,
+    },
+    {
+      source: '/llm.text',
+      destination: '/llms.txt',
+      statusCode: 301,
+    },
+  ],
   rewrites: [
     {
       source: '/assets/:path*',
@@ -21,8 +38,12 @@ const config = {
       destination: '/robots.txt',
     },
     {
+      source: '/llms.txt',
+      destination: '/llms.txt',
+    },
+    {
       source: '/sitemap.xml',
-      destination: '/sitemap.xml',
+      destination: '/api/sitemap',
     },
     {
       source: '/library/:slug',

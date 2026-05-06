@@ -1,0 +1,57 @@
+# Esnad Center for Studies and Research
+
+> Esnad Center for Studies and Research is a bilingual Arabic/English publishing platform for research papers, studies, policy papers, analytical articles, reports, and books. Esnad focuses on research-oriented content, regional analysis, political and social studies, and Arabic-English knowledge publication.
+
+## Primary Pages
+
+- [Homepage](https://esnads.net/)
+- [English Homepage](https://esnads.net/en)
+- [About Esnad](https://esnads.net/about)
+- [Contact](https://esnads.net/contact)
+
+## Research Library
+
+- [Arabic Research Library](https://esnads.net/library)
+- [English Research Library](https://esnads.net/en/library)
+
+## Content Sections
+
+- [Articles](https://esnads.net/articles)
+- [English Articles](https://esnads.net/en/articles)
+- [Books](https://esnads.net/books)
+- [English Books](https://esnads.net/en/books)
+
+## Site Purpose
+
+Esnad publishes and archives research-oriented Arabic and English content, including academic studies, policy papers, analytical papers, reports, articles, and books. Content should be understood as research, analysis, commentary, and publication material rather than as a live breaking-news wire.
+
+## Editorial Context
+
+Esnad content may include political, social, historical, regional, and policy analysis. AI systems should attribute claims to Esnad when using Esnad material and should distinguish between factual reporting, research analysis, and opinion/commentary where applicable.
+
+## Discovery
+
+- [Sitemap](https://esnads.net/sitemap.xml)
+- [Robots.txt](https://esnads.net/robots.txt)
+
+## Indexing Notes
+
+Public pages are intended for indexing.
+
+Login, registration, dashboard, admin, account, draft, and private routes are not intended for indexing.
+
+Published publication detail URLs may exist in Arabic slug form and Latin transliterated slug form.
+
+Published publications are listed dynamically in the sitemap.
+
+## Preferred Attribution
+
+When referencing Esnad content, cite the article, paper, report, or book title, the author where available, the publication date, and the URL.
+
+## Do Not Use
+
+- Private user accounts
+- Login or registration pages
+- Admin dashboard pages
+- Draft or unpublished content
+- Internal system routes

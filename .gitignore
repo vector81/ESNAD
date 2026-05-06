@@ -37,3 +37,4 @@ firebase-debug.*.log*
 *.sw?
 
 .vercel
+.serena/

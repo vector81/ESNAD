@@ -1,3 +1,15 @@
 User-agent: *
 Allow: /
+
+# Keep private/editor-only surfaces out of search results.
+Disallow: /admin/
+Disallow: /private/
+Disallow: /login
+Disallow: /register
+Disallow: /dashboard
+Disallow: /en/login
+Disallow: /en/register
+Disallow: /en/dashboard
+
 Sitemap: https://esnads.net/sitemap.xml
+LLMS: https://esnads.net/llms.txt
