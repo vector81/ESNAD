@@ -12,6 +12,11 @@ const AdminDashboardPage = lazy(async () =>
     default: module.AdminDashboardPage,
   })),
 )
+const AdminAnalyticsPage = lazy(async () =>
+  import('../../pages/admin/AdminAnalyticsPage').then((module) => ({
+    default: module.AdminAnalyticsPage,
+  })),
+)
 const StudioPage = lazy(async () =>
   import('../../studio/pages/StudioPage').then((module) => ({
     default: module.StudioPage,
@@ -39,6 +44,7 @@ export function AdminApp() {
             <Route path="/" element={<ProtectedRoute />}>
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminDashboardPage />} />
+                <Route path="admin/analytics" element={<AdminAnalyticsPage />} />
                 <Route path="admin/publications/new" element={<StudioPage />} />
                 <Route path="admin/publications/:id/edit" element={<StudioPage />} />
               </Route>

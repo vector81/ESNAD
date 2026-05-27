@@ -34,6 +34,8 @@ export const PUBLICATION_CATEGORIES: Array<{
   { id: 'situation-assessment', label_ar: 'تقييم وضعية', label_en: 'Situation Assessment' },
   { id: 'legal-paper', label_ar: 'ورقة قانونية', label_en: 'Legal Paper' },
   { id: 'opinion-article', label_ar: 'مقالات رأي', label_en: 'Opinion Articles' },
+  { id: 'cultural-article', label_ar: 'مقالة ثقافية', label_en: 'Cultural Article' },
+  { id: 'cultural-paper', label_ar: 'ورقة ثقافية', label_en: 'Cultural Paper' },
   { id: 'foresight', label_ar: 'استشراف', label_en: 'Foresight' },
   { id: 'position-analysis', label_ar: 'تحليل موقف', label_en: 'Position Analysis' },
   { id: 'expert-survey', label_ar: 'استطلاع رأي الخبراء', label_en: 'Expert Survey' },

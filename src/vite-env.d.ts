@@ -12,6 +12,8 @@ interface ImportMetaEnv {
   readonly VITE_CLOUDINARY_CLOUD_NAME: string
   readonly VITE_CLOUDINARY_UPLOAD_PRESET: string
   readonly VITE_CLOUDINARY_FOLDER: string
+  readonly VITE_POSTHOG_TOKEN: string
+  readonly VITE_POSTHOG_HOST: string
 }
 
 interface ImportMeta {

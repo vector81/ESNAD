@@ -254,17 +254,38 @@ const I = {
   table: <span>▦</span>,
   textColor: <span style={{ fontWeight: 800 }}>A</span>,
   highlight: <span style={{ fontWeight: 800 }}>✱</span>,
+  undo: <span style={{ fontWeight: 800 }}>↶</span>,
+  redo: <span style={{ fontWeight: 800 }}>↷</span>,
 }
 
 export function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
   const imageInputRef = useRef<HTMLInputElement | null>(null)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [historyState, setHistoryState] = useState(() => ({
+    canUndo: editor.can().undo(),
+    canRedo: editor.can().redo(),
+  }))
 
   const activeFontFamily = String(editor.getAttributes('textStyle').fontFamily || '')
   const activeColor = String(editor.getAttributes('textStyle').color || '')
   const activeHighlight = String(editor.getAttributes('highlight').color || '')
   const activeFontSize = String(editor.getAttributes('textStyle').fontSize || '')
   const activeStyleId = getActiveStyleId(editor)
+
+  useEffect(() => {
+    const updateHistoryState = () => {
+      setHistoryState({
+        canUndo: editor.can().undo(),
+        canRedo: editor.can().redo(),
+      })
+    }
+
+    updateHistoryState()
+    editor.on('transaction', updateHistoryState)
+    return () => {
+      editor.off('transaction', updateHistoryState)
+    }
+  }, [editor])
 
   const handleStyleSelect = (id: string) => {
     const chain = editor.chain().focus()
@@ -370,6 +391,29 @@ export function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
         accept="image/*"
         onChange={(event) => void handleInsertImage(event.target.files?.[0] ?? null)}
       />
+
+      {/* === Edit group === */}
+      <div className="editor-toolbar__group">
+        <div className="editor-toolbar__group-row">
+          <ToolbarButton
+            title="تراجع"
+            disabled={!historyState.canUndo}
+            onClick={() => editor.chain().focus().undo().run()}
+          >
+            {I.undo}
+          </ToolbarButton>
+          <ToolbarButton
+            title="إعادة"
+            disabled={!historyState.canRedo}
+            onClick={() => editor.chain().focus().redo().run()}
+          >
+            {I.redo}
+          </ToolbarButton>
+        </div>
+        <div className="editor-toolbar__group-label">تحرير</div>
+      </div>
+
+      <div className="editor-toolbar__divider" />
 
       {/* === Font group === */}
       <div className="editor-toolbar__group">

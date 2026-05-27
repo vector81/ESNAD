@@ -22,6 +22,7 @@
     "preview:editor": "vite preview --config vite.admin.config.ts"
   },
   "dependencies": {
+    "@posthog/react": "^1.9.1",
     "@tiptap/core": "^3.20.3",
     "@tiptap/extension-color": "^3.20.3",
     "@tiptap/extension-dropcursor": "^3.20.3",
@@ -49,6 +50,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "katex": "^0.16.45",
+    "posthog-js": "^1.376.0",
     "quill-image-resize-module-react": "^3.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

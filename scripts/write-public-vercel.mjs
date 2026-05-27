@@ -22,6 +22,10 @@ const config = {
   ],
   rewrites: [
     {
+      source: '/api/:path*',
+      destination: '/api/:path*',
+    },
+    {
       source: '/assets/:path*',
       destination: '/assets/:path*',
     },

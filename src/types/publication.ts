@@ -16,6 +16,8 @@ export type PublicationCategory =
   | 'situation-assessment'
   | 'legal-paper'
   | 'opinion-article'
+  | 'cultural-article'
+  | 'cultural-paper'
   | 'foresight'
   | 'position-analysis'
   | 'expert-survey'

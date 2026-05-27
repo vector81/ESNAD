@@ -5,6 +5,10 @@ const targetPath = resolve('dist/editor/vercel.json')
 const config = {
   rewrites: [
     {
+      source: '/api/:path*',
+      destination: '/api/:path*',
+    },
+    {
       source: '/(.*)',
       destination: '/index.html',
     },

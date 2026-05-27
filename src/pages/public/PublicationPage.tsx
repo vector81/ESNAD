@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { PublicationCard } from '../../components/public/PublicationCard'
 import { PublicSiteShell } from '../../components/public/PublicSiteShell'
@@ -24,7 +24,33 @@ import {
   listPublications,
 } from '../../lib/publications'
 import { getPublicSiteUrl } from '../../lib/siteLinks'
+import {
+  getAnalyticsConsentStatus,
+  subscribeAnalyticsConsent,
+  trackPublicationReadTime,
+  trackPublicationView,
+} from '../../lib/analytics'
 import type { AppLanguage, Publication } from '../../types/publication'
+
+function createReadSessionId() {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID()
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+function getCurrentScrollDepth() {
+  const documentElement = document.documentElement
+  const body = document.body
+  const scrollTop = window.scrollY || documentElement.scrollTop || body.scrollTop || 0
+  const viewportHeight = window.innerHeight || documentElement.clientHeight || 1
+  const scrollHeight = Math.max(documentElement.scrollHeight, body.scrollHeight, viewportHeight)
+
+  if (scrollHeight <= viewportHeight) return 100
+
+  return Math.max(0, Math.min(100, ((scrollTop + viewportHeight) / scrollHeight) * 100))
+}
 
 export function PublicationPage({ language }: { language: AppLanguage }) {
   const { slug } = useParams()
@@ -34,6 +60,8 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
   const [related, setRelated] = useState<Publication[]>([])
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(true)
+  const [analyticsConsentStatus, setAnalyticsConsentStatus] = useState(() => getAnalyticsConsentStatus())
+  const trackedViewRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (!slug) return
@@ -64,6 +92,81 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
       })
     return () => { cancelled = true }
   }, [slug])
+
+  useEffect(() => {
+    return subscribeAnalyticsConsent(setAnalyticsConsentStatus)
+  }, [])
+
+  useEffect(() => {
+    if (analyticsConsentStatus !== 'accepted') return
+    if (!publication) return
+    const viewKey = `${publication.id}:${language}`
+    if (trackedViewRef.current === viewKey) return
+    trackedViewRef.current = viewKey
+    trackPublicationView(publication, language)
+  }, [analyticsConsentStatus, language, publication])
+
+  useEffect(() => {
+    if (analyticsConsentStatus !== 'accepted') return
+    if (!publication) return
+
+    const readSessionId = createReadSessionId()
+    let visibleStartedAt = document.visibilityState === 'visible' ? performance.now() : null
+    let activeMilliseconds = 0
+    let reportedMilliseconds = 0
+    let maxScrollDepth = getCurrentScrollDepth()
+
+    const updateScrollDepth = () => {
+      maxScrollDepth = Math.max(maxScrollDepth, getCurrentScrollDepth())
+    }
+
+    const accrueVisibleTime = () => {
+      if (visibleStartedAt === null) return
+      const now = performance.now()
+      activeMilliseconds += Math.max(0, now - visibleStartedAt)
+      visibleStartedAt = now
+    }
+
+    const reportReadTime = () => {
+      updateScrollDepth()
+      accrueVisibleTime()
+      const deltaMilliseconds = activeMilliseconds - reportedMilliseconds
+      const readingSeconds = Math.round(deltaMilliseconds / 1000)
+
+      if (readingSeconds < 3) return
+
+      reportedMilliseconds += readingSeconds * 1000
+      trackPublicationReadTime(publication, language, readingSeconds, maxScrollDepth, readSessionId)
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        accrueVisibleTime()
+        visibleStartedAt = null
+        reportReadTime()
+        return
+      }
+
+      if (visibleStartedAt === null) {
+        visibleStartedAt = performance.now()
+      }
+    }
+
+    const handlePageHide = () => {
+      reportReadTime()
+    }
+
+    window.addEventListener('scroll', updateScrollDepth, { passive: true })
+    window.addEventListener('pagehide', handlePageHide)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('scroll', updateScrollDepth)
+      window.removeEventListener('pagehide', handlePageHide)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      reportReadTime()
+    }
+  }, [analyticsConsentStatus, language, publication])
 
   const isSaved = publication ? library.saved_item_ids.includes(publication.id) : false
   const isPurchased = publication ? library.purchased_item_ids.includes(publication.id) : false

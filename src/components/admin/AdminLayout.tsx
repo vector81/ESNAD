@@ -36,6 +36,9 @@ export function AdminLayout() {
             <NavLink className={({ isActive }) => getNavClassName(isActive)} to="/admin/publications/new">
               إصدار جديد
             </NavLink>
+            <NavLink className={({ isActive }) => getNavClassName(isActive)} to="/admin/analytics">
+              التحليلات
+            </NavLink>
             {publicSiteUrl ? (
               <a className="admin-nav__link" href={publicSiteUrl} target="_blank" rel="noreferrer">
                 الموقع العام
