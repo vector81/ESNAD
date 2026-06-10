@@ -1,9 +1,7 @@
 import type { FormEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { PublicSiteShell } from '../../components/public/PublicSiteShell'
-import { db, isFirebaseConfigured } from '../../lib/firebase'
 import { optimizeCloudinaryUrl } from '../../lib/cloudinary'
 import { buildLocalizedPath, buildPublicationPath } from '../../lib/navigation'
 import {
@@ -103,12 +101,13 @@ export function ResearchHomePage({ language }: { language: AppLanguage }) {
     }
     setNewsletterStatus('submitting')
     try {
-      if (db && isFirebaseConfigured) {
-        await addDoc(collection(db, 'newsletter_subscribers'), {
-          email: value,
-          language,
-          created_at: serverTimestamp(),
-        })
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: value, language }),
+      })
+      if (!response.ok) {
+        throw new Error('subscribe request failed')
       }
       setNewsletterStatus('success')
       setEmail('')

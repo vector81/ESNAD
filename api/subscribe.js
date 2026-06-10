@@ -6,17 +6,16 @@ import { sendSubscriberNotification } from './_lib/resend.js'
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function normalizeInput(body) {
+  const name = typeof body?.name === 'string' ? body.name.trim() : ''
+
   return {
-    name: typeof body?.name === 'string' ? body.name.trim() : '',
+    name: name || 'مشترك النشرة',
     email: typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '',
+    language: body?.language === 'en' ? 'en' : 'ar',
   }
 }
 
-function validateInput(name, email) {
-  if (!name) {
-    throw new Error('يرجى إدخال الاسم.')
-  }
-
+function validateInput(email) {
   if (!email) {
     throw new Error('يرجى إدخال البريد الإلكتروني.')
   }
@@ -48,8 +47,8 @@ export default async function handler(request, response) {
 
   try {
     const body = await readJsonBody(request)
-    const { name, email } = normalizeInput(body)
-    validateInput(name, email)
+    const { name, email, language } = normalizeInput(body)
+    validateInput(email)
 
     const createdAt = new Date()
     let storedInFirestore = false
@@ -67,6 +66,7 @@ export default async function handler(request, response) {
       await db.collection('subscribers').add({
         name,
         email,
+        language,
         created_at: FieldValue.serverTimestamp(),
       })
 
