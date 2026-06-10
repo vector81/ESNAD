@@ -290,7 +290,7 @@ async function sendResendEmail({ to, subject, html, text, replyTo, headers = {} 
       'Idempotency-Key': crypto.randomUUID(),
     },
     body: JSON.stringify({
-      from: DEFAULT_FROM_EMAIL,
+      from: process.env.RESEND_FROM_EMAIL?.trim() || DEFAULT_FROM_EMAIL,
       to: recipients,
       subject,
       html,
