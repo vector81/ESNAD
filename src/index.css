@@ -3401,6 +3401,113 @@ h1, h2, h3, h4, p {
   to   { transform: rotate(360deg); }
 }
 
+/* Accessible visually-hidden helper */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skeleton loading placeholders */
+.skeleton {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+[dir='rtl'] .skeleton::after {
+  transform: translateX(100%);
+  animation-name: skeleton-shimmer-rtl;
+}
+
+@keyframes skeleton-shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@keyframes skeleton-shimmer-rtl {
+  100% { transform: translateX(-100%); }
+}
+
+.pub-skeleton .panel {
+  display: grid;
+  gap: 12px;
+}
+
+.skeleton--badge {
+  width: 96px;
+  height: 24px;
+  border-radius: 999px;
+}
+
+.skeleton--title {
+  width: 80%;
+  height: 38px;
+  margin-top: 14px;
+}
+
+.skeleton--text {
+  width: 100%;
+  height: 14px;
+  margin-top: 10px;
+}
+
+.skeleton--text-short {
+  width: 60%;
+}
+
+.skeleton--toolbar {
+  width: 70%;
+  height: 18px;
+  margin-top: 20px;
+}
+
+.skeleton--block {
+  width: 100%;
+  height: 320px;
+}
+
+.skeleton--cover {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  height: auto;
+  border-radius: 12px;
+}
+
+.skeleton--btn {
+  width: 100%;
+  height: 46px;
+  border-radius: 10px;
+  margin-top: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
+
 .brand-lockup__text {
   display: grid;
   gap: 4px;

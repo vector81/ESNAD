@@ -98,6 +98,14 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
   }, [])
 
   useEffect(() => {
+    if (!publication || !slug) return
+    const canonicalSlug = getShareSlug(publication)
+    if (slug === canonicalSlug) return
+    const section = publication.kind === 'book' ? '/books' : '/library'
+    navigate(buildLocalizedPath(language, `${section}/${canonicalSlug}`), { replace: true })
+  }, [language, navigate, publication, slug])
+
+  useEffect(() => {
     if (analyticsConsentStatus !== 'accepted') return
     if (!publication) return
     const viewKey = `${publication.id}:${language}`
@@ -416,7 +424,32 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
   if (loading) {
     return (
       <PublicSiteShell language={language}>
-        <div className="empty">{language === 'ar' ? 'جار تحميل الإصدار...' : 'Loading publication...'}</div>
+        <div className="detail-layout pub-skeleton" aria-busy="true" aria-live="polite">
+          <span className="sr-only">
+            {language === 'ar' ? 'جار تحميل الإصدار...' : 'Loading publication...'}
+          </span>
+          <div className="detail-content">
+            <span className="skeleton skeleton--badge" />
+            <span className="skeleton skeleton--title" />
+            <span className="skeleton skeleton--text" />
+            <span className="skeleton skeleton--text skeleton--text-short" />
+            <div className="skeleton skeleton--toolbar" />
+            <section className="panel">
+              <span className="skeleton skeleton--text" />
+              <span className="skeleton skeleton--text" />
+              <span className="skeleton skeleton--text" />
+              <span className="skeleton skeleton--text skeleton--text-short" />
+            </section>
+            <section className="panel">
+              <span className="skeleton skeleton--block" />
+            </section>
+          </div>
+          <aside className="detail-sidebar">
+            <span className="skeleton skeleton--cover" />
+            <span className="skeleton skeleton--btn" />
+            <span className="skeleton skeleton--btn" />
+          </aside>
+        </div>
       </PublicSiteShell>
     )
   }
