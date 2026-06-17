@@ -24,6 +24,7 @@
 
   --radius: 8px;
   --radius-sm: 4px;
+  --radius-pill: 3px;
   --max-w: 1440px;
 
   font-family: 'Cairo', 'Noto Naskh Arabic', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -1348,7 +1349,7 @@ h1, h2, h3, h4, p {
   align-items: center;
   justify-content: center;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(27, 58, 123, 0.12);
   color: var(--text-muted);
@@ -1361,7 +1362,7 @@ h1, h2, h3, h4, p {
 
 .editor-figure__tool {
   border: 1px solid rgba(27, 58, 123, 0.12);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.94);
   color: var(--text-muted);
   padding: 5px 10px;
@@ -3458,7 +3459,7 @@ h1, h2, h3, h4, p {
 .skeleton--badge {
   width: 96px;
   height: 24px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .skeleton--title {
@@ -3733,15 +3734,38 @@ h1, h2, h3, h4, p {
 }
 
 .home-badge {
+  position: relative;
   display: inline-flex;
   align-self: start;
-  background: var(--brand-red-soft);
+  background: transparent;
   color: var(--brand-red);
   font-size: 12px;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 999px;
-  letter-spacing: 0.01em;
+  font-weight: 700;
+  padding: 8px 14px;
+  letter-spacing: 0.02em;
+}
+
+.home-badge::before,
+.home-badge::after {
+  content: '';
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--brand-red);
+}
+
+.home-badge::before {
+  top: 0;
+  inset-inline-start: 0;
+  border-inline-end: none;
+  border-bottom: none;
+}
+
+.home-badge::after {
+  bottom: 0;
+  inset-inline-end: 0;
+  border-inline-start: none;
+  border-top: none;
 }
 
 .home-hero__title {
@@ -3836,7 +3860,7 @@ h1, h2, h3, h4, p {
   color: var(--brand-red);
   background: var(--brand-red-soft);
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   letter-spacing: 0.02em;
 }
 
@@ -3857,7 +3881,7 @@ h1, h2, h3, h4, p {
   font-size: 13px;
   font-weight: 500;
   padding: 7px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--bg-muted);
   color: var(--text);
   border: 1px solid transparent;
@@ -4533,7 +4557,7 @@ h1, h2, h3, h4, p {
   text-decoration: none;
   padding: 8px 14px;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
 }
 
@@ -4663,7 +4687,7 @@ h1, h2, h3, h4, p {
   color: var(--brand-red);
   background: var(--brand-red-soft);
   padding: 7px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .auth-screen__title {
@@ -4685,7 +4709,7 @@ h1, h2, h3, h4, p {
 .auth-screen__switch {
   display: inline-flex;
   background: var(--bg-muted);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 5px;
   align-self: start;
 }
@@ -4696,7 +4720,7 @@ h1, h2, h3, h4, p {
   font-size: 16px;
   font-weight: 600;
   padding: 11px 26px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--text-muted);
   cursor: pointer;
   transition: background 180ms ease, color 180ms ease;
@@ -4975,7 +4999,7 @@ h1, h2, h3, h4, p {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border);
   background: #fff;
   color: var(--text);
@@ -4996,7 +5020,7 @@ h1, h2, h3, h4, p {
   min-width: 22px;
   height: 22px;
   padding: 0 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--bg-muted);
   font-size: 12px;
   font-weight: 700;
@@ -5044,28 +5068,23 @@ h1, h2, h3, h4, p {
 }
 
 .kind-badge {
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid transparent;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 0;
+  letter-spacing: 0.01em;
+  background: transparent;
+  border: none;
 }
 
 .kind-badge--article {
-  background: rgba(91, 163, 230, 0.14);
   color: #1b6fb5;
-  border-color: rgba(91, 163, 230, 0.4);
 }
 
 .kind-badge--research-paper {
-  background: rgba(196, 48, 43, 0.10);
   color: #c4302b;
-  border-color: rgba(196, 48, 43, 0.32);
 }
 
 .kind-badge--book {
-  background: rgba(27, 58, 123, 0.10);
   color: #1b3a7b;
-  border-color: rgba(27, 58, 123, 0.32);
 }
 .mb-3 { margin-bottom: 24px; }
