@@ -1,5 +1,5 @@
 import anyAscii from 'any-ascii'
-import { PUBLICATION_ID_MAP } from './publication-id-map.js'
+import { PUBLICATION_ID_MAP } from './_lib/publication-id-map.js'
 import { getPublicationByReference as getPublicationByReferenceFromAdmin } from './_lib/publications.js'
 
 const DEFAULT_SITE_TITLE = 'مركز إسناد للدراسات والأبحاث'

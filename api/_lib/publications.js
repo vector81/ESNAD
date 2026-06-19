@@ -1,5 +1,5 @@
 import anyAscii from 'any-ascii'
-import { PUBLICATION_ID_MAP } from '../publication-id-map.js'
+import { PUBLICATION_ID_MAP } from './publication-id-map.js'
 import { getAdminAuth, getAdminDb } from './firebase-admin.js'
 import { getBearerToken } from './http.js'
 import { isAllowedAdminEmail } from './admin-auth.js'
@@ -326,4 +326,3 @@ export async function listChaptersForPublication(publicationId) {
 
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
 }
-
