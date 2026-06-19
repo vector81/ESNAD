@@ -199,7 +199,7 @@ export function trackPublicationView(publication: Publication, language: AppLang
     publication_author_en: publication.author_en,
     publication_access_tier: publication.access_tier,
     publication_published_at: publication.published_at,
-    has_pdf: Boolean(publication.pdf_url),
+    has_pdf: Boolean(publication.pdf_url || publication.has_pdf),
     language,
     path: window.location.pathname,
     url: window.location.href,

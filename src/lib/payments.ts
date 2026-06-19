@@ -47,3 +47,21 @@ export async function confirmCheckoutSession(
 
   return payload
 }
+
+export async function downloadPurchasedPublicationPdf(publicationId: string, token: string) {
+  const response = await fetch('/api/publication-download', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ publicationId }),
+  })
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null
+    throw new Error(payload?.error || 'تعذر تنزيل ملف PDF.')
+  }
+
+  return response.blob()
+}

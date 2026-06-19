@@ -108,14 +108,5 @@ export async function grantPurchasedItem(user: SessionUser, publicationId: strin
     return next
   }
 
-  await setDoc(
-    doc(db, 'user_libraries', user.uid),
-    {
-      purchased_item_ids: arrayUnion(publicationId),
-      updated_at: serverTimestamp(),
-    },
-    { merge: true },
-  )
-
-  return getLibrarySnapshot(user)
+  throw new Error('Paid entitlements can only be granted by the purchase confirmation API.')
 }

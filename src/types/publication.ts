@@ -42,6 +42,12 @@ export interface TocItem {
 
 export interface Publication {
   id: string
+  public_id?: string | number
+  publicId?: string | number
+  numeric_id?: string | number
+  numericId?: string | number
+  article_id?: string | number
+  articleId?: string | number
   slug: string
   slug_ar?: string
   slug_latin?: string
@@ -76,6 +82,10 @@ export interface Publication {
   cover_position_x: number
   cover_position_y: number
   pdf_url: string
+  has_pdf?: boolean
+  has_content?: boolean
+  can_access?: boolean
+  is_locked?: boolean
   featured: boolean
   language_mode: 'ar' | 'en' | 'both'
   pages: number

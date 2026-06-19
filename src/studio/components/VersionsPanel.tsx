@@ -8,16 +8,28 @@ interface VersionsPanelProps {
 }
 
 export function VersionsPanel({ publicationId, onRestore }: VersionsPanelProps) {
-  const [versions, setVersions] = useState<Version[]>([])
-  const [loading, setLoading] = useState(true)
+  const [versionState, setVersionState] = useState<{
+    publicationId: string
+    versions: Version[]
+  }>({ publicationId: '', versions: [] })
 
   useEffect(() => {
-    setLoading(true)
+    let cancelled = false
     listVersions(publicationId)
-      .then((list) => setVersions(list))
-      .catch(() => setVersions([]))
-      .finally(() => setLoading(false))
+      .then((versions) => {
+        if (!cancelled) setVersionState({ publicationId, versions })
+      })
+      .catch(() => {
+        if (!cancelled) setVersionState({ publicationId, versions: [] })
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [publicationId])
+
+  const loading = versionState.publicationId !== publicationId
+  const versions = versionState.publicationId === publicationId ? versionState.versions : []
 
   return (
     <div className="context-panel__section">

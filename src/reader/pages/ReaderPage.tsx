@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getPublicationBySlug } from '../../lib/publications'
-import { listChapters } from '../../studio/lib/chapters'
+import { listReadableChapters } from '../../studio/lib/chapters'
 import { ArticleReader } from '../components/ArticleReader'
 import { BookReader } from '../components/BookReader'
 import type { Publication } from '../../types/publication'
@@ -9,44 +9,65 @@ import type { Chapter } from '../../types/studio'
 
 export function ReaderPage() {
   const { slug } = useParams<{ slug: string }>()
-  const [publication, setPublication] = useState<Publication | null>(null)
-  const [chapters, setChapters] = useState<Chapter[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const currentSlug = slug ?? ''
+  const [readerState, setReaderState] = useState<{
+    slug: string
+    publication: Publication | null
+    chapters: Chapter[]
+    error: string
+  }>({
+    slug: '',
+    publication: null,
+    chapters: [],
+    error: '',
+  })
 
   useEffect(() => {
-    if (!slug) {
-      setLoading(false)
-      return
-    }
+    if (!currentSlug) return undefined
+
     let cancelled = false
-    setLoading(true)
-    setPublication(null)
-    setChapters([])
-    setError('')
-    getPublicationBySlug(slug)
+    getPublicationBySlug(currentSlug)
       .then(async (pub) => {
         if (cancelled) return
         if (!pub) {
-          setError('الإصدار غير موجود.')
-          setLoading(false)
+          setReaderState({
+            slug: currentSlug,
+            publication: null,
+            chapters: [],
+            error: 'الإصدار غير موجود.',
+          })
           return
         }
-        setPublication(pub)
+        let nextChapters: Chapter[] = []
         if (pub.type === 'book') {
-          const chs = await listChapters(pub.id)
-          if (!cancelled) setChapters(chs)
+          nextChapters = await listReadableChapters(pub.id)
         }
-        if (!cancelled) setLoading(false)
+        if (!cancelled) {
+          setReaderState({
+            slug: currentSlug,
+            publication: pub,
+            chapters: nextChapters,
+            error: '',
+          })
+        }
       })
       .catch(() => {
         if (!cancelled) {
-          setError('تعذر تحميل الإصدار.')
-          setLoading(false)
+          setReaderState({
+            slug: currentSlug,
+            publication: null,
+            chapters: [],
+            error: 'تعذر تحميل الإصدار.',
+          })
         }
       })
     return () => { cancelled = true }
-  }, [slug])
+  }, [currentSlug])
+
+  const loading = Boolean(currentSlug) && readerState.slug !== currentSlug
+  const publication = readerState.slug === currentSlug ? readerState.publication : null
+  const chapters = readerState.slug === currentSlug ? readerState.chapters : []
+  const error = currentSlug ? readerState.error : 'الإصدار غير موجود.'
 
   if (loading) {
     return (

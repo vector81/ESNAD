@@ -1,9 +1,14 @@
-// @ts-nocheck
-import { TiptapNode, mergeAttributes } from '../tiptap-core-shim'
+import { Node as TiptapNode, mergeAttributes } from '@tiptap/core'
 
-export interface CitationOptions {}
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    citation: {
+      insertCitation: (options: { id: string; text: string }) => ReturnType
+    }
+  }
+}
 
-export const CitationNode = TiptapNode.create<CitationOptions>({
+export const CitationNode = TiptapNode.create({
   name: 'citation',
   group: 'inline',
   inline: true,

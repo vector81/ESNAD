@@ -18,31 +18,73 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function isPublished(data) {
+      return data.get('status', '') == 'published'
+        || data.get('workflow_stage', '') == 'published';
+    }
+
+    function isFreePublished(data) {
+      return isPublished(data) && data.get('access_tier', 'free') != 'paid';
+    }
+
+    function isFreePublishedPublication(publicationId) {
+      return exists(/databases/$(database)/documents/publications/$(publicationId))
+        && isFreePublished(get(/databases/$(database)/documents/publications/$(publicationId)).data);
+    }
+
+    function validLibrarySavedItems() {
+      return !('saved_item_ids' in request.resource.data)
+        || (
+          request.resource.data.saved_item_ids is list
+          && request.resource.data.saved_item_ids.size() <= 1000
+        );
+    }
+
+    function validLibraryCreate(userId) {
+      return isOwnDocument(userId)
+        && request.resource.data.keys().hasOnly(['saved_item_ids', 'updated_at'])
+        && validLibrarySavedItems();
+    }
+
+    function validLibraryUpdate(userId) {
+      return isOwnDocument(userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['saved_item_ids', 'updated_at'])
+        && validLibrarySavedItems();
+    }
+
     match /publications/{publicationId} {
       allow read: if isAdmin()
-        || resource.data.get('status', '') == 'published'
-        || resource.data.get('workflow_stage', '') == 'published';
+        || isFreePublished(resource.data);
       allow create, update, delete: if isAdmin();
     }
 
+    match /publications/{publicationId}/chapters/{chapterId} {
+      allow read: if isAdmin() || isFreePublishedPublication(publicationId);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /publications/{publicationId}/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
     match /user_libraries/{userId} {
-      allow read, write: if isOwnDocument(userId) || isAdmin();
+      allow read: if isOwnDocument(userId) || isAdmin();
+      allow create: if isAdmin() || validLibraryCreate(userId);
+      allow update: if isAdmin() || validLibraryUpdate(userId);
+      allow delete: if isAdmin();
     }
 
     match /purchase_records/{recordId} {
       allow read: if isAdmin();
-      allow create: if isSignedIn();
-      allow update, delete: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     match /contact_messages/{messageId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow read, create, update, delete: if isAdmin();
     }
 
     match /subscribers/{subscriberId} {
-      allow read, update, delete: if isAdmin();
-      allow create: if true;
+      allow read, create, update, delete: if isAdmin();
     }
 
     match /{document=**} {

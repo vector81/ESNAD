@@ -1,7 +1,18 @@
-// @ts-nocheck
-import { TiptapNode, mergeAttributes } from '../tiptap-core-shim'
+import { Node as TiptapNode, mergeAttributes } from '@tiptap/core'
 
-export interface FigureOptions {}
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    figure: {
+      insertFigure: (options: {
+        src: string
+        alt?: string
+        caption?: string
+        width?: number
+        align?: 'left' | 'center' | 'right'
+      }) => ReturnType
+    }
+  }
+}
 
 const SIZE_PRESETS = [40, 55, 70, 100]
 
@@ -41,7 +52,7 @@ function applyFigureLayout(dom: HTMLElement, img: HTMLImageElement, attrs: Recor
   img.style.width = '100%'
 }
 
-export const FigureNode = TiptapNode.create<FigureOptions>({
+export const FigureNode = TiptapNode.create({
   name: 'figure',
   group: 'block',
   atom: true,
@@ -139,7 +150,7 @@ export const FigureNode = TiptapNode.create<FigureOptions>({
 
       const syncAttrs = (partial: Record<string, unknown>) => {
         const pos = typeof getPos === 'function' ? getPos() : null
-        if (pos === null) return
+        if (typeof pos !== 'number') return
 
         const nextAttrs = { ...currentNode.attrs, ...partial }
         editor

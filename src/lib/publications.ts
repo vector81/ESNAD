@@ -17,7 +17,8 @@ import type {
   PublicationInput,
   PublicationKind,
 } from '../types/publication'
-import { db, isFirebaseConfigured, logFirebaseDebug, waitForAuthenticatedUser } from './firebase'
+import { auth, db, isFirebaseConfigured, logFirebaseDebug, waitForAuthenticatedUser } from './firebase'
+import { PUBLICATION_ID_MAP } from './publicationIdMap'
 import { uploadFileToFirebaseStorage } from './storageAssets'
 
 export const PUBLICATION_CATEGORIES: Array<{
@@ -62,6 +63,7 @@ export interface PublicationFilters {
 }
 
 const LOCAL_STORAGE_KEY = 'esnad_publications_catalog'
+const shouldUsePublicApi = isFirebaseConfigured && typeof fetch !== 'undefined' && !import.meta.env.DEV
 
 function slugify(value: string) {
   return value
@@ -95,6 +97,33 @@ function clampCoverPosition(value: unknown): number {
 
 const clampCoverPositionY = clampCoverPosition
 
+function deriveNumericPublicationId(value: string) {
+  let hash = 2166136261
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+  return String(1000000 + ((hash >>> 0) % 9000000))
+}
+
+export function getPublicPublicationId(publication: Publication) {
+  const candidates = [
+    publication.public_id,
+    publication.publicId,
+    publication.numeric_id,
+    publication.numericId,
+    publication.article_id,
+    publication.articleId,
+    publication.id,
+  ]
+
+  const numericId = candidates
+    .map((candidate) => String(candidate || '').trim())
+    .find((candidate) => /^\d+$/.test(candidate))
+
+  return numericId || deriveNumericPublicationId(publication.id)
+}
+
 export function getCoverObjectPosition(
   publication: Pick<Publication, 'cover_position_y'> & Partial<Pick<Publication, 'cover_position_x'>>,
 ): string {
@@ -104,11 +133,7 @@ export function getCoverObjectPosition(
 }
 
 export function getShareSlug(publication: Publication) {
-  // Prefer the editor-set slug (Arabic, by design for an Arabic publication).
-  // Browsers and Vercel handle Unicode in URL paths fine; share links auto-encode.
-  // Fall back to a Latin transliteration only if no slug was ever set on the doc.
-  if (publication.slug) return publication.slug
-  return slugifyLatin(publication.title_en || publication.title_ar || '') || publication.id
+  return getPublicPublicationId(publication)
 }
 
 function normalizeTags(value: string[] | string | undefined) {
@@ -145,6 +170,12 @@ function normalizePublication(id: string, raw: Partial<PublicationInput>): Publi
             : 'draft'
   return {
     id,
+    public_id: raw.public_id,
+    publicId: raw.publicId,
+    numeric_id: raw.numeric_id,
+    numericId: raw.numericId,
+    article_id: raw.article_id,
+    articleId: raw.articleId,
     slug: raw.slug?.trim() || slugify(raw.title_en || raw.title_ar || id),
     slug_ar: raw.slug_ar?.trim() || raw.slugAr?.trim() || raw.slug?.trim() || '',
     slug_latin:
@@ -293,6 +324,42 @@ function writeLocalPublications(items: Publication[]) {
   window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items))
 }
 
+async function getPublicApiHeaders() {
+  const token = await auth?.currentUser?.getIdToken().catch(() => '')
+  return token ? { Authorization: `Bearer ${token}` } : undefined
+}
+
+async function listPublicationsFromApi() {
+  const response = await fetch('/api/publications', {
+    headers: await getPublicApiHeaders(),
+  })
+  const payload = (await response.json().catch(() => null)) as { publications?: Publication[] } | null
+
+  if (!response.ok) {
+    throw new Error('تعذر تحميل الإصدارات حالياً.')
+  }
+
+  return Array.isArray(payload?.publications) ? payload.publications : []
+}
+
+async function getPublicationFromApi(reference: string) {
+  const params = new URLSearchParams({ reference })
+  const response = await fetch(`/api/publications?${params.toString()}`, {
+    headers: await getPublicApiHeaders(),
+  })
+  const payload = (await response.json().catch(() => null)) as { publication?: Publication | null } | null
+
+  if (response.status === 404) {
+    return null
+  }
+
+  if (!response.ok) {
+    throw new Error('تعذر تحميل الإصدار حالياً.')
+  }
+
+  return payload?.publication ?? null
+}
+
 export function getPublicationCategoryLabel(category: PublicationCategory, language: AppLanguage) {
   const categoryMeta = PUBLICATION_CATEGORIES.find((item) => item.id === category)
   if (!categoryMeta) {
@@ -369,13 +436,35 @@ export async function listPublications(filters: PublicationFilters = {}) {
     return sortByPublished(readLocalPublications()).filter((item) => filterPublication(item, filters))
   }
 
+  if (shouldUsePublicApi) {
+    const publications = await listPublicationsFromApi()
+    return publications.filter((item) => filterPublication(item, filters))
+  }
+
   const publications = await listPublishedPublicationsFromFirestore()
   return publications.filter((item) => filterPublication(item, filters))
 }
 
+async function getPublishedPublicationDocumentById(id: string) {
+  if (!db) return null
+
+  try {
+    const snapshot = await getDoc(doc(db, 'publications', id))
+    if (!snapshot.exists()) return null
+
+    const publication = normalizePublication(snapshot.id, snapshot.data() as PublicationInput)
+    return isPublicationPublic(publication) ? publication : null
+  } catch {
+    return null
+  }
+}
+
 export async function getPublicationBySlug(slug: string) {
+  const trimmedSlug = slug.trim()
   const matchSlug = (item: Publication) =>
     [
+      item.id,
+      getPublicPublicationId(item),
       item.slug,
       item.slug_ar,
       item.slugAr,
@@ -386,19 +475,33 @@ export async function getPublicationBySlug(slug: string) {
       slugifyLatin(item.title_en || item.title_ar || item.slug),
     ]
       .map((candidate) => candidate?.trim())
-      .includes(slug)
+      .includes(trimmedSlug)
 
   if (!db || !isFirebaseConfigured) {
     return readLocalPublications().find(matchSlug) ?? null
   }
+
+  if (shouldUsePublicApi) {
+    return getPublicationFromApi(trimmedSlug)
+  }
+
   try {
+    const mappedId = /^\d+$/.test(trimmedSlug) ? PUBLICATION_ID_MAP[trimmedSlug] : undefined
+    if (mappedId) {
+      const mappedPublication = await getPublishedPublicationDocumentById(mappedId)
+      if (mappedPublication) return mappedPublication
+    }
+
+    const byId = await getPublishedPublicationDocumentById(trimmedSlug)
+    if (byId) return byId
+
     // Query Firestore directly by slug field — avoids fetching all publications
     // and eliminates stale-cache cross-contamination between articles.
     for (const slugField of ['slug', 'slug_ar', 'slugAr', 'slug_latin', 'slugLatin', 'slug_en', 'slugEn']) {
       const [bySlugStatus, bySlugWorkflow] = await Promise.all([
-        getDocs(query(collection(db, 'publications'), where(slugField, '==', slug), where('status', '==', 'published'))),
+        getDocs(query(collection(db, 'publications'), where(slugField, '==', trimmedSlug), where('status', '==', 'published'))),
         getDocs(
-          query(collection(db, 'publications'), where(slugField, '==', slug), where('workflow_stage', '==', 'published')),
+          query(collection(db, 'publications'), where(slugField, '==', trimmedSlug), where('workflow_stage', '==', 'published')),
         ),
       ])
 
@@ -422,10 +525,17 @@ export async function getPublicationBySlug(slug: string) {
 
 export async function getPublicationById(id: string) {
   if (!db || !isFirebaseConfigured) {
-    return readLocalPublications().find((item) => item.id === id) ?? null
+    return readLocalPublications().find((item) => item.id === id && isPublicationPublic(item)) ?? null
   }
+
+  if (shouldUsePublicApi) {
+    return getPublicationFromApi(id)
+  }
+
   const snapshot = await getDoc(doc(db, 'publications', id))
-  return snapshot.exists() ? normalizePublication(snapshot.id, snapshot.data() as PublicationInput) : null
+  if (!snapshot.exists()) return null
+  const publication = normalizePublication(snapshot.id, snapshot.data() as PublicationInput)
+  return isPublicationPublic(publication) ? publication : null
 }
 
 export async function listAdminPublications() {

@@ -2,6 +2,7 @@ import { readJsonBody, sendJson, setCorsHeaders } from './_lib/http.js'
 import { rateLimit } from './_lib/rate-limit.js'
 
 const RESEND_API_URL = 'https://api.resend.com/emails'
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function escapeHtml(value = '') {
   return value
@@ -20,10 +21,7 @@ async function sendContactEmail({ name, email, message }) {
     process.env.VITE_ADMIN_EMAIL?.trim()
 
   if (!apiKey || !to) {
-    console.info('[esnad/contact] missing Resend configuration, logging message only', {
-      name,
-      email,
-    })
+    console.info('[esnad/contact] missing Resend configuration')
     return null
   }
 
@@ -72,7 +70,7 @@ export default async function handler(request, response) {
     return
   }
 
-  const limited = rateLimit(request, { maxRequests: 3 })
+  const limited = rateLimit(request, { maxRequests: 3, keyPrefix: 'contact' })
   if (limited) {
     response.setHeader('Retry-After', String(limited.retryAfter))
     sendJson(response, 429, { error: 'عدد الطلبات تجاوز الحد المسموح. يرجى المحاولة لاحقاً.' })
@@ -87,6 +85,10 @@ export default async function handler(request, response) {
 
     if (!name || !email || !message) {
       throw new Error('الاسم والبريد والرسالة مطلوبة.')
+    }
+
+    if (name.length > 120 || message.length > 4000 || !EMAIL_PATTERN.test(email)) {
+      throw new Error('بيانات نموذج التواصل غير صالحة.')
     }
 
     await sendContactEmail({ name, email, message })

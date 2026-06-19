@@ -38,7 +38,7 @@ export default async function handler(request, response) {
     return
   }
 
-  const limited = rateLimit(request, { maxRequests: 5 })
+  const limited = rateLimit(request, { maxRequests: 5, keyPrefix: 'subscribe' })
   if (limited) {
     response.setHeader('Retry-After', String(limited.retryAfter))
     sendJson(response, 429, { error: 'عدد الطلبات تجاوز الحد المسموح. يرجى المحاولة لاحقاً.' })
@@ -49,6 +49,9 @@ export default async function handler(request, response) {
     const body = await readJsonBody(request)
     const { name, email, language } = normalizeInput(body)
     validateInput(email)
+    if (name.length > 120) {
+      throw new Error('الاسم طويل جداً.')
+    }
 
     const createdAt = new Date()
     let storedInFirestore = false

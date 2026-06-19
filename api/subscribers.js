@@ -1,13 +1,6 @@
 import { getAdminAuth, getAdminDb } from './_lib/firebase-admin.js'
 import { getBearerToken, sendJson, setCorsHeaders } from './_lib/http.js'
-
-function getAllowedAdminEmail() {
-  return (
-    process.env.ADMIN_EMAIL?.trim().toLowerCase() ||
-    process.env.VITE_ADMIN_EMAIL?.trim().toLowerCase() ||
-    ''
-  )
-}
+import { isAllowedAdminEmail } from './_lib/admin-auth.js'
 
 async function verifyAdminRequest(request) {
   const token = getBearerToken(request)
@@ -17,10 +10,9 @@ async function verifyAdminRequest(request) {
   }
 
   const decodedToken = await getAdminAuth().verifyIdToken(token)
-  const allowedAdminEmail = getAllowedAdminEmail()
   const currentEmail = decodedToken.email?.trim().toLowerCase() || ''
 
-  if (allowedAdminEmail && currentEmail !== allowedAdminEmail) {
+  if (!isAllowedAdminEmail(currentEmail)) {
     throw new Error('forbidden')
   }
 

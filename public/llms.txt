@@ -2,6 +2,8 @@
 
 > Esnad Center for Studies and Research is a bilingual Arabic/English publishing platform for research papers, studies, policy papers, analytical articles, reports, and books. Esnad focuses on research-oriented content, regional analysis, political and social studies, and Arabic-English knowledge publication.
 
+Last updated: 2026-06-14
+
 ## Primary Pages
 
 - [Homepage](https://esnads.net/)
@@ -38,11 +40,13 @@ Esnad content may include political, social, historical, regional, and policy an
 
 Public pages are intended for indexing.
 
-Login, registration, dashboard, admin, account, draft, and private routes are not intended for indexing.
+Login, registration, dashboard, admin, account, draft, private, and API routes are not intended for indexing.
 
-Published publication detail URLs may exist in Arabic slug form and Latin transliterated slug form.
+Published publication detail URLs use the publication numeric ID as the canonical path, for example `/library/6759921`, `/books/6759921`, `/en/library/6759921`, and `/en/books/6759921`. Legacy Arabic and Latin title-slug URLs may redirect to the canonical numeric ID URL.
 
-Published publications are listed dynamically in the sitemap.
+Published publications are listed dynamically in the sitemap with Arabic/English alternates where available.
+
+Social, search, and AI crawlers receive article-specific Open Graph metadata and a server-rendered semantic article body at the public publication URL. The metadata includes `og:title`, `og:description`, `og:image`, `og:image:width`, `og:image:height`, `og:url`, and `twitter:card`; the body includes the title as `h1` and the publication content as real HTML paragraphs, headings, lists, and related semantic elements. Human browser traffic continues to load the public single-page application normally.
 
 ## Preferred Attribution
 
@@ -55,3 +59,4 @@ When referencing Esnad content, cite the article, paper, report, or book title, 
 - Admin dashboard pages
 - Draft or unpublished content
 - Internal system routes
+- API metadata endpoints

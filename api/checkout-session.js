@@ -1,6 +1,8 @@
 import Stripe from 'stripe'
-import { getAdminAuth, getAdminDb } from './_lib/firebase-admin.js'
-import { getBearerToken, readJsonBody, sendJson, setCorsHeaders } from './_lib/http.js'
+import { getAdminDb } from './_lib/firebase-admin.js'
+import { requireUser } from './_lib/admin-auth.js'
+import { readJsonBody, sendJson, setCorsHeaders } from './_lib/http.js'
+import { rateLimit } from './_lib/rate-limit.js'
 
 const DEFAULT_SITE_URL = 'https://esnads.net'
 
@@ -10,16 +12,6 @@ function getSiteUrl() {
     process.env.PUBLIC_SITE_URL?.trim() ||
     DEFAULT_SITE_URL
   ).replace(/\/+$/, '')
-}
-
-async function requireUser(request) {
-  const token = getBearerToken(request)
-
-  if (!token) {
-    throw new Error('missing_token')
-  }
-
-  return getAdminAuth().verifyIdToken(token)
 }
 
 export default async function handler(request, response) {
@@ -35,9 +27,16 @@ export default async function handler(request, response) {
     return
   }
 
+  const limited = rateLimit(request, { maxRequests: 10, keyPrefix: 'checkout-session' })
+  if (limited) {
+    response.setHeader('Retry-After', String(limited.retryAfter))
+    sendJson(response, 429, { error: 'عدد الطلبات تجاوز الحد المسموح. يرجى المحاولة لاحقاً.' })
+    return
+  }
+
   try {
     const decoded = await requireUser(request)
-    const body = await readJsonBody(request)
+    const body = await readJsonBody(request, { maxBytes: 4096 })
     const publicationId = typeof body?.publicationId === 'string' ? body.publicationId.trim() : ''
     const language = body?.language === 'en' ? 'en' : 'ar'
 
@@ -54,15 +53,20 @@ export default async function handler(request, response) {
 
     const publication = publicationSnapshot.data()
     const amount = Number(publication?.price_aud ?? 0)
+    const isPublished = publication?.status === 'published' || publication?.workflow_stage === 'published'
+
+    if (!isPublished) {
+      throw new Error('publication_not_found')
+    }
 
     if (publication?.access_tier !== 'paid' || amount <= 0) {
-      sendJson(response, 200, { mode: 'fallback' })
+      sendJson(response, 400, { error: 'هذا الإصدار لا يتطلب عملية شراء.' })
       return
     }
 
     const stripeSecret = process.env.STRIPE_SECRET_KEY?.trim()
     if (!stripeSecret) {
-      sendJson(response, 200, { mode: 'fallback' })
+      sendJson(response, 503, { error: 'الدفع غير مفعّل حالياً. يرجى المحاولة لاحقاً.' })
       return
     }
 
@@ -71,6 +75,7 @@ export default async function handler(request, response) {
     const dashboardPath = language === 'en' ? '/en/dashboard' : '/dashboard'
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
+      client_reference_id: `${decoded.uid}:${publicationId}`,
       customer_email: decoded.email ?? undefined,
       success_url: `${siteUrl}${dashboardPath}?purchase=${publicationId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}${dashboardPath}`,

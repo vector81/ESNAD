@@ -21,13 +21,14 @@ setInterval(() => {
   }
 }, CLEANUP_INTERVAL_MS).unref?.()
 
-export function rateLimit(request, { maxRequests = 5, windowMs = WINDOW_MS } = {}) {
+export function rateLimit(request, { maxRequests = 5, windowMs = WINDOW_MS, keyPrefix = '' } = {}) {
   const ip = getClientIp(request)
+  const key = keyPrefix ? `${keyPrefix}:${ip}` : ip
   const now = Date.now()
-  const entry = buckets.get(ip)
+  const entry = buckets.get(key)
 
   if (!entry || now - entry.windowStart > windowMs) {
-    buckets.set(ip, { windowStart: now, count: 1 })
+    buckets.set(key, { windowStart: now, count: 1 })
     return null
   }
 

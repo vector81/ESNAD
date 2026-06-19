@@ -37,6 +37,15 @@ export function DashboardPage({ language }: { language: AppLanguage }) {
             : 'Purchase confirmed and added to your account.',
         ),
       )
+      .catch((error) => {
+        setNotice(
+          error instanceof Error
+            ? error.message
+            : language === 'ar'
+              ? 'تعذر تأكيد الشراء.'
+              : 'Could not confirm purchase.',
+        )
+      })
       .finally(() => {
         const next = new URLSearchParams(searchParams)
         next.delete('purchase')

@@ -7,23 +7,40 @@ import type { AppLanguage, Publication } from '../../types/publication'
 
 export function ArticlesPage({ language }: { language: AppLanguage }) {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [items, setItems] = useState<Publication[]>([])
-  const [loading, setLoading] = useState(true)
+  const [results, setResults] = useState<{
+    key: string
+    items: Publication[]
+    loaded: boolean
+  }>({ key: '', items: [], loaded: false })
 
   const search = searchParams.get('q') ?? ''
   const isAr = language === 'ar'
 
   useEffect(() => {
-    setLoading(true)
+    let cancelled = false
     listPublications({
       category: 'all',
       kind: 'article',
       access_tier: 'all',
       search,
     })
-      .then(setItems)
-      .finally(() => setLoading(false))
+      .then((items) => {
+        if (!cancelled) setResults({ key: search, items, loaded: true })
+      })
+      .catch(() => {
+        if (!cancelled) setResults({ key: search, items: [], loaded: true })
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [search])
+
+  const loading = !results.loaded || results.key !== search
+  const items = useMemo(
+    () => (results.key === search ? results.items : []),
+    [results.items, results.key, search],
+  )
 
   const sorted = useMemo(
     () =>

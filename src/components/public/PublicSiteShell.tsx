@@ -29,10 +29,6 @@ export function PublicSiteShell({
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   useEffect(() => {
-    setMobileNavOpen(false)
-  }, [location.pathname])
-
-  useEffect(() => {
     if (!mobileNavOpen) return
     const original = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -170,6 +166,7 @@ export function PublicSiteShell({
               <Link
                 className={`mobile-drawer__link${active ? ' mobile-drawer__link--active' : ''}`}
                 key={item.path}
+                onClick={() => setMobileNavOpen(false)}
                 to={href}
               >
                 {item.label}

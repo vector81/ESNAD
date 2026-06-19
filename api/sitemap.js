@@ -1,22 +1,22 @@
-import anyAscii from 'any-ascii'
 import { getAdminDb } from './_lib/firebase-admin.js'
 
 const SITE_URL = 'https://esnads.net'
+const SITE_LASTMOD = '2026-06-14T00:21:14.000Z'
 
 const STATIC_URLS = [
-  { path: '/', changefreq: 'daily', priority: '1.0' },
-  { path: '/en', changefreq: 'daily', priority: '0.9' },
-  { path: '/library', changefreq: 'daily', priority: '0.9' },
-  { path: '/en/library', changefreq: 'daily', priority: '0.8' },
-  { path: '/books', changefreq: 'daily', priority: '0.8' },
-  { path: '/en/books', changefreq: 'daily', priority: '0.7' },
-  { path: '/articles', changefreq: 'daily', priority: '0.8' },
-  { path: '/en/articles', changefreq: 'daily', priority: '0.7' },
-  { path: '/about', changefreq: 'monthly', priority: '0.8' },
-  { path: '/en/about', changefreq: 'monthly', priority: '0.7' },
-  { path: '/contact', changefreq: 'monthly', priority: '0.7' },
-  { path: '/en/contact', changefreq: 'monthly', priority: '0.6' },
-  { path: '/llms.txt', changefreq: 'monthly', priority: '0.3' },
+  { path: '/', language: 'ar', alternateGroup: 'home', changefreq: 'daily', priority: '1.0', lastmod: SITE_LASTMOD },
+  { path: '/en', language: 'en', alternateGroup: 'home', changefreq: 'daily', priority: '0.9', lastmod: SITE_LASTMOD },
+  { path: '/library', language: 'ar', alternateGroup: 'library', changefreq: 'daily', priority: '0.9', lastmod: SITE_LASTMOD },
+  { path: '/en/library', language: 'en', alternateGroup: 'library', changefreq: 'daily', priority: '0.8', lastmod: SITE_LASTMOD },
+  { path: '/books', language: 'ar', alternateGroup: 'books', changefreq: 'daily', priority: '0.8', lastmod: SITE_LASTMOD },
+  { path: '/en/books', language: 'en', alternateGroup: 'books', changefreq: 'daily', priority: '0.7', lastmod: SITE_LASTMOD },
+  { path: '/articles', language: 'ar', alternateGroup: 'articles', changefreq: 'daily', priority: '0.8', lastmod: SITE_LASTMOD },
+  { path: '/en/articles', language: 'en', alternateGroup: 'articles', changefreq: 'daily', priority: '0.7', lastmod: SITE_LASTMOD },
+  { path: '/about', language: 'ar', alternateGroup: 'about', changefreq: 'monthly', priority: '0.8', lastmod: SITE_LASTMOD },
+  { path: '/en/about', language: 'en', alternateGroup: 'about', changefreq: 'monthly', priority: '0.7', lastmod: SITE_LASTMOD },
+  { path: '/contact', language: 'ar', alternateGroup: 'contact', changefreq: 'monthly', priority: '0.7', lastmod: SITE_LASTMOD },
+  { path: '/en/contact', language: 'en', alternateGroup: 'contact', changefreq: 'monthly', priority: '0.6', lastmod: SITE_LASTMOD },
+  { path: '/llms.txt', changefreq: 'monthly', priority: '0.3', lastmod: SITE_LASTMOD },
 ]
 
 function escapeXml(value = '') {
@@ -26,20 +26,6 @@ function escapeXml(value = '') {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&apos;')
-}
-
-function slugifyLatin(value = '') {
-  return anyAscii(String(value))
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/['"`´]+/g, '')
-    .replace(/&/g, ' and ')
-    .replace(/[^a-zA-Z0-9\s-]/g, ' ')
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
 }
 
 function decodeFirestoreValue(value) {
@@ -68,6 +54,33 @@ function normalizeDocument(document) {
   const fields = Object.entries(document.fields ?? {})
   const data = Object.fromEntries(fields.map(([key, value]) => [key, decodeFirestoreValue(value)]))
   return { id: document.name?.split('/').pop() ?? '', ...data }
+}
+
+function deriveNumericPublicationId(value = '') {
+  let hash = 2166136261
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+  return String(1000000 + ((hash >>> 0) % 9000000))
+}
+
+function getPublicPublicationId(publication) {
+  const candidates = [
+    publication?.public_id,
+    publication?.publicId,
+    publication?.numeric_id,
+    publication?.numericId,
+    publication?.article_id,
+    publication?.articleId,
+    publication?.id,
+  ]
+
+  const numericId = candidates
+    .map((candidate) => String(candidate || '').trim())
+    .find((candidate) => /^\d+$/.test(candidate))
+
+  return numericId || deriveNumericPublicationId(publication?.id || '')
 }
 
 async function firestoreQuery(projectId, apiKey, body) {
@@ -152,29 +165,6 @@ function getPublicationSection(publication) {
   return publication.kind === 'book' ? 'books' : 'library'
 }
 
-function getPublicationSlug(publication) {
-  return publication.slug || publication.id
-}
-
-function getPublicationSlugCandidates(publication) {
-  const storedSlug =
-    publication.slug_ar ||
-    publication.slugAr ||
-    publication.slug ||
-    publication.id
-
-  const latinSlug =
-    publication.slug_latin ||
-    publication.slugLatin ||
-    publication.slug_en ||
-    publication.slugEn ||
-    slugifyLatin(publication.title_en || publication.title_ar || publication.slug || publication.id)
-
-  return [storedSlug, latinSlug]
-    .map((slug) => String(slug || '').trim())
-    .filter(Boolean)
-}
-
 function getPublicationLanguages(publication) {
   if (publication.language_mode === 'ar') return ['ar']
   if (publication.language_mode === 'en') return ['en']
@@ -186,6 +176,22 @@ function toAbsoluteUrl(path) {
   return `${SITE_URL}${path}`
 }
 
+function buildAlternateGroups(urls) {
+  const groups = new Map()
+
+  for (const url of urls) {
+    if (!url.alternateGroup || !url.language) continue
+
+    const existing = groups.get(url.alternateGroup) || {}
+    groups.set(url.alternateGroup, {
+      ...existing,
+      [url.language]: toAbsoluteUrl(url.path),
+    })
+  }
+
+  return groups
+}
+
 function getLastModified(value) {
   const date = new Date(value || Date.now())
   return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString()
@@ -194,23 +200,17 @@ function getLastModified(value) {
 function buildPublicationUrls(publications) {
   return publications.flatMap((publication) => {
     const section = getPublicationSection(publication)
-    const slugs = getPublicationSlugCandidates(publication)
-      .map(encodePathSegment)
-      .filter(Boolean)
+    const id = encodePathSegment(getPublicPublicationId(publication))
+    if (!id) return []
 
-    if (!slugs.length) {
-      const fallbackSlug = encodePathSegment(getPublicationSlug(publication))
-      if (fallbackSlug) slugs.push(fallbackSlug)
-    }
-
-    return slugs.flatMap((slug) =>
-      getPublicationLanguages(publication).map((language) => ({
-        path: language === 'en' ? `/en/${section}/${slug}` : `/${section}/${slug}`,
-        changefreq: 'weekly',
-        priority: section === 'books' ? '0.7' : '0.8',
-        lastmod: getLastModified(publication.updated_at || publication.published_at),
-      })),
-    )
+    return getPublicationLanguages(publication).map((language) => ({
+      path: language === 'en' ? `/en/${section}/${id}` : `/${section}/${id}`,
+      language,
+      alternateGroup: `${section}:${id}`,
+      changefreq: 'weekly',
+      priority: section === 'books' ? '0.7' : '0.8',
+      lastmod: getLastModified(publication.updated_at || publication.published_at),
+    }))
   })
 }
 
@@ -225,11 +225,25 @@ function dedupeUrls(urls) {
 }
 
 function renderSitemap(urls) {
+  const alternateGroups = buildAlternateGroups(urls)
   const renderedUrls = dedupeUrls(urls)
     .map((url) => {
       const lastmod = url.lastmod ? `\n    <lastmod>${escapeXml(url.lastmod)}</lastmod>` : ''
+      const alternates = alternateGroups.get(url.alternateGroup)
+      const alternateLinks = alternates
+        ? Object.entries(alternates)
+            .map(
+              ([language, href]) =>
+                `\n    <xhtml:link rel="alternate" hreflang="${escapeXml(language)}" href="${escapeXml(href)}" />`,
+            )
+            .join('') +
+          (alternates.ar
+            ? `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(alternates.ar)}" />`
+            : '')
+        : ''
+
       return `  <url>
-    <loc>${escapeXml(toAbsoluteUrl(url.path))}</loc>${lastmod}
+    <loc>${escapeXml(toAbsoluteUrl(url.path))}</loc>${lastmod}${alternateLinks}
     <changefreq>${escapeXml(url.changefreq)}</changefreq>
     <priority>${escapeXml(url.priority)}</priority>
   </url>`
@@ -237,7 +251,7 @@ function renderSitemap(urls) {
     .join('\n')
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${renderedUrls}
 </urlset>
 `

@@ -1,9 +1,14 @@
-// @ts-nocheck
-import { TiptapNode, mergeAttributes } from '../tiptap-core-shim'
+import { Node as TiptapNode, mergeAttributes } from '@tiptap/core'
 
-export interface FootnoteOptions {}
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    footnote: {
+      insertFootnote: (options: { id: string; content?: string }) => ReturnType
+    }
+  }
+}
 
-export const FootnoteNode = TiptapNode.create<FootnoteOptions>({
+export const FootnoteNode = TiptapNode.create({
   name: 'footnote',
   group: 'block',
   atom: true,
@@ -61,7 +66,7 @@ export const FootnoteNode = TiptapNode.create<FootnoteOptions>({
 
       text.addEventListener('blur', () => {
         const pos = typeof getPos === 'function' ? getPos() : null
-        if (pos !== null) {
+        if (typeof pos === 'number') {
           editor
             .chain()
             .focus()

@@ -19,17 +19,21 @@ import type {
 
 export function LibraryPage({ language }: { language: AppLanguage }) {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [items, setItems] = useState<Publication[]>([])
-  const [loading, setLoading] = useState(true)
+  const [results, setResults] = useState<{
+    key: string
+    items: Publication[]
+    loaded: boolean
+  }>({ key: '', items: [], loaded: false })
 
   const category = (searchParams.get('category') as PublicationCategory | 'all' | null) ?? 'all'
   const accessTier = (searchParams.get('access') as AccessTier | 'all' | null) ?? 'all'
   const kind = (searchParams.get('kind') as PublicationKind | 'all' | null) ?? 'all'
   const topic = searchParams.get('topic') ?? ''
   const search = searchParams.get('q') ?? ''
+  const filterKey = JSON.stringify([category, accessTier, topic, search])
 
   useEffect(() => {
-    setLoading(true)
+    let cancelled = false
     listPublications({
       category,
       access_tier: accessTier,
@@ -37,9 +41,23 @@ export function LibraryPage({ language }: { language: AppLanguage }) {
       topic,
       search,
     })
-      .then(setItems)
-      .finally(() => setLoading(false))
-  }, [accessTier, category, search, topic])
+      .then((items) => {
+        if (!cancelled) setResults({ key: filterKey, items, loaded: true })
+      })
+      .catch(() => {
+        if (!cancelled) setResults({ key: filterKey, items: [], loaded: true })
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [accessTier, category, filterKey, search, topic])
+
+  const loading = !results.loaded || results.key !== filterKey
+  const items = useMemo(
+    () => (results.key === filterKey ? results.items : []),
+    [filterKey, results.items, results.key],
+  )
 
   const kindCounts = useMemo(() => {
     const base: Record<PublicationKind | 'all', number> = {

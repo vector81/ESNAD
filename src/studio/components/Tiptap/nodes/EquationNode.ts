@@ -1,10 +1,15 @@
-// @ts-nocheck
-import { TiptapNode, mergeAttributes } from '../tiptap-core-shim'
+import { Node as TiptapNode, mergeAttributes } from '@tiptap/core'
 import katex from 'katex'
 
-export interface EquationOptions {}
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    equation: {
+      insertEquation: (options: { expression: string; displayMode?: boolean }) => ReturnType
+    }
+  }
+}
 
-export const EquationNode = TiptapNode.create<EquationOptions>({
+export const EquationNode = TiptapNode.create({
   name: 'equation',
   group: 'inline',
   inline: true,

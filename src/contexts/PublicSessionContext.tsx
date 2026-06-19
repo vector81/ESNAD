@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -31,6 +32,13 @@ interface PublicSessionContextValue {
 }
 
 const PublicSessionContext = createContext<PublicSessionContextValue | undefined>(undefined)
+
+function emptyLibrarySnapshot(): LibrarySnapshot {
+  return {
+    saved_item_ids: [],
+    purchased_item_ids: [],
+  }
+}
 
 function getDemoUser() {
   if (typeof window === 'undefined') {
@@ -71,41 +79,51 @@ function mapFirebaseUser(user: {
 }
 
 export function PublicSessionProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<SessionUser | null>(null)
-  const [library, setLibrary] = useState<LibrarySnapshot>({
-    saved_item_ids: [],
-    purchased_item_ids: [],
-  })
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<SessionUser | null>(() =>
+    !auth || !isFirebaseConfigured ? getDemoUser() : null,
+  )
+  const [library, setLibrary] = useState<LibrarySnapshot>(() => emptyLibrarySnapshot())
+  const [loading, setLoading] = useState(() => Boolean(auth && isFirebaseConfigured))
 
-  const refreshLibrary = async () => {
-    if (!user) {
-      setLibrary({ saved_item_ids: [], purchased_item_ids: [] })
-      return
-    }
-
-    setLibrary(await getLibrarySnapshot(user))
-  }
+  const refreshLibrary = useCallback(async () => {
+    const snapshot = user ? await getLibrarySnapshot(user) : emptyLibrarySnapshot()
+    setLibrary(snapshot)
+  }, [user])
 
   useEffect(() => {
     if (!auth || !isFirebaseConfigured) {
-      const demoUser = getDemoUser()
-      setUser(demoUser)
-      setLoading(false)
       return undefined
     }
 
     return onAuthStateChanged(auth, (nextUser) => {
-      setUser(nextUser ? mapFirebaseUser(nextUser) : null)
+      if (nextUser) {
+        setUser(mapFirebaseUser(nextUser))
+      } else {
+        setUser(null)
+        setLibrary(emptyLibrarySnapshot())
+      }
       setLoading(false)
     })
   }, [])
 
   useEffect(() => {
-    void refreshLibrary()
+    if (!user) return undefined
+
+    let cancelled = false
+    void getLibrarySnapshot(user)
+      .then((snapshot) => {
+        if (!cancelled) setLibrary(snapshot)
+      })
+      .catch(() => {
+        if (!cancelled) setLibrary(emptyLibrarySnapshot())
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [user])
 
-  const signInUser = async (email: string, password: string) => {
+  const signInUser = useCallback(async (email: string, password: string) => {
     if (!auth || !isFirebaseConfigured) {
       const demoUser = {
         uid: `demo-${email.toLowerCase()}`,
@@ -119,9 +137,9 @@ export function PublicSessionProvider({ children }: { children: ReactNode }) {
 
     const credentials = await signInWithEmailAndPassword(auth, email, password)
     setUser(mapFirebaseUser(credentials.user))
-  }
+  }, [])
 
-  const registerUser = async (name: string, email: string, password: string) => {
+  const registerUser = useCallback(async (name: string, email: string, password: string) => {
     if (!auth || !isFirebaseConfigured) {
       const demoUser = {
         uid: `demo-${email.toLowerCase()}`,
@@ -138,20 +156,20 @@ export function PublicSessionProvider({ children }: { children: ReactNode }) {
       displayName: name.trim(),
     })
     setUser(mapFirebaseUser(credentials.user))
-  }
+  }, [])
 
-  const signOutUser = async () => {
+  const signOutUser = useCallback(async () => {
     if (!auth || !isFirebaseConfigured) {
       setDemoUser(null)
       setUser(null)
-      setLibrary({ saved_item_ids: [], purchased_item_ids: [] })
+      setLibrary(emptyLibrarySnapshot())
       return
     }
 
     await signOut(auth)
     setUser(null)
-    setLibrary({ saved_item_ids: [], purchased_item_ids: [] })
-  }
+    setLibrary(emptyLibrarySnapshot())
+  }, [])
 
   const value = useMemo(
     () => ({
@@ -163,7 +181,7 @@ export function PublicSessionProvider({ children }: { children: ReactNode }) {
       registerUser,
       signOutUser,
     }),
-    [user, loading, library],
+    [user, loading, library, refreshLibrary, signInUser, registerUser, signOutUser],
   )
 
   return <PublicSessionContext.Provider value={value}>{children}</PublicSessionContext.Provider>

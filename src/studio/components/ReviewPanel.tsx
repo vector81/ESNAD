@@ -9,23 +9,40 @@ interface ReviewPanelProps {
 }
 
 export function ReviewPanel({ publicationId, chapterId, canComment }: ReviewPanelProps) {
-  const [comments, setComments] = useState<Comment[]>([])
-  const [loading, setLoading] = useState(true)
+  const requestKey = `${publicationId}:${chapterId ?? ''}`
+  const [commentState, setCommentState] = useState<{
+    key: string
+    comments: Comment[]
+  }>({ key: '', comments: [] })
   const [text, setText] = useState('')
 
   useEffect(() => {
-    setLoading(true)
+    let cancelled = false
     listComments(publicationId, chapterId)
-      .then((list) => setComments(list))
-      .catch(() => setComments([]))
-      .finally(() => setLoading(false))
-  }, [publicationId, chapterId])
+      .then((comments) => {
+        if (!cancelled) setCommentState({ key: requestKey, comments })
+      })
+      .catch(() => {
+        if (!cancelled) setCommentState({ key: requestKey, comments: [] })
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [publicationId, chapterId, requestKey])
+
+  const loading = commentState.key !== requestKey
+  const comments = commentState.key === requestKey ? commentState.comments : []
 
   const handleSubmit = async () => {
     if (!text.trim()) return
     try {
       const saved = await saveComment(publicationId, { text, chapter_id: chapterId || null })
-      setComments((list) => [...list, saved])
+      setCommentState((current) =>
+        current.key === requestKey
+          ? { ...current, comments: [...current.comments, saved] }
+          : current,
+      )
       setText('')
     } catch {
       // ignore
@@ -35,8 +52,15 @@ export function ReviewPanel({ publicationId, chapterId, canComment }: ReviewPane
   const toggleResolved = async (comment: Comment) => {
     try {
       await resolveComment(publicationId, comment.id, !comment.resolved)
-      setComments((list) =>
-        list.map((c) => (c.id === comment.id ? { ...c, resolved: !c.resolved } : c))
+      setCommentState((current) =>
+        current.key === requestKey
+          ? {
+              ...current,
+              comments: current.comments.map((c) =>
+                c.id === comment.id ? { ...c, resolved: !c.resolved } : c,
+              ),
+            }
+          : current,
       )
     } catch {
       // ignore

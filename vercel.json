@@ -12,12 +12,24 @@
         { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.stripe.com https://*.cloudfunctions.net https://api.cloudinary.com https://*.cloudinary.com https://us.i.posthog.com https://us.posthog.com https://*.posthog.com; frame-src https://js.stripe.com; object-src 'none'; base-uri 'self'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.firebasestorage.app; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.stripe.com https://*.cloudfunctions.net https://api.cloudinary.com https://*.cloudinary.com https://us.i.posthog.com https://us.posthog.com https://*.posthog.com; frame-src 'self' https://js.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.firebasestorage.app; object-src 'none'; base-uri 'self'"
         }
       ]
     },
     {
-      "source": "/assets/(.*)",
+      "source": "/assets/index.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/assets/index.css",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/assets/chunks/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]

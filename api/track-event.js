@@ -1,4 +1,5 @@
 import { readJsonBody, sendJson, setCorsHeaders } from './_lib/http.js'
+import { rateLimit } from './_lib/rate-limit.js'
 
 const ALLOWED_EVENTS = new Set([
   '$pageview',
@@ -31,7 +32,11 @@ function cleanProperties(value) {
   return Object.fromEntries(
     Object.entries(value)
       .filter(([key]) => typeof key === 'string' && key.length > 0 && key.length < 80)
-      .filter(([, item]) => ['string', 'number', 'boolean'].includes(typeof item) || item === null),
+      .filter(([, item]) => ['string', 'number', 'boolean'].includes(typeof item) || item === null)
+      .map(([key, item]) => [
+        key,
+        typeof item === 'string' ? item.slice(0, 500) : item,
+      ]),
   )
 }
 
@@ -48,6 +53,13 @@ export default async function handler(request, response) {
     return
   }
 
+  const limited = rateLimit(request, { maxRequests: 60, keyPrefix: 'track-event' })
+  if (limited) {
+    response.setHeader('Retry-After', String(limited.retryAfter))
+    sendJson(response, 429, { error: 'rate_limited' })
+    return
+  }
+
   try {
     const token = process.env.VITE_POSTHOG_TOKEN?.trim()
     if (!token) {
@@ -55,7 +67,7 @@ export default async function handler(request, response) {
       return
     }
 
-    const body = await readJsonBody(request)
+    const body = await readJsonBody(request, { maxBytes: 16 * 1024 })
     const event = typeof body?.event === 'string' ? body.event.trim() : ''
     const distinctId = typeof body?.distinct_id === 'string' ? body.distinct_id.trim() : ''
 

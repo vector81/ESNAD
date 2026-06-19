@@ -4,9 +4,9 @@ import { PublicationCard } from '../../components/public/PublicationCard'
 import { PublicSiteShell } from '../../components/public/PublicSiteShell'
 import { usePublicSession } from '../../contexts/PublicSessionContext'
 import { auth, isFirebaseConfigured } from '../../lib/firebase'
-import { grantPurchasedItem, toggleSavedItem } from '../../lib/library'
+import { toggleSavedItem } from '../../lib/library'
 import { buildLocalizedPath } from '../../lib/navigation'
-import { createCheckoutSession } from '../../lib/payments'
+import { createCheckoutSession, downloadPurchasedPublicationPdf } from '../../lib/payments'
 import { optimizeCloudinaryUrl } from '../../lib/cloudinary'
 import { renderPmJson } from '../../reader/lib/render-pm-json'
 import {
@@ -55,7 +55,7 @@ function getCurrentScrollDepth() {
 export function PublicationPage({ language }: { language: AppLanguage }) {
   const { slug } = useParams()
   const navigate = useNavigate()
-  const { user, library, refreshLibrary } = usePublicSession()
+  const { user, library, refreshLibrary, loading: sessionLoading } = usePublicSession()
   const [publication, setPublication] = useState<Publication | null>(null)
   const [related, setRelated] = useState<Publication[]>([])
   const [message, setMessage] = useState('')
@@ -65,6 +65,7 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
 
   useEffect(() => {
     if (!slug) return
+    if (sessionLoading) return
     let cancelled = false
     setLoading(true)
     setPublication(null)
@@ -91,7 +92,7 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
         if (!cancelled) setLoading(false)
       })
     return () => { cancelled = true }
-  }, [slug])
+  }, [sessionLoading, slug, user?.uid])
 
   useEffect(() => {
     return subscribeAnalyticsConsent(setAnalyticsConsentStatus)
@@ -178,8 +179,10 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
 
   const isSaved = publication ? library.saved_item_ids.includes(publication.id) : false
   const isPurchased = publication ? library.purchased_item_ids.includes(publication.id) : false
-  // All publications are openly viewable — no login or purchase required to read or download.
-  const canAccess = Boolean(publication)
+  const canAccess = Boolean(
+    publication && (publication.access_tier === 'free' || isPurchased || publication.can_access),
+  )
+  const hasPdf = Boolean(publication?.pdf_url || publication?.has_pdf)
 
   const publishedDate = useMemo(
     () =>
@@ -319,14 +322,26 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
     })
 
   const handleDownloadPdf = async () => {
-    if (!publication?.pdf_url) return
+    if (!publication || !hasPdf) return
     const baseName =
       getShareSlug(publication) || getPublicationTitle(publication, language) || 'publication'
     const fileName = baseName.endsWith('.pdf') ? baseName : `${baseName}.pdf`
     try {
-      const response = await fetch(publication.pdf_url, { credentials: 'omit' })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      const blob = await response.blob()
+      const blob =
+        publication.access_tier === 'paid'
+          ? await (async () => {
+              if (!isFirebaseConfigured || !auth?.currentUser) {
+                throw new Error('auth_required')
+              }
+              const token = await auth.currentUser.getIdToken()
+              return downloadPurchasedPublicationPdf(publication.id, token)
+            })()
+          : await (async () => {
+              if (!publication.pdf_url) throw new Error('missing_pdf_url')
+              const response = await fetch(publication.pdf_url, { credentials: 'omit' })
+              if (!response.ok) throw new Error(`HTTP ${response.status}`)
+              return response.blob()
+            })()
       const objectUrl = URL.createObjectURL(blob)
       const anchor = document.createElement('a')
       anchor.href = objectUrl
@@ -336,14 +351,18 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
       anchor.remove()
       setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
     } catch {
-      const anchor = document.createElement('a')
-      anchor.href = publication.pdf_url
-      anchor.download = fileName
-      anchor.target = '_blank'
-      anchor.rel = 'noreferrer'
-      document.body.appendChild(anchor)
-      anchor.click()
-      anchor.remove()
+      if (publication.access_tier === 'free' && publication.pdf_url) {
+        const anchor = document.createElement('a')
+        anchor.href = publication.pdf_url
+        anchor.download = fileName
+        anchor.target = '_blank'
+        anchor.rel = 'noreferrer'
+        document.body.appendChild(anchor)
+        anchor.click()
+        anchor.remove()
+        return
+      }
+      setMessage(language === 'ar' ? 'تعذر تنزيل ملف PDF حالياً.' : 'Could not download the PDF right now.')
     }
   }
 
@@ -354,17 +373,13 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
       return
     }
     if (!isFirebaseConfigured || !auth?.currentUser) {
-      await grantPurchasedItem(user, publication.id)
-      await refreshLibrary()
-      setMessage(language === 'ar' ? 'تمت إضافة الإصدار إلى مشترياتك في وضع المعاينة.' : 'Publication added to purchases in demo mode.')
+      setMessage(language === 'ar' ? 'الدفع غير متاح حالياً.' : 'Payment is not available right now.')
       return
     }
     const token = await auth.currentUser.getIdToken()
     const session = await createCheckoutSession(publication.id, token, language)
-    if (session?.mode === 'fallback' || !session?.url) {
-      await grantPurchasedItem(user, publication.id)
-      await refreshLibrary()
-      setMessage(language === 'ar' ? 'تمت إضافة الإصدار إلى مشترياتك.' : 'Publication added to your purchases.')
+    if (!session?.url) {
+      setMessage(language === 'ar' ? 'تعذر بدء عملية الدفع حالياً.' : 'Could not start checkout right now.')
       return
     }
     window.location.href = session.url
@@ -385,8 +400,9 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
 
   const shareToWhatsApp = () => {
     if (!shareUrl) return
-    const text = encodeURIComponent(`${shareText} ${shareUrl}`)
-    window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer')
+    // Pass only the URL — WhatsApp builds its own preview card from the page's
+    // OG tags. Injecting the title too would duplicate it above the card.
+    window.open(`https://wa.me/?text=${encodeURIComponent(shareUrl)}`, '_blank', 'noopener,noreferrer')
   }
 
   const shareToTwitter = () => {
@@ -487,14 +503,22 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
           {message ? <div className="notice notice--success">{message}</div> : null}
 
           <section className="panel">
-            {publication.content_json ? (
-              <div className="reader-body detail-prose pub-pdf-source">
-                {renderPmJson(publication.content_json)}
-              </div>
+            {canAccess ? (
+              publication.content_json ? (
+                <div className="reader-body detail-prose pub-pdf-source">
+                  {renderPmJson(publication.content_json)}
+                </div>
+              ) : (
+                <p className="body-muted pub-pdf-source">
+                  {getPublicationDescription(publication, language)}
+                </p>
+              )
             ) : (
-              <p className="body-muted pub-pdf-source">
-                {getPublicationDescription(publication, language)}
-              </p>
+              <div className="empty">
+                {language === 'ar'
+                  ? 'هذا الإصدار مدفوع. يرجى تسجيل الدخول وإتمام الشراء لقراءة المحتوى الكامل.'
+                  : 'This is a paid publication. Sign in and complete purchase to read the full content.'}
+              </div>
             )}
           </section>
 
@@ -506,6 +530,16 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
                 src={`${publication.pdf_url}#page=1&toolbar=0&navpanes=0`}
                 title={getPublicationTitle(publication, language)}
               />
+            ) : hasPdf ? (
+              <div className="empty">
+                {canAccess
+                  ? language === 'ar'
+                    ? 'ملف PDF متاح للتنزيل الآمن.'
+                    : 'The PDF is available as a secure download.'
+                  : language === 'ar'
+                    ? 'معاينة PDF متاحة بعد الشراء.'
+                    : 'PDF preview is available after purchase.'}
+              </div>
             ) : (
               <div className="empty">
                 {language === 'ar' ? 'لا توجد معاينة PDF متاحة.' : 'No PDF preview available.'}
@@ -548,7 +582,7 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
 
           <div className="detail-actions">
             {canAccess ? (
-              publication.pdf_url ? (
+              hasPdf ? (
                 <>
                   <button
                     className="btn btn--primary"
@@ -557,14 +591,16 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
                   >
                     {language === 'ar' ? 'تنزيل PDF' : 'Download PDF'}
                   </button>
-                  <a
-                    className="btn btn--secondary"
-                    href={publication.pdf_url}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {language === 'ar' ? 'قراءة في نافذة جديدة' : 'Open in new tab'}
-                  </a>
+                  {publication.pdf_url ? (
+                    <a
+                      className="btn btn--secondary"
+                      href={publication.pdf_url}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      {language === 'ar' ? 'قراءة في نافذة جديدة' : 'Open in new tab'}
+                    </a>
+                  ) : null}
                 </>
               ) : (
                 <button

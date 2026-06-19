@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Mark } from '@tiptap/core'
 
 export const CommentMark = Mark.create({

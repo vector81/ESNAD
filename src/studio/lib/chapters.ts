@@ -8,7 +8,7 @@ import {
   setDoc,
   writeBatch,
 } from 'firebase/firestore'
-import { db, isFirebaseConfigured, waitForAuthenticatedUser } from '../../lib/firebase'
+import { auth, db, isFirebaseConfigured, waitForAuthenticatedUser } from '../../lib/firebase'
 import type { Chapter } from '../../types/studio'
 
 function normalizeChapter(id: string, data: Partial<Chapter>, publicationId: string): Chapter {
@@ -34,6 +34,25 @@ export async function listChapters(publicationId: string): Promise<Chapter[]> {
     query(collection(db, 'publications', publicationId, 'chapters'), orderBy('order', 'asc'))
   )
   return snapshot.docs.map((d) => normalizeChapter(d.id, d.data() as Partial<Chapter>, publicationId))
+}
+
+export async function listReadableChapters(publicationId: string): Promise<Chapter[]> {
+  if (!isFirebaseConfigured || import.meta.env.DEV) {
+    return listChapters(publicationId)
+  }
+
+  const params = new URLSearchParams({ publicationId })
+  const token = await auth?.currentUser?.getIdToken().catch(() => '')
+  const response = await fetch(`/api/publication-chapters?${params.toString()}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  })
+  const payload = (await response.json().catch(() => null)) as { chapters?: Chapter[] } | null
+
+  if (!response.ok) {
+    return []
+  }
+
+  return Array.isArray(payload?.chapters) ? payload.chapters : []
 }
 
 export async function saveChapter(publicationId: string, input: Partial<Chapter>, chapterId?: string): Promise<Chapter> {
