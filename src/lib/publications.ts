@@ -170,12 +170,12 @@ function normalizePublication(id: string, raw: Partial<PublicationInput>): Publi
             : 'draft'
   return {
     id,
-    public_id: raw.public_id,
-    publicId: raw.publicId,
-    numeric_id: raw.numeric_id,
-    numericId: raw.numericId,
-    article_id: raw.article_id,
-    articleId: raw.articleId,
+    ...(raw.public_id !== undefined ? { public_id: raw.public_id } : {}),
+    ...(raw.publicId !== undefined ? { publicId: raw.publicId } : {}),
+    ...(raw.numeric_id !== undefined ? { numeric_id: raw.numeric_id } : {}),
+    ...(raw.numericId !== undefined ? { numericId: raw.numericId } : {}),
+    ...(raw.article_id !== undefined ? { article_id: raw.article_id } : {}),
+    ...(raw.articleId !== undefined ? { articleId: raw.articleId } : {}),
     slug: raw.slug?.trim() || slugify(raw.title_en || raw.title_ar || id),
     slug_ar: raw.slug_ar?.trim() || raw.slugAr?.trim() || raw.slug?.trim() || '',
     slug_latin:
