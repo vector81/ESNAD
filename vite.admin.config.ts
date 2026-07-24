@@ -10,6 +10,15 @@ export default defineConfig({
   envDir: rootDir,
   publicDir: resolve(rootDir, 'public'),
   root: resolve(rootDir, 'sites/editor'),
+  server: {
+    proxy: {
+      '/api/posthog-summary': {
+        target: 'https://esnad-editor.vercel.app',
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
   build: {
     outDir: resolve(rootDir, 'dist/editor'),
     emptyOutDir: true,
