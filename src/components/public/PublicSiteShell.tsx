@@ -2,6 +2,8 @@ import type { FormEvent, ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { usePublicSession } from '../../contexts/PublicSessionContext'
+import { getRouteMeta, usePageMeta } from '../../hooks/usePageMeta'
+import WireframeDottedGlobe from '../ui/wireframe-dotted-globe'
 import { buildLocalizedPath } from '../../lib/navigation'
 import type { AppLanguage } from '../../types/publication'
 
@@ -27,6 +29,8 @@ export function PublicSiteShell({
   const navItems = getNavItems(language)
   const [searchValue, setSearchValue] = useState('')
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+
+  usePageMeta(language, getRouteMeta(location.pathname, language))
 
   useEffect(() => {
     if (!mobileNavOpen) return
@@ -65,10 +69,9 @@ export function PublicSiteShell({
             to={buildLocalizedPath(language, '/')}
             aria-label={language === 'ar' ? 'مركز إسناد للدراسات والأبحاث' : 'Esnad Center for Studies and Research'}
           >
-            <img
-              className="brand-lockup__logo"
-              src="/newlogo.png"
-              alt={language === 'ar' ? 'شعار مركز إسناد' : 'Esnad logo'}
+            <WireframeDottedGlobe
+              className="brand-lockup__globe"
+              ariaLabel={language === 'ar' ? 'كرة أرضية' : 'Globe'}
             />
             <span className="brand-lockup__text">
               <span className="brand-lockup__name">
