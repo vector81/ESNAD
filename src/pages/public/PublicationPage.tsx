@@ -24,6 +24,7 @@ import {
   listPublications,
 } from '../../lib/publications'
 import { getPublicSiteUrl } from '../../lib/siteLinks'
+import { usePageMeta } from '../../hooks/usePageMeta'
 import {
   getAnalyticsConsentStatus,
   subscribeAnalyticsConsent,
@@ -62,6 +63,21 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
   const [loading, setLoading] = useState(true)
   const [analyticsConsentStatus, setAnalyticsConsentStatus] = useState(() => getAnalyticsConsentStatus())
   const trackedViewRef = useRef<string | null>(null)
+
+  const pageMeta = useMemo(() => {
+    if (!publication) return null
+    const abstract = getPublicationAbstract(publication, language) || ''
+    const section = publication.kind === 'book' ? '/books' : '/library'
+    return {
+      title: getPublicationTitle(publication, language),
+      description: abstract.replace(/\s+/g, ' ').trim().slice(0, 200) || undefined,
+      path: buildLocalizedPath(language, `${section}/${getShareSlug(publication)}`),
+      image: publication.cover_image
+        ? optimizeCloudinaryUrl(publication.cover_image, { width: 1200 })
+        : undefined,
+    }
+  }, [language, publication])
+  usePageMeta(language, pageMeta)
 
   useEffect(() => {
     if (!slug) return

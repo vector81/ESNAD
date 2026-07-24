@@ -716,7 +716,26 @@ function renderCatalogHtml({ lang, section, publications }) {
 </html>`
 }
 
-function renderHtml({ lang, title, description, image, url, ogType, articleTitle, articleAuthor, articlePublishedAt, articleBodyHtml }) {
+function renderArticleJsonLd({ pub, language, url, image }) {
+  const author = language === 'en' ? pub.author_en || pub.author_ar : pub.author_ar || pub.author_en
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: getHeadline(pub, language) || getTitle(pub, language),
+    name: getTitle(pub, language),
+    description: getAbstract(pub, language),
+    inLanguage: language,
+    url,
+    mainEntityOfPage: url,
+    publisher: { '@type': 'Organization', name: DEFAULT_SITE_TITLE, url: DEFAULT_SITE_URL },
+    ...(image ? { image: [image] } : {}),
+    ...(author ? { author: { '@type': 'Person', name: author } } : {}),
+    ...(pub.published_at ? { datePublished: new Date(pub.published_at).toISOString() } : {}),
+    ...(pub.updated_at ? { dateModified: new Date(pub.updated_at).toISOString() } : {}),
+  }).replace(/</g, '\\u003c')
+}
+
+function renderHtml({ lang, title, description, image, url, ogType, articleTitle, articleAuthor, articlePublishedAt, articleBodyHtml, jsonLd }) {
   const pageTitle =
     title && title !== DEFAULT_SITE_TITLE ? `${title} | ${DEFAULT_SITE_NAME}` : DEFAULT_SITE_TITLE
   const pageDescription = description || DEFAULT_SITE_DESCRIPTION
@@ -753,6 +772,7 @@ ${imageMetadata}
     <meta name="twitter:description" content="${escapeHtml(pageDescription)}" />
     <meta name="twitter:image" content="${escapeHtml(image || '')}" />
     <meta name="theme-color" content="#c4302b" />
+    ${jsonLd ? `<script type="application/ld+json">${jsonLd}</script>` : ''}
   </head>
   <body>
     <main>
@@ -843,6 +863,12 @@ export default async function handler(request, response) {
         articleAuthor: language === 'en' ? pub.author_en || pub.author_ar : pub.author_ar || pub.author_en,
         articlePublishedAt: pub.published_at ? new Date(pub.published_at).toISOString().slice(0, 10) : '',
         articleBodyHtml: getArticleBodyHtml(pub, language),
+        jsonLd: renderArticleJsonLd({
+          pub,
+          language,
+          url: buildAbsoluteUrl(canonicalPath),
+          image: optimizeOgImage(pub.cover_image || ''),
+        }),
       }),
     )
   } catch (error) {
