@@ -1,5 +1,4 @@
 import { createHash } from 'node:crypto'
-import { getAdminAuth } from './_lib/firebase-admin.js'
 import { getBearerToken, sendJson, setCorsHeaders } from './_lib/http.js'
 
 const DEFAULT_POSTHOG_HOST = 'https://us.posthog.com'
@@ -31,9 +30,46 @@ async function verifyAdminRequest(request) {
     return null
   }
 
-  const decodedToken = await getAdminAuth().verifyIdToken(token)
-  const email = decodedToken.email?.trim().toLowerCase() || ''
-  return getAllowedAdminEmails().has(email) ? decodedToken : null
+  const apiKey = process.env.VITE_FIREBASE_API_KEY?.trim()
+  if (!apiKey) {
+    throw new Error('Firebase authentication is not configured.')
+  }
+
+  const authResponse = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ idToken: token }),
+    },
+  )
+
+  if (authResponse.status === 400 || authResponse.status === 401) {
+    return null
+  }
+
+  const authPayload = await authResponse.json().catch(() => null)
+  if (!authResponse.ok) {
+    const detail =
+      authPayload?.error?.message ||
+      authPayload?.message ||
+      authResponse.statusText ||
+      'Firebase token verification failed.'
+    throw new Error(detail)
+  }
+
+  const user = authPayload?.users?.[0]
+  const email = user?.email?.trim().toLowerCase() || ''
+  if (!user?.localId || !getAllowedAdminEmails().has(email)) {
+    return null
+  }
+
+  return {
+    uid: user.localId,
+    email,
+  }
 }
 
 function normalizeHost(value) {

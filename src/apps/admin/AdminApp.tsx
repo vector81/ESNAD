@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { ProtectedRoute } from '../../components/admin/ProtectedRoute'
 import { AuthProvider } from '../../contexts/AuthContext'
@@ -34,6 +34,11 @@ function EditorLoadingFallback() {
   )
 }
 
+function StudioPageRoute() {
+  const { id } = useParams<{ id?: string }>()
+  return <StudioPage key={id ?? 'new'} />
+}
+
 export function AdminApp() {
   return (
     <BrowserRouter>
@@ -45,8 +50,8 @@ export function AdminApp() {
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminDashboardPage />} />
                 <Route path="admin/analytics" element={<AdminAnalyticsPage />} />
-                <Route path="admin/publications/new" element={<StudioPage />} />
-                <Route path="admin/publications/:id/edit" element={<StudioPage />} />
+                <Route path="admin/publications/new" element={<StudioPageRoute />} />
+                <Route path="admin/publications/:id/edit" element={<StudioPageRoute />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate replace to="/" />} />
