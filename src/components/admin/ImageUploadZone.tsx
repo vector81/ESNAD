@@ -93,22 +93,28 @@ export function ImageUploadZone({
             <div className="upload-preview upload-preview--compact upload-preview--thumbnail">
               <img alt="معاينة الصورة" className="upload-preview__image" src={imageUrl} />
               <div className="upload-preview__actions">
-                <button className="button" onClick={triggerInput} type="button">
+                <button className="btn btn--secondary btn--xs" onClick={triggerInput} type="button">
                   تغيير الصورة
                 </button>
-                <button className="button button--danger" onClick={onRemove} type="button">
+                <button className="btn btn--ghost btn--xs" onClick={onRemove} type="button">
                   إزالة
                 </button>
               </div>
             </div>
           ) : (
             <button
-              className="button upload-inline__button"
+              className="asset-drop asset-drop--image upload-inline__button"
               disabled={disabled || isUploading}
               onClick={triggerInput}
               type="button"
             >
-              {isUploading ? 'جارٍ رفع الصورة...' : compactLabel}
+              <span aria-hidden="true" className="asset-drop__icon asset-drop__icon--image">
+                +
+              </span>
+              <span className="asset-drop__copy">
+                <strong>{isUploading ? 'جارٍ رفع الصورة…' : compactLabel}</strong>
+                <small>اسحب صورة أو انقر للاختيار</small>
+              </span>
             </button>
           )}
         </div>
@@ -134,7 +140,7 @@ export function ImageUploadZone({
           onKeyDown={handleKeyDown}
           onPaste={(event) => void handlePaste(event)}
           role="button"
-          tabIndex={0}
+          tabIndex={disabled || isUploading ? -1 : 0}
         >
           <svg aria-hidden="true" className="upload-zone__icon" viewBox="0 0 24 24">
             <path
@@ -169,7 +175,7 @@ export function ImageUploadZone({
         <div className="upload-preview">
           <img alt="معاينة الصورة" className="upload-preview__image" src={imageUrl} />
           <div className="upload-preview__actions">
-            <button className="button button--danger" onClick={onRemove} type="button">
+            <button className="btn btn--ghost btn--xs" onClick={onRemove} type="button">
               إزالة الصورة
             </button>
           </div>

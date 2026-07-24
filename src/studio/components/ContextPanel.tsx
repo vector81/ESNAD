@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { PublicationInput } from '../../types/publication'
 import { VersionsPanel } from './VersionsPanel'
 import { ImageUploadZone } from '../../components/admin/ImageUploadZone'
+import { PdfUploadZone } from '../../components/admin/PdfUploadZone'
 import { FocalPointPicker } from '../../components/admin/FocalPointPicker'
 import { PUBLICATION_CATEGORIES, getCoverObjectPosition, getPublicationCategoryLabel } from '../../lib/publications'
 import type { Chapter } from '../../types/studio'
@@ -230,14 +231,11 @@ export function ContextPanel({
             {/* PDF */}
             <div className="panel-group">
               <h4 className="panel-group__title">ملف PDF</h4>
-              <input
-                accept="application/pdf"
+              <PdfUploadZone
                 disabled={pdfUploading || isSaving}
-                onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (file) void onPdfUpload(file)
-                }}
-                type="file"
+                fileUrl={publication.pdf_url}
+                onRemove={() => onChange({ pdf_url: '' })}
+                onUpload={onPdfUpload}
               />
               <input
                 dir="ltr"

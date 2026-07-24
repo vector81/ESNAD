@@ -1,6 +1,4 @@
-import anyAscii from 'any-ascii'
 import { PUBLICATION_ID_MAP } from './publication-id-map.js'
-import { getAdminAuth, getAdminDb } from './firebase-admin.js'
 import { getBearerToken } from './http.js'
 import { isAllowedAdminEmail } from './admin-auth.js'
 
@@ -20,7 +18,10 @@ function slugify(value = '') {
 }
 
 function slugifyLatin(value = '') {
-  return anyAscii(String(value))
+  return String(value)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\x00-\x7F]/g, ' ')
     .trim()
     .toLowerCase()
     .replace(/['"`´]+/g, '')
@@ -55,6 +56,105 @@ function slugifyArabic(value = '') {
     .replace(/[\s_]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
+}
+
+async function getFirebaseAdmin() {
+  return await import('./firebase-admin.js')
+}
+
+function hasRestConfig() {
+  return Boolean(process.env.VITE_FIREBASE_PROJECT_ID?.trim() && process.env.VITE_FIREBASE_API_KEY?.trim())
+}
+
+function hasAdminConfig() {
+  return Boolean(
+    process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim() ||
+      process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON?.trim() ||
+      process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim() ||
+      (
+        process.env.FIREBASE_PROJECT_ID?.trim() &&
+        process.env.FIREBASE_CLIENT_EMAIL?.trim() &&
+        process.env.FIREBASE_PRIVATE_KEY?.trim()
+      ),
+  )
+}
+
+function decodeFirestoreValue(value) {
+  if (!value || typeof value !== 'object') return undefined
+  if ('stringValue' in value) return value.stringValue
+  if ('booleanValue' in value) return value.booleanValue
+  if ('integerValue' in value) return Number(value.integerValue)
+  if ('doubleValue' in value) return Number(value.doubleValue)
+  if ('timestampValue' in value) return value.timestampValue
+  if ('nullValue' in value) return null
+  if ('arrayValue' in value) {
+    return (value.arrayValue.values ?? []).map(decodeFirestoreValue)
+  }
+  if ('mapValue' in value) {
+    return Object.fromEntries(
+      Object.entries(value.mapValue.fields ?? {}).map(([key, child]) => [
+        key,
+        decodeFirestoreValue(child),
+      ]),
+    )
+  }
+  return undefined
+}
+
+function normalizeFirestoreDocument(document) {
+  const fields = Object.entries(document.fields ?? {})
+  const data = Object.fromEntries(fields.map(([key, value]) => [key, decodeFirestoreValue(value)]))
+  return { id: document.name?.split('/').pop() ?? '', ...data }
+}
+
+async function firestoreQuery(projectId, apiKey, body) {
+  const response = await fetch(
+    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+
+  if (!response.ok) {
+    throw new Error(`Firestore query failed (${response.status})`)
+  }
+
+  const payload = await response.json()
+  return payload.filter((item) => item.document).map((item) => normalizeFirestoreDocument(item.document))
+}
+
+async function firestoreGetPublication(projectId, apiKey, id) {
+  const encodedId = encodeURIComponent(id)
+  const response = await fetch(
+    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/publications/${encodedId}?key=${apiKey}`,
+  )
+
+  if (response.status === 403 || response.status === 404) return null
+  if (!response.ok) {
+    throw new Error(`Firestore document fetch failed (${response.status})`)
+  }
+
+  return normalizeFirestoreDocument(await response.json())
+}
+
+function buildPublishedFilter(extraFilter, publishedField) {
+  return {
+    compositeFilter: {
+      op: 'AND',
+      filters: [
+        {
+          fieldFilter: {
+            field: { fieldPath: publishedField },
+            op: 'EQUAL',
+            value: { stringValue: 'published' },
+          },
+        },
+        extraFilter,
+      ],
+    },
+  }
 }
 
 function clampCoverPosition(value) {
@@ -211,7 +311,8 @@ function snapshotToPublication(documentSnapshot) {
   return normalizePublication(documentSnapshot.id, documentSnapshot.data() || {})
 }
 
-export async function listPublishedPublications() {
+async function listPublishedPublicationsFromAdmin() {
+  const { getAdminDb } = await getFirebaseAdmin()
   const db = getAdminDb()
   const seen = new Map()
 
@@ -229,15 +330,97 @@ export async function listPublishedPublications() {
   )
 }
 
-export async function getPublishedPublicationById(id) {
+async function listPublishedPublicationsFromRest() {
+  const projectId = process.env.VITE_FIREBASE_PROJECT_ID?.trim()
+  const apiKey = process.env.VITE_FIREBASE_API_KEY?.trim()
+  if (!projectId || !apiKey) return []
+
+  const seen = new Map()
+  for (const publishedField of ['status', 'workflow_stage']) {
+    const documents = await firestoreQuery(projectId, apiKey, {
+      structuredQuery: {
+        from: [{ collectionId: 'publications' }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: publishedField },
+            op: 'EQUAL',
+            value: { stringValue: 'published' },
+          },
+        },
+      },
+    })
+
+    for (const document of documents) {
+      if (!seen.has(document.id)) {
+        seen.set(document.id, normalizePublication(document.id, document))
+      }
+    }
+  }
+
+  return [...seen.values()].sort(
+    (left, right) => new Date(right.published_at).getTime() - new Date(left.published_at).getTime(),
+  )
+}
+
+export async function listPublishedPublications() {
+  if (hasRestConfig()) {
+    try {
+      return await listPublishedPublicationsFromRest()
+    } catch (error) {
+      console.error('[esnad/publications] REST list failed; falling back to admin', error)
+    }
+  }
+
+  if (hasAdminConfig()) {
+    try {
+      return await listPublishedPublicationsFromAdmin()
+    } catch (error) {
+      console.error('[esnad/publications] admin list failed', error)
+    }
+  }
+
+  return []
+}
+
+async function getPublishedPublicationByIdFromAdmin(id) {
   const trimmedId = String(id || '').trim()
   if (!DOCUMENT_ID_PATTERN.test(trimmedId)) return null
 
+  const { getAdminDb } = await getFirebaseAdmin()
   const publication = snapshotToPublication(await getAdminDb().collection('publications').doc(trimmedId).get())
   return isPublished(publication) ? publication : null
 }
 
-export async function getPublicationByReference(reference) {
+export async function getPublishedPublicationById(id) {
+  if (hasRestConfig()) {
+    try {
+      const trimmedId = String(id || '').trim()
+      if (!DOCUMENT_ID_PATTERN.test(trimmedId)) return null
+
+      const projectId = process.env.VITE_FIREBASE_PROJECT_ID?.trim()
+      const apiKey = process.env.VITE_FIREBASE_API_KEY?.trim()
+      if (!projectId || !apiKey) return null
+
+      const document = await firestoreGetPublication(projectId, apiKey, trimmedId)
+      const publication = document ? normalizePublication(document.id, document) : null
+      if (isPublished(publication)) return publication
+    } catch (error) {
+      console.error('[esnad/publications] REST document lookup failed; falling back to admin', error)
+    }
+  }
+
+  if (hasAdminConfig()) {
+    try {
+      return await getPublishedPublicationByIdFromAdmin(id)
+    } catch (error) {
+      console.error('[esnad/publications] admin document lookup failed', error)
+    }
+  }
+
+  return null
+}
+
+async function getPublicationByReferenceFromAdmin(reference) {
   const trimmedReference = String(reference || '').trim()
   if (!trimmedReference) return null
 
@@ -250,6 +433,7 @@ export async function getPublicationByReference(reference) {
   const byId = await getPublishedPublicationById(trimmedReference)
   if (byId) return byId
 
+  const { getAdminDb } = await getFirebaseAdmin()
   const db = getAdminDb()
   for (const slugField of SLUG_FIELDS) {
     for (const publishedField of ['status', 'workflow_stage']) {
@@ -270,13 +454,87 @@ export async function getPublicationByReference(reference) {
   return publications.find((publication) => publicationMatchesReference(publication, trimmedReference)) || null
 }
 
+async function getPublicationByReferenceFromRest(reference) {
+  const trimmedReference = String(reference || '').trim()
+  const projectId = process.env.VITE_FIREBASE_PROJECT_ID?.trim()
+  const apiKey = process.env.VITE_FIREBASE_API_KEY?.trim()
+  if (!projectId || !apiKey || !trimmedReference) return null
+
+  if (/^\d+$/.test(trimmedReference)) {
+    const mappedId = PUBLICATION_ID_MAP[trimmedReference]
+    if (mappedId) {
+      const mappedDocument = await firestoreGetPublication(projectId, apiKey, mappedId)
+      const mappedPublication = mappedDocument ? normalizePublication(mappedDocument.id, mappedDocument) : null
+      if (isPublished(mappedPublication)) return mappedPublication
+    }
+  }
+
+  if (DOCUMENT_ID_PATTERN.test(trimmedReference)) {
+    const document = await firestoreGetPublication(projectId, apiKey, trimmedReference)
+    const publication = document ? normalizePublication(document.id, document) : null
+    if (isPublished(publication)) return publication
+  }
+
+  for (const slugField of SLUG_FIELDS) {
+    const slugFilter = {
+      fieldFilter: {
+        field: { fieldPath: slugField },
+        op: 'EQUAL',
+        value: { stringValue: trimmedReference },
+      },
+    }
+
+    for (const publishedField of ['status', 'workflow_stage']) {
+      const documents = await firestoreQuery(projectId, apiKey, {
+        structuredQuery: {
+          from: [{ collectionId: 'publications' }],
+          where: buildPublishedFilter(slugFilter, publishedField),
+          limit: 1,
+        },
+      })
+
+      if (documents[0]) {
+        return normalizePublication(documents[0].id, documents[0])
+      }
+    }
+  }
+
+  const publications = await listPublishedPublicationsFromRest()
+  return publications.find((publication) => publicationMatchesReference(publication, trimmedReference)) || null
+}
+
+export async function getPublicationByReference(reference) {
+  if (hasRestConfig()) {
+    try {
+      const publication = await getPublicationByReferenceFromRest(reference)
+      if (publication) return publication
+    } catch (error) {
+      console.error('[esnad/publications] REST reference lookup failed; falling back to admin', error)
+    }
+  }
+
+  if (hasAdminConfig()) {
+    try {
+      const publication = await getPublicationByReferenceFromAdmin(reference)
+      if (publication) return publication
+    } catch (error) {
+      console.error('[esnad/publications] admin reference lookup failed', error)
+    }
+  }
+
+  return null
+}
+
 export async function getRequestIdentity(request) {
   const token = getBearerToken(request)
   if (!token) {
     return { user: null, isAdmin: false }
   }
 
-  const decodedToken = await getAdminAuth().verifyIdToken(token).catch(() => null)
+  const decodedToken = await getFirebaseAdmin()
+    .then(({ getAdminAuth }) => getAdminAuth().verifyIdToken(token))
+    .catch(() => null)
+
   if (!decodedToken) {
     return { user: null, isAdmin: false }
   }
@@ -292,10 +550,16 @@ export async function canAccessPublication(publication, identity) {
   if (identity?.isAdmin) return true
   if (!identity?.user?.uid) return false
 
-  const snapshot = await getAdminDb().collection('user_libraries').doc(identity.user.uid).get()
-  const data = snapshot.exists ? snapshot.data() : null
-  const purchasedIds = Array.isArray(data?.purchased_item_ids) ? data.purchased_item_ids.map(String) : []
-  return purchasedIds.includes(publication.id) || purchasedIds.includes(getPublicPublicationId(publication))
+  try {
+    const { getAdminDb } = await getFirebaseAdmin()
+    const snapshot = await getAdminDb().collection('user_libraries').doc(identity.user.uid).get()
+    const data = snapshot.exists ? snapshot.data() : null
+    const purchasedIds = Array.isArray(data?.purchased_item_ids) ? data.purchased_item_ids.map(String) : []
+    return purchasedIds.includes(publication.id) || purchasedIds.includes(getPublicPublicationId(publication))
+  } catch (error) {
+    console.error('[esnad/publications] paid access check failed', error)
+    return false
+  }
 }
 
 export function sanitizePublication(publication, canAccess, { includeContent = true } = {}) {
@@ -317,6 +581,7 @@ export function sanitizePublication(publication, canAccess, { includeContent = t
 }
 
 export async function listChaptersForPublication(publicationId) {
+  const { getAdminDb } = await getFirebaseAdmin()
   const snapshot = await getAdminDb()
     .collection('publications')
     .doc(publicationId)

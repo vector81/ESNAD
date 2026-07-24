@@ -1,6 +1,8 @@
-import anyAscii from 'any-ascii'
 import { PUBLICATION_ID_MAP } from './_lib/publication-id-map.js'
-import { getPublicationByReference as getPublicationByReferenceFromAdmin } from './_lib/publications.js'
+import {
+  getPublicationByReference as getPublicationByReferenceFromAdmin,
+  listPublishedPublications,
+} from './_lib/publications.js'
 
 const DEFAULT_SITE_TITLE = 'مركز إسناد للدراسات والأبحاث'
 const DEFAULT_SITE_DESCRIPTION =
@@ -24,7 +26,10 @@ function escapeHtml(value = '') {
 }
 
 function slugifyLatin(value = '') {
-  return anyAscii(String(value))
+  return String(value)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\x00-\x7F]/g, ' ')
     .trim()
     .toLowerCase()
     .replace(/['"`´]+/g, '')
@@ -528,6 +533,189 @@ function sendPublicationJson(response, pub, language, requestedSection) {
   })
 }
 
+function getCatalogMeta(section, language) {
+  const isEnglish = language === 'en'
+  if (section === 'articles') {
+    return {
+      title: isEnglish ? 'Articles' : 'المقالات',
+      heading: isEnglish ? 'Opinion and analysis articles' : 'مقالات الرأي والتحليل',
+      description: isEnglish
+        ? 'Latest public Esnad analytical articles with titles, authors, summaries, dates, and canonical links.'
+        : 'أحدث مقالات إسناد المنشورة مع العناوين والكتاب والملخصات والتواريخ والروابط الدائمة.',
+      path: isEnglish ? '/en/articles' : '/articles',
+    }
+  }
+  if (section === 'books') {
+    return {
+      title: isEnglish ? 'Books' : 'الكتب',
+      heading: isEnglish ? 'Books' : 'الكتب',
+      description: isEnglish
+        ? 'Published Esnad books with metadata, summaries, and canonical links.'
+        : 'كتب إسناد المنشورة مع البيانات التعريفية والملخصات والروابط الدائمة.',
+      path: isEnglish ? '/en/books' : '/books',
+    }
+  }
+  if (section === 'library') {
+    return {
+      title: isEnglish ? 'Research library' : 'المكتبة البحثية',
+      heading: isEnglish ? 'Research library' : 'المكتبة البحثية',
+      description: isEnglish
+        ? 'Published Esnad research papers, studies, reports, and articles.'
+        : 'أرشيف إسناد المنشور من الدراسات والأوراق البحثية والتقارير والمقالات.',
+      path: isEnglish ? '/en/library' : '/library',
+    }
+  }
+  return {
+    title: isEnglish ? 'Esnad Center for Studies and Research' : DEFAULT_SITE_TITLE,
+    heading: isEnglish ? 'Esnad Center for Studies and Research' : DEFAULT_SITE_TITLE,
+    description: isEnglish
+      ? 'A bilingual platform for studies, research papers, books, and analytical articles.'
+      : DEFAULT_SITE_DESCRIPTION,
+    path: isEnglish ? '/en' : '/',
+  }
+}
+
+function filterCatalogPublications(publications, section) {
+  if (section === 'articles') return publications.filter((pub) => pub.kind === 'article')
+  if (section === 'books') return publications.filter((pub) => pub.kind === 'book')
+  if (section === 'library') return publications.filter((pub) => pub.kind !== 'book')
+  return publications.slice(0, 12)
+}
+
+function getCatalogItemPath(pub, language) {
+  return getCanonicalPath(pub, language, getPublicationSection(pub))
+}
+
+function renderCatalogNavigation(language) {
+  const links = language === 'en'
+    ? [
+        ['/en', 'Home'],
+        ['/en/articles', 'Articles'],
+        ['/en/library', 'Library'],
+        ['/en/books', 'Books'],
+        ['/llms.txt', 'LLMS'],
+        ['/sitemap.xml', 'Sitemap'],
+      ]
+    : [
+        ['/', 'الرئيسية'],
+        ['/articles', 'المقالات'],
+        ['/library', 'المكتبة'],
+        ['/books', 'الكتب'],
+        ['/llms.txt', 'LLMS'],
+        ['/sitemap.xml', 'Sitemap'],
+      ]
+
+  return `<nav aria-label="Primary navigation">${links
+    .map(([href, label]) => `<a href="${escapeHtml(href)}">${escapeHtml(label)}</a>`)
+    .join('')}</nav>`
+}
+
+function renderCatalogPublication(pub, language) {
+  const title = getTitle(pub, language)
+  const headline = getHeadline(pub, language) || title
+  const abstract = getAbstract(pub, language)
+  const path = getCatalogItemPath(pub, language)
+  const publishedDate = pub.published_at ? new Date(pub.published_at).toISOString().slice(0, 10) : ''
+  const author = language === 'en' ? pub.author_en || pub.author_ar : pub.author_ar || pub.author_en
+
+  return `<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    ${pub.cover_image ? `<a href="${escapeHtml(path)}"><img src="${escapeHtml(optimizeOgImage(pub.cover_image))}" alt="${escapeHtml(title)}" loading="lazy" itemprop="image" /></a>` : ''}
+    <div>
+      <p class="meta">
+        ${author ? `<span itemprop="author">${escapeHtml(author)}</span>` : ''}
+        ${publishedDate ? `<time datetime="${escapeHtml(publishedDate)}" itemprop="datePublished">${escapeHtml(publishedDate)}</time>` : ''}
+        ${pub.category ? `<span>${escapeHtml(pub.category)}</span>` : ''}
+      </p>
+      <h2 itemprop="headline"><a href="${escapeHtml(path)}">${escapeHtml(headline)}</a></h2>
+      ${headline !== title ? `<p class="full-title" itemprop="name">${escapeHtml(title)}</p>` : ''}
+      ${abstract ? `<p itemprop="description">${escapeHtml(abstract)}</p>` : ''}
+      <p><a href="${escapeHtml(path)}">${language === 'en' ? 'Read publication' : 'قراءة الإصدار'}</a></p>
+    </div>
+  </article>`
+}
+
+function renderCatalogJsonLd(items, meta, language) {
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: meta.heading,
+    description: meta.description,
+    url: buildAbsoluteUrl(meta.path),
+    inLanguage: language,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: items.length,
+      itemListElement: items.map((pub, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: getTitle(pub, language),
+        url: buildAbsoluteUrl(getCatalogItemPath(pub, language)),
+      })),
+    },
+  }).replace(/</g, '\\u003c')
+}
+
+function renderCatalogHtml({ lang, section, publications }) {
+  const meta = getCatalogMeta(section, lang)
+  const title = meta.title === DEFAULT_SITE_TITLE ? meta.title : `${meta.title} | ${DEFAULT_SITE_NAME}`
+  const alternatePath = lang === 'en'
+    ? meta.path.replace(/^\/en$/, '/').replace(/^\/en\//, '/')
+    : meta.path === '/' ? '/en' : `/en${meta.path}`
+
+  return `<!doctype html>
+<html dir="${lang === 'en' ? 'ltr' : 'rtl'}" lang="${lang}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${escapeHtml(title)}</title>
+    <meta name="description" content="${escapeHtml(meta.description)}" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="${escapeHtml(buildAbsoluteUrl(meta.path))}" />
+    <link rel="alternate" hreflang="${lang === 'en' ? 'ar' : 'en'}" href="${escapeHtml(buildAbsoluteUrl(alternatePath))}" />
+    <link rel="alternate" hreflang="x-default" href="${escapeHtml(buildAbsoluteUrl(lang === 'en' ? alternatePath : meta.path))}" />
+    <link rel="stylesheet" href="${ENTRY_CSS}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="${escapeHtml(DEFAULT_SITE_NAME)}" />
+    <meta property="og:title" content="${escapeHtml(meta.title)}" />
+    <meta property="og:description" content="${escapeHtml(meta.description)}" />
+    <meta property="og:url" content="${escapeHtml(buildAbsoluteUrl(meta.path))}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">${renderCatalogJsonLd(publications, meta, lang)}</script>
+    <style>
+      body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f2933; background: #fff; }
+      main { max-width: 1120px; margin: 0 auto; padding: 32px 20px 56px; }
+      nav { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 28px; }
+      nav a, article a { color: #9f1d20; text-decoration: none; }
+      h1 { font-size: 32px; line-height: 1.2; margin: 0 0 10px; }
+      .lede { max-width: 780px; color: #53606f; margin: 0 0 28px; line-height: 1.8; }
+      .catalog-item { display: grid; grid-template-columns: minmax(160px, 260px) 1fr; gap: 20px; padding: 22px 0; border-top: 1px solid #e5e7eb; }
+      .catalog-item img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: #f3f4f6; }
+      .catalog-item h2 { margin: 4px 0 8px; font-size: 22px; line-height: 1.45; }
+      .catalog-item p { margin: 0 0 10px; line-height: 1.75; }
+      .catalog-item .meta { display: flex; flex-wrap: wrap; gap: 10px; color: #687385; font-size: 14px; }
+      .catalog-item .full-title { font-weight: 600; }
+      @media (max-width: 700px) { .catalog-item { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      ${renderCatalogNavigation(lang)}
+      <header>
+        <h1>${escapeHtml(meta.heading)}</h1>
+        <p class="lede">${escapeHtml(meta.description)}</p>
+      </header>
+      <section aria-label="${escapeHtml(meta.heading)}">
+        ${publications.length
+          ? publications.map((pub) => renderCatalogPublication(pub, lang)).join('\n')
+          : `<p>${lang === 'en' ? 'No published items are available.' : 'لا توجد مواد منشورة حالياً.'}</p>`}
+      </section>
+    </main>
+    <div id="root" hidden></div>
+    <script type="module" src="${ENTRY_JS}"></script>
+  </body>
+</html>`
+}
+
 function renderHtml({ lang, title, description, image, url, ogType, articleTitle, articleAuthor, articlePublishedAt, articleBodyHtml }) {
   const pageTitle =
     title && title !== DEFAULT_SITE_TITLE ? `${title} | ${DEFAULT_SITE_NAME}` : DEFAULT_SITE_TITLE
@@ -592,9 +780,24 @@ export default async function handler(request, response) {
   const language = normalizeLanguage(
     typeof request.query.lang === 'string' ? request.query.lang : 'ar',
   )
+  const wantsCatalog = request.query.mode === 'catalog'
   const wantsJson = request.query.format === 'json'
   const fallbackPath =
     language === 'en' ? `/en/${section}/${slug}` : `/${section}/${slug}`
+
+  if (wantsCatalog) {
+    try {
+      const publications = filterCatalogPublications(await listPublishedPublications(), section)
+      response.setHeader('content-type', 'text/html; charset=utf-8')
+      response.setHeader('cache-control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=600')
+      response.status(200).send(renderCatalogHtml({ lang: language, section, publications }))
+    } catch (error) {
+      console.error('[esnad/publication-shell] failed to render catalog', error)
+      response.setHeader('content-type', 'text/html; charset=utf-8')
+      response.status(200).send(renderCatalogHtml({ lang: language, section, publications: [] }))
+    }
+    return
+  }
 
   try {
     const pub = await getPublicationByReference(slug)

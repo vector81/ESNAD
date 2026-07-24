@@ -1,4 +1,3 @@
-import { getAdminAuth } from './firebase-admin.js'
 import { getBearerToken } from './http.js'
 
 const BASELINE_ADMIN_EMAILS = ['abuali882005@gmail.com', 'info@esnad.com.lb']
@@ -24,17 +23,21 @@ export function isAllowedAdminEmail(email) {
   return Boolean(email && getAllowedAdminEmails().has(String(email).trim().toLowerCase()))
 }
 
+async function getAdminAuth() {
+  const admin = await import('./firebase-admin.js')
+  return admin.getAdminAuth()
+}
+
 export async function requireUser(request) {
   const token = getBearerToken(request)
   if (!token) {
     throw new Error('missing_token')
   }
 
-  return getAdminAuth().verifyIdToken(token)
+  return (await getAdminAuth()).verifyIdToken(token)
 }
 
 export async function verifyAdminRequest(request) {
   const decodedToken = await requireUser(request)
   return isAllowedAdminEmail(decodedToken.email) ? decodedToken : null
 }
-

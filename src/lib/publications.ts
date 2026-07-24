@@ -437,7 +437,10 @@ export async function listPublications(filters: PublicationFilters = {}) {
   }
 
   if (shouldUsePublicApi) {
-    const publications = await listPublicationsFromApi()
+    const publications = await listPublicationsFromApi().catch((error) => {
+      logFirebaseDebug('listPublications:api-fallback', error)
+      return listPublishedPublicationsFromFirestore()
+    })
     return publications.filter((item) => filterPublication(item, filters))
   }
 
@@ -482,8 +485,33 @@ export async function getPublicationBySlug(slug: string) {
   }
 
   if (shouldUsePublicApi) {
-    return getPublicationFromApi(trimmedSlug)
+    return getPublicationFromApi(trimmedSlug).catch((error) => {
+      logFirebaseDebug('getPublicationBySlug:api-fallback', error)
+      return getPublicationBySlugFromFirestore(trimmedSlug)
+    })
   }
+
+  return getPublicationBySlugFromFirestore(trimmedSlug)
+}
+
+async function getPublicationBySlugFromFirestore(trimmedSlug: string) {
+  if (!db) return null
+
+  const matchSlug = (item: Publication) =>
+    [
+      item.id,
+      getPublicPublicationId(item),
+      item.slug,
+      item.slug_ar,
+      item.slugAr,
+      item.slug_latin,
+      item.slugLatin,
+      item.slug_en,
+      item.slugEn,
+      slugifyLatin(item.title_en || item.title_ar || item.slug),
+    ]
+      .map((candidate) => candidate?.trim())
+      .includes(trimmedSlug)
 
   try {
     const mappedId = /^\d+$/.test(trimmedSlug) ? PUBLICATION_ID_MAP[trimmedSlug] : undefined
@@ -525,17 +553,19 @@ export async function getPublicationBySlug(slug: string) {
 
 export async function getPublicationById(id: string) {
   if (!db || !isFirebaseConfigured) {
-    return readLocalPublications().find((item) => item.id === id && isPublicationPublic(item)) ?? null
+    return readLocalPublications().find((item) => item.id === id) ?? null
   }
 
-  if (shouldUsePublicApi) {
-    return getPublicationFromApi(id)
-  }
+  await waitForAuthenticatedUser()
+  return getPublicationByIdFromFirestore(id)
+}
+
+async function getPublicationByIdFromFirestore(id: string) {
+  if (!db) return null
 
   const snapshot = await getDoc(doc(db, 'publications', id))
   if (!snapshot.exists()) return null
-  const publication = normalizePublication(snapshot.id, snapshot.data() as PublicationInput)
-  return isPublicationPublic(publication) ? publication : null
+  return normalizePublication(snapshot.id, snapshot.data() as PublicationInput)
 }
 
 export async function listAdminPublications() {

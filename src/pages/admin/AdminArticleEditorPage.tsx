@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ImageUploadZone } from '../../components/admin/ImageUploadZone'
+import { PdfUploadZone } from '../../components/admin/PdfUploadZone'
 import { FocalPointPicker } from '../../components/admin/FocalPointPicker'
 import {
   PUBLICATION_CATEGORIES,
@@ -410,7 +411,12 @@ export function AdminArticleEditorPage() {
         <div className="editor-sidebar__card">
           <h3 className="editor-sidebar__title">ملف PDF</h3>
           <div className="editor-fieldset">
-            <input accept="application/pdf" disabled={pdfUploading} onChange={(e) => { const file = e.target.files?.[0]; if (file) void handlePdfUpload(file) }} type="file" />
+            <PdfUploadZone
+              disabled={pdfUploading}
+              fileUrl={form.pdf_url}
+              onRemove={() => updateField('pdf_url', '')}
+              onUpload={handlePdfUpload}
+            />
             <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>أو أدخل رابطاً:</p>
             <input dir="ltr" className="editor-input" style={{ marginTop: 6 }} value={form.pdf_url} onChange={(e) => updateField('pdf_url', e.target.value)} placeholder="https://..." />
           </div>

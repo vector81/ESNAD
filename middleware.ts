@@ -35,10 +35,24 @@ const REAL_BROWSER_USER_AGENT_PATTERN =
   /(Chrome|CriOS|Firefox|FxiOS|Safari|Edg|OPR|Opera|SamsungBrowser|DuckDuckGo|YaBrowser|iPhone|iPad|Android)/i
 
 const ROUTE_PATTERN = /^\/(?:(en)\/)?(library|books)\/([^/?#]+)\/?$/i
+const CATALOG_ROUTE_PATTERN = /^\/(?:(en)(?:\/)?)?(?:(articles|library|books)\/?)?$/i
 const SHORT_ID_PATTERN = /^\d+$/
 
 export const config = {
-  matcher: ['/library/:slug*', '/books/:slug*', '/en/library/:slug*', '/en/books/:slug*'],
+  matcher: [
+    '/',
+    '/en',
+    '/articles',
+    '/en/articles',
+    '/library',
+    '/en/library',
+    '/books',
+    '/en/books',
+    '/library/:slug*',
+    '/books/:slug*',
+    '/en/library/:slug*',
+    '/en/books/:slug*',
+  ],
 }
 
 async function resolveCanonicalPath(request: Request, section: string, language: string, slug: string) {
@@ -66,6 +80,20 @@ export default async function middleware(request: Request) {
   const normalizedUserAgent = userAgent.toLowerCase()
 
   const requestUrl = new URL(request.url)
+  const isExplicitCrawler = CRAWLER_USER_AGENT_TOKENS.some((token) => normalizedUserAgent.includes(token))
+  const isKnownRealBrowser = REAL_BROWSER_USER_AGENT_PATTERN.test(userAgent)
+  const shouldServeBrowserApp = !isExplicitCrawler && isKnownRealBrowser
+
+  const catalogMatch = requestUrl.pathname.match(CATALOG_ROUTE_PATTERN)
+  if (catalogMatch && !shouldServeBrowserApp) {
+    const [, languagePrefix, section] = catalogMatch
+    const metadataUrl = new URL('/api/publication-shell', request.url)
+    metadataUrl.searchParams.set('mode', 'catalog')
+    metadataUrl.searchParams.set('lang', languagePrefix === 'en' ? 'en' : 'ar')
+    metadataUrl.searchParams.set('section', section?.toLowerCase() || 'home')
+    return rewrite(metadataUrl)
+  }
+
   const match = requestUrl.pathname.match(ROUTE_PATTERN)
 
   if (!match) {
@@ -84,10 +112,7 @@ export default async function middleware(request: Request) {
     }
   }
 
-  const isExplicitCrawler = CRAWLER_USER_AGENT_TOKENS.some((token) => normalizedUserAgent.includes(token))
-  const isKnownRealBrowser = REAL_BROWSER_USER_AGENT_PATTERN.test(userAgent)
-
-  if (!isExplicitCrawler && isKnownRealBrowser) {
+  if (shouldServeBrowserApp) {
     return next()
   }
 

@@ -1,5 +1,3 @@
-import { getAdminDb } from './_lib/firebase-admin.js'
-
 const SITE_URL = 'https://esnads.net'
 const SITE_LASTMOD = '2026-06-14T00:21:14.000Z'
 
@@ -102,6 +100,7 @@ async function firestoreQuery(projectId, apiKey, body) {
 }
 
 async function listPublishedPublicationsFromAdmin() {
+  const { getAdminDb } = await import('./_lib/firebase-admin.js')
   const db = getAdminDb()
   const seen = new Map()
 
