@@ -51,6 +51,7 @@ assert.match(xml, /hreflang="ar"/)
 assert.match(xml, /hreflang="x-default"/)
 assert.doesNotMatch(readFileSync('api/sitemap.js', 'utf8'), /path: '\/en/)
 assert.doesNotMatch(readFileSync('sites/public/index.html', 'utf8'), /hreflang="en"/)
+assert.doesNotMatch(readFileSync('sites/public/index.html', 'utf8'), /hreflang=/)
 
 const template = readFileSync('dist/public/index.html', 'utf8')
 const middlewareSource = ts.transpileModule(readFileSync('middleware.ts', 'utf8'), {
