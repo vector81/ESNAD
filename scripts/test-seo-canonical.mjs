@@ -74,7 +74,7 @@ for (const path of ['/en', '/en/about', '/en/contact', '/en/reader/9547512', '/e
   const response = await middleware(new Request(`https://esnads.net${path}`, { headers: { 'user-agent': 'Chrome/140' } }))
   assert.equal(response.status, 200)
   assert.equal(response.headers.get('location'), null)
-  checkHead(await response.text(), `https://esnads.net${path.includes('/library/') ? '/library/9547512' : path.replace(/^\/en/, '')}`)
+  checkHead(await response.text(), `https://esnads.net${/\/(library|reader)\//.test(path) ? '/library/9547512' : path.replace(/^\/en/, '')}`)
 }
 const crawler = await middleware(new Request('https://esnads.net/en/library/legacy-slug', {headers:{'user-agent':'Googlebot'}}))
 assert.match(crawler.rewrite, /lang=en/)
@@ -92,6 +92,14 @@ for (const status of [404, 503]) {
   }
 }
 lookupStatus = 200
+for (const ua of ['Googlebot', 'Chrome/140']) {
+  for (const path of ['/reader/9547512', '/en/reader/9547512']) {
+    const reader = await middleware(new Request(`https://esnads.net${path}`, {headers:{'user-agent':ua}}))
+    assert.equal(reader.status, 200)
+    assert.equal(reader.headers.get('location'), null)
+    checkHead(await reader.text(), canonical)
+  }
+}
 for (const ua of ['Googlebot', 'Chrome/140']) {
   const wrongSection = await middleware(new Request('https://esnads.net/books/9547512?source=test', {headers:{'user-agent':ua}}))
   assert.equal(wrongSection.status, 301)

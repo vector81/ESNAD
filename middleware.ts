@@ -75,11 +75,10 @@ async function resolvePublication(request: Request, section: string, language: s
   }
 }
 
-// English views remain accessible, but their initial HTML identifies the Arabic
-// URL even on routes that are not handled by the crawler publication renderer.
-async function renderEnglishAppShell(request: Request, pathname: string) {
+// Render route-specific canonical metadata before the client app starts.
+async function renderAppShell(request: Request, pathname: string, language = 'en') {
   const shell = await fetch(new URL('/index.html', request.url)).catch(() => null)
-  if (!shell?.ok) return pageError(503, 'en')
+  if (!shell?.ok) return pageError(503, language)
   const path = pathname.replace(/^\/en(?=\/|$)/, '') || '/'
   const canonical = `https://esnads.net${path === '/' ? '' : path}`
     .replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;')
@@ -127,10 +126,11 @@ export default async function middleware(request: Request) {
     if (reader) {
       const result = await resolvePublication(request, 'library', isEnglishRoute ? 'en' : 'ar', reader[1])
       if (result.status !== 200) return pageError(result.status, isEnglishRoute ? 'en' : 'ar')
+      return renderAppShell(request, result.canonicalPath, isEnglishRoute ? 'en' : 'ar')
     } else if (!catalogMatch && !/^\/(?:en\/)?(?:about|contact|login|register|dashboard)\/?$/.test(requestUrl.pathname)) {
       return pageError(404, isEnglishRoute ? 'en' : 'ar')
     }
-    return isEnglishRoute ? renderEnglishAppShell(request, requestUrl.pathname) : next()
+    return isEnglishRoute ? renderAppShell(request, requestUrl.pathname) : next()
   }
 
   const [, languagePrefix, section, slug] = match
@@ -149,7 +149,7 @@ export default async function middleware(request: Request) {
   }
 
   if (shouldServeBrowserApp) {
-    return isEnglishRoute ? renderEnglishAppShell(request, `/en${result.canonicalPath}`) : next()
+    return isEnglishRoute ? renderAppShell(request, `/en${result.canonicalPath}`) : next()
   }
 
   const metadataUrl = new URL('/api/publication-shell', request.url)
