@@ -121,8 +121,8 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
     if (!publication || !slug) return
     if (language === 'en') return
     const canonicalSlug = getShareSlug(publication)
-    if (slug === canonicalSlug) return
     const section = publication.kind === 'book' ? '/books' : '/library'
+    if (slug === canonicalSlug && window.location.pathname.replace(/\/$/, '') === `${section}/${canonicalSlug}`) return
     navigate(buildLocalizedPath(language, `${section}/${canonicalSlug}`), { replace: true })
   }, [language, navigate, publication, slug])
 

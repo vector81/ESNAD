@@ -37,7 +37,6 @@ const REAL_BROWSER_USER_AGENT_PATTERN =
 
 const ROUTE_PATTERN = /^\/(?:(en)\/)?(library|books)\/([^/?#]+)\/?$/i
 const CATALOG_ROUTE_PATTERN = /^(?:\/(en))?(?:\/(articles|library|books))?\/?$/i
-const SHORT_ID_PATTERN = /^\d+$/
 
 export const config = { matcher: ['/:path*'] }
 
@@ -140,9 +139,9 @@ export default async function middleware(request: Request) {
   const result = await resolvePublication(request, section, language, slug)
   if (result.status !== 200) return pageError(result.status, language)
 
-  if (!isEnglishRoute && !SHORT_ID_PATTERN.test(slug)) {
+  if (!isEnglishRoute) {
     const canonicalPath = result.canonicalPath
-    if (canonicalPath && canonicalPath !== requestUrl.pathname) {
+    if (canonicalPath && canonicalPath !== requestUrl.pathname.replace(/\/$/, '')) {
       const redirectUrl = new URL(canonicalPath, request.url)
       redirectUrl.search = requestUrl.search
       return Response.redirect(redirectUrl, 301)
@@ -150,7 +149,7 @@ export default async function middleware(request: Request) {
   }
 
   if (shouldServeBrowserApp) {
-    return isEnglishRoute ? renderEnglishAppShell(request, requestUrl.pathname) : next()
+    return isEnglishRoute ? renderEnglishAppShell(request, `/en${result.canonicalPath}`) : next()
   }
 
   const metadataUrl = new URL('/api/publication-shell', request.url)

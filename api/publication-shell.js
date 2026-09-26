@@ -478,13 +478,13 @@ function buildAbsoluteUrl(path = '/') {
   return `${DEFAULT_SITE_URL}/${segments}`
 }
 
-function getPublicationSection(pub, requestedSection = 'library') {
-  if (pub?.kind === 'book' || pub?.type === 'book' || requestedSection === 'books') return 'books'
+function getPublicationSection(pub) {
+  if (pub?.kind === 'book' || (!pub?.kind && pub?.type === 'book')) return 'books'
   return 'library'
 }
 
-function getCanonicalPath(pub, language = 'ar', requestedSection = 'library') {
-  const section = getPublicationSection(pub, requestedSection)
+function getCanonicalPath(pub) {
+  const section = getPublicationSection(pub)
   return `/${section}/${getPublicPublicationId(pub)}`
 }
 
@@ -496,7 +496,7 @@ function sendPublicationJson(response, pub, language, requestedSection) {
     return
   }
 
-  const canonicalPath = getCanonicalPath(pub, language, requestedSection)
+  const canonicalPath = getCanonicalPath(pub)
   response.setHeader('cache-control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=600')
   response.status(200).json({
     found: true,
@@ -504,7 +504,7 @@ function sendPublicationJson(response, pub, language, requestedSection) {
     publicId: getPublicPublicationId(pub),
     canonicalPath,
     canonicalUrl: buildAbsoluteUrl(canonicalPath),
-    section: getPublicationSection(pub, requestedSection),
+    section: getPublicationSection(pub),
     language,
     title: getTitle(pub, language),
     description: getAbstract(pub, language),
@@ -562,7 +562,7 @@ function filterCatalogPublications(publications, section) {
 }
 
 function getCatalogItemPath(pub, language) {
-  const path = getCanonicalPath(pub, language, getPublicationSection(pub))
+  const path = getCanonicalPath(pub)
   return language === 'en' ? `/en${path}` : path
 }
 
@@ -809,7 +809,7 @@ export default async function handler(request, response) {
 
     response.setHeader('content-type', 'text/html; charset=utf-8')
     response.setHeader('cache-control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=600')
-    const canonicalPath = getCanonicalPath(pub, language, section)
+    const canonicalPath = getCanonicalPath(pub)
     response.status(200).send(
       renderHtml({
         lang: language,

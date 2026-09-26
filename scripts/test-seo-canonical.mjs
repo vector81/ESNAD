@@ -21,6 +21,9 @@ assert.equal(shell.buildAbsoluteUrl('/en/library/9547512'), canonical)
 assert.equal(shell.buildAbsoluteUrl('/en'), 'https://esnads.net')
 assert.equal(shell.buildAbsoluteUrl('/energy'), 'https://esnads.net/energy')
 assert.equal(shell.getCanonicalPath(pub, 'en', 'library'), '/library/9547512')
+assert.equal(shell.getCanonicalPath(pub, 'ar', 'books'), '/library/9547512')
+assert.equal(shell.getCanonicalPath({ ...pub, kind: 'article', type: 'book' }, 'ar', 'books'), '/library/9547512')
+assert.equal(shell.getCanonicalPath({ ...pub, kind: 'book' }, 'ar', 'library'), '/books/9547512')
 assert.equal(shell.getCanonicalPath({ ...pub, kind: 'book' }, 'en', 'books'), '/books/9547512')
 assert.equal(shell.buildAbsoluteUrl('/en/books/9547512'), 'https://esnads.net/books/9547512')
 
@@ -70,7 +73,7 @@ for (const path of ['/en', '/en/about', '/en/contact', '/en/reader/9547512', '/e
   const response = await middleware(new Request(`https://esnads.net${path}`, { headers: { 'user-agent': 'Chrome/140' } }))
   assert.equal(response.status, 200)
   assert.equal(response.headers.get('location'), null)
-  checkHead(await response.text(), `https://esnads.net${path.replace(/^\/en/, '')}`)
+  checkHead(await response.text(), `https://esnads.net${path.includes('/library/') ? '/library/9547512' : path.replace(/^\/en/, '')}`)
 }
 const crawler = await middleware(new Request('https://esnads.net/en/library/legacy-slug', {headers:{'user-agent':'Googlebot'}}))
 assert.match(crawler.rewrite, /lang=en/)
@@ -88,6 +91,18 @@ for (const status of [404, 503]) {
   }
 }
 lookupStatus = 200
+for (const ua of ['Googlebot', 'Chrome/140']) {
+  const wrongSection = await middleware(new Request('https://esnads.net/books/9547512?source=test', {headers:{'user-agent':ua}}))
+  assert.equal(wrongSection.status, 301)
+  assert.equal(wrongSection.headers.get('location'), 'https://esnads.net/library/9547512?source=test')
+  const englishWrongSection = await middleware(new Request('https://esnads.net/en/books/9547512', {headers:{'user-agent':ua}}))
+  if (ua.startsWith('Chrome')) {
+    assert.equal(englishWrongSection.status, 200)
+    checkHead(await englishWrongSection.text(), canonical)
+  } else {
+    assert.match(englishWrongSection.rewrite, /lang=en/)
+  }
+}
 for (const path of ['/not-a-route', '/en/not-a-route', '/library/a/b', '/enlibrary']) {
   const response = await middleware(new Request(`https://esnads.net${path}`))
   assert.equal(response.status, 404)
