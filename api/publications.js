@@ -35,6 +35,7 @@ export default async function handler(request, response) {
     if (reference) {
       const publication = await getPublicationByReference(reference)
       if (!publication) {
+        response.setHeader('x-robots-tag', 'noindex, follow')
         sendJson(response, 404, { publication: null })
         return
       }
@@ -56,7 +57,9 @@ export default async function handler(request, response) {
     sendJson(response, 200, { publications: sanitized })
   } catch (error) {
     console.error('[esnad/publications] failed', error)
-    sendJson(response, 500, { error: 'publications_failed' })
+    response.setHeader('x-robots-tag', 'noindex, follow')
+    response.setHeader('cache-control', 'no-store')
+    sendJson(response, 503, { error: 'publications_failed' })
   }
 }
 

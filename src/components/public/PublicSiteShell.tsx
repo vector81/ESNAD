@@ -19,9 +19,11 @@ function getNavItems(language: AppLanguage) {
 export function PublicSiteShell({
   language,
   children,
+  noindex = false,
 }: {
   language: AppLanguage
   children: ReactNode
+  noindex?: boolean
 }) {
   const location = useLocation()
   const navigate = useNavigate()
@@ -30,7 +32,7 @@ export function PublicSiteShell({
   const [searchValue, setSearchValue] = useState('')
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
-  usePageMeta(language, getRouteMeta(location.pathname, language))
+  usePageMeta(language, { ...getRouteMeta(location.pathname, language), ...(noindex ? { noindex: true } : {}) })
 
   useEffect(() => {
     if (!mobileNavOpen) return

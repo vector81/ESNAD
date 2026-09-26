@@ -1,3 +1,4 @@
+import { sendPageError } from './_lib/page-error.js'
 import { PUBLICATION_ID_MAP } from './_lib/publication-id-map.js'
 import {
   getPublicationByReference as getPublicationByReferenceFromAdmin,
@@ -251,31 +252,7 @@ async function findByTitleSlug(projectId, apiKey, slug) {
 }
 
 async function getPublicationByReference(reference) {
-  try {
-    const publication = await getPublicationByReferenceFromAdmin(reference)
-    if (publication) return publication
-  } catch (error) {
-    console.error('[esnad/publication-shell] admin publication lookup failed; falling back to REST', error)
-  }
-
-  const projectId = process.env.VITE_FIREBASE_PROJECT_ID?.trim()
-  const apiKey = process.env.VITE_FIREBASE_API_KEY?.trim()
-  if (!projectId || !apiKey || !reference) return null
-
-  if (/^\d+$/.test(reference)) {
-    const mappedId = PUBLICATION_ID_MAP[reference]
-    if (mappedId) {
-      const mapped = await findById(projectId, apiKey, mappedId)
-      if (mapped) return mapped
-    }
-  }
-
-  const byId = await findById(projectId, apiKey, reference)
-  if (byId) return byId
-
-  const direct = await findBySlugField(projectId, apiKey, reference)
-  if (direct) return direct
-  return await findByTitleSlug(projectId, apiKey, reference)
+  return await getPublicationByReferenceFromAdmin(reference)
 }
 
 function normalizeLanguage(value) {
@@ -513,6 +490,8 @@ function getCanonicalPath(pub, language = 'ar', requestedSection = 'library') {
 
 function sendPublicationJson(response, pub, language, requestedSection) {
   if (!pub) {
+    response.setHeader('cache-control', 'no-store')
+    response.setHeader('x-robots-tag', 'noindex, follow')
     response.status(404).json({ found: false })
     return
   }
@@ -801,8 +780,6 @@ export default async function handler(request, response) {
   )
   const wantsCatalog = request.query.mode === 'catalog'
   const wantsJson = request.query.format === 'json'
-  const fallbackPath =
-    language === 'en' ? `/en/${section}/${slug}` : `/${section}/${slug}`
 
   if (wantsCatalog) {
     try {
@@ -812,8 +789,7 @@ export default async function handler(request, response) {
       response.status(200).send(renderCatalogHtml({ lang: language, section, publications }))
     } catch (error) {
       console.error('[esnad/publication-shell] failed to render catalog', error)
-      response.setHeader('content-type', 'text/html; charset=utf-8')
-      response.status(200).send(renderCatalogHtml({ lang: language, section, publications: [] }))
+      sendPageError(response, 503, language)
     }
     return
   }
@@ -827,19 +803,7 @@ export default async function handler(request, response) {
     }
 
     if (!pub) {
-      response.setHeader('content-type', 'text/html; charset=utf-8')
-      response.status(200).send(
-        renderHtml({
-          lang: language,
-          title: DEFAULT_SITE_TITLE,
-        description: DEFAULT_SITE_DESCRIPTION,
-        image: '',
-        url: buildAbsoluteUrl(fallbackPath),
-        ogType: 'website',
-        articleTitle: DEFAULT_SITE_TITLE,
-        articleBodyHtml: `<p>${escapeHtml(DEFAULT_SITE_DESCRIPTION)}</p>`,
-      }),
-    )
+      sendPageError(response, 404, language)
       return
     }
 
@@ -873,21 +837,11 @@ export default async function handler(request, response) {
   } catch (error) {
     console.error('[esnad/publication-shell] failed to render', error)
     if (wantsJson) {
-      response.status(500).json({ found: false })
+      response.setHeader('cache-control', 'no-store')
+      response.setHeader('x-robots-tag', 'noindex, follow')
+      response.status(503).json({ error: 'temporarily_unavailable' })
       return
     }
-    response.setHeader('content-type', 'text/html; charset=utf-8')
-    response.status(200).send(
-      renderHtml({
-        lang: language,
-        title: DEFAULT_SITE_TITLE,
-        description: DEFAULT_SITE_DESCRIPTION,
-        image: '',
-        url: buildAbsoluteUrl(fallbackPath),
-        ogType: 'website',
-        articleTitle: DEFAULT_SITE_TITLE,
-        articleBodyHtml: `<p>${escapeHtml(DEFAULT_SITE_DESCRIPTION)}</p>`,
-      }),
-    )
+    sendPageError(response, 503, language)
   }
 }

@@ -2,13 +2,14 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import ts from 'typescript'
+import { renderPageError, sendPageError } from '../api/_lib/page-error.js'
 
 // Exercise the real renderers without connecting to production databases.
-function loadFunctions(file, names) {
+function loadFunctions(file, names, globals = {}) {
   const source = readFileSync(file, 'utf8')
     .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
     .replace('export default async function handler', 'async function handler')
-  return vm.runInNewContext(`${source}\n;({${names.join(',')}})`, { console })
+  return vm.runInNewContext(`${source}\n;({${names.join(',')}})`, { console: { error() {} }, ...globals })
 }
 
 const shell = loadFunctions('api/publication-shell.js', [
@@ -52,9 +53,13 @@ const template = readFileSync('dist/public/index.html', 'utf8')
 const middlewareSource = ts.transpileModule(readFileSync('middleware.ts', 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
 }).outputText.replace(/^import .*$/gm, '').replace('export const config', 'const config').replace('export default async function middleware', 'async function middleware')
+let lookupStatus = 200
 const middleware = vm.runInNewContext(`${middlewareSource}\n;middleware`, {
-  URL, Response,
+  URL, Response, AbortSignal, process: { env: {} }, renderPageError,
   fetch: async url => {
+    if (new URL(url).pathname === '/api/publication-shell') {
+      return new Response(JSON.stringify({canonicalPath: '/library/9547512'}), {status: lookupStatus})
+    }
     assert.equal(new URL(url).pathname, '/index.html')
     return new Response(template)
   },
@@ -70,4 +75,45 @@ for (const path of ['/en', '/en/about', '/en/contact', '/en/reader/9547512', '/e
 const crawler = await middleware(new Request('https://esnads.net/en/library/legacy-slug', {headers:{'user-agent':'Googlebot'}}))
 assert.match(crawler.rewrite, /lang=en/)
 assert.match(crawler.rewrite, /slug=legacy-slug/)
+
+for (const status of [404, 503]) {
+  lookupStatus = status
+  for (const ua of ['Googlebot', 'Chrome/140']) {
+    for (const path of ['/library/missing', '/en/books/missing', '/reader/missing']) {
+      const response = await middleware(new Request(`https://esnads.net${path}`, {headers:{'user-agent':ua}}))
+      assert.equal(response.status, status)
+      assert.match(response.headers.get('x-robots-tag'), /noindex/)
+      assert.match(await response.text(), /name="robots" content="noindex/)
+    }
+  }
+}
+lookupStatus = 200
+for (const path of ['/not-a-route', '/en/not-a-route', '/library/a/b', '/enlibrary']) {
+  const response = await middleware(new Request(`https://esnads.net${path}`))
+  assert.equal(response.status, 404)
+  assert.match(await response.text(), /noindex/)
+}
+for (const path of ['/assets/index.js', '/api/publications', '/robots.txt', '/sitemap.xml']) {
+  assert.equal((await middleware(new Request(`https://esnads.net${path}`))).next, true)
+}
+function responseMock() {
+  return { headers: {}, setHeader(k,v) { this.headers[k]=v }, status(code) { this.code=code; return this }, send(body) { this.body=body }, json(body) { this.body=body } }
+}
+for (const failure of [false, true]) {
+  const {handler} = loadFunctions('api/publication-shell.js', ['handler'], {
+    sendPageError,
+    getPublicationByReferenceFromAdmin: async () => { if(failure) throw new Error('database unavailable'); return null },
+    listPublishedPublications: async () => { throw new Error('database unavailable') },
+  })
+  for (const format of [undefined, 'json']) {
+    const response = responseMock()
+    await handler({query:{slug:'missing',format}}, response)
+    assert.equal(response.code, failure ? 503 : 404)
+    assert.match(response.headers['x-robots-tag'], /noindex/)
+  }
+  const response = responseMock()
+  await handler({query:{mode:'catalog'}}, response)
+  assert.equal(response.code, 503)
+  assert.match(response.body, /noindex/)
+}
 console.log('SEO canonical regression checks passed: renderers, sitemap, browser shell, and English no-redirect routing.')

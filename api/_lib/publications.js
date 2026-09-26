@@ -379,7 +379,7 @@ export async function listPublishedPublications() {
     }
   }
 
-  return []
+  throw new Error('Publication backend unavailable')
 }
 
 async function getPublishedPublicationByIdFromAdmin(id) {
@@ -506,8 +506,7 @@ async function getPublicationByReferenceFromRest(reference) {
 export async function getPublicationByReference(reference) {
   if (hasRestConfig()) {
     try {
-      const publication = await getPublicationByReferenceFromRest(reference)
-      if (publication) return publication
+      return await getPublicationByReferenceFromRest(reference)
     } catch (error) {
       console.error('[esnad/publications] REST reference lookup failed; falling back to admin', error)
     }
@@ -515,14 +514,13 @@ export async function getPublicationByReference(reference) {
 
   if (hasAdminConfig()) {
     try {
-      const publication = await getPublicationByReferenceFromAdmin(reference)
-      if (publication) return publication
+      return await getPublicationByReferenceFromAdmin(reference)
     } catch (error) {
       console.error('[esnad/publications] admin reference lookup failed', error)
     }
   }
 
-  return null
+  throw new Error('Publication backend unavailable')
 }
 
 export async function getRequestIdentity(request) {

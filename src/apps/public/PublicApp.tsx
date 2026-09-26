@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { NotFoundPage } from '../../pages/public/NotFoundPage'
 import { AnalyticsIdentityTracker, AnalyticsPageViewTracker } from '../../components/public/AnalyticsTracker'
 import { CookieConsentBanner } from '../../components/public/CookieConsentBanner'
 import { PublicSessionProvider, usePublicSession } from '../../contexts/PublicSessionContext'
@@ -40,7 +41,7 @@ function PublicRoutes() {
       <Route path="/en/register" element={<AuthPage language="en" />} />
       <Route path="/dashboard" element={<DashboardPage language="ar" />} />
       <Route path="/en/dashboard" element={<DashboardPage language="en" />} />
-      <Route path="*" element={<Navigate replace to="/" />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

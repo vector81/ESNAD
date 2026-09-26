@@ -10,7 +10,6 @@ import type { Chapter } from '../../types/studio'
 
 export function ReaderPage() {
   const { pathname } = useLocation()
-  usePageMeta(pathname.startsWith('/en/') ? 'en' : 'ar', { path: pathname })
   const { slug } = useParams<{ slug: string }>()
   const currentSlug = slug ?? ''
   const [readerState, setReaderState] = useState<{
@@ -71,6 +70,10 @@ export function ReaderPage() {
   const publication = readerState.slug === currentSlug ? readerState.publication : null
   const chapters = readerState.slug === currentSlug ? readerState.chapters : []
   const error = currentSlug ? readerState.error : 'الإصدار غير موجود.'
+  usePageMeta(pathname.startsWith('/en/') ? 'en' : 'ar', {
+    path: pathname,
+    noindex: !loading && Boolean(error || !publication),
+  })
 
   if (loading) {
     return (

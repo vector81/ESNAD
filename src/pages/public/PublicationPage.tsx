@@ -61,11 +61,12 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
   const [related, setRelated] = useState<Publication[]>([])
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(true)
+  const [loadFailed, setLoadFailed] = useState(false)
   const [analyticsConsentStatus, setAnalyticsConsentStatus] = useState(() => getAnalyticsConsentStatus())
   const trackedViewRef = useRef<string | null>(null)
 
   const pageMeta = useMemo(() => {
-    if (!publication) return null
+    if (!publication) return loading ? null : { noindex: true }
     const abstract = getPublicationAbstract(publication, language) || ''
     const section = publication.kind === 'book' ? '/books' : '/library'
     return {
@@ -76,7 +77,7 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
         ? optimizeCloudinaryUrl(publication.cover_image, { width: 1200 })
         : undefined,
     }
-  }, [language, publication])
+  }, [language, publication, loading])
   usePageMeta(language, pageMeta)
 
   useEffect(() => {
@@ -84,6 +85,7 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
     if (sessionLoading) return
     let cancelled = false
     setLoading(true)
+    setLoadFailed(false)
     setPublication(null)
     setRelated([])
     getPublicationBySlug(slug)
@@ -102,8 +104,9 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
           category: item.category,
         }).then((items) => {
           if (!cancelled) setRelated(items.filter((entry) => entry.id !== item.id).slice(0, 3))
-        })
+        }).catch(() => { /* Related items do not determine publication availability. */ })
       })
+      .catch(() => { if (!cancelled) setLoadFailed(true) })
       .finally(() => {
         if (!cancelled) setLoading(false)
       })
@@ -489,8 +492,10 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
 
   if (!publication) {
     return (
-      <PublicSiteShell language={language}>
-        <div className="empty">{language === 'ar' ? 'الإصدار غير موجود.' : 'Publication not found.'}</div>
+      <PublicSiteShell language={language} noindex>
+        <div className="empty">{loadFailed
+          ? (language === 'ar' ? 'تعذر تحميل الإصدار. يرجى المحاولة بعد قليل.' : 'Unable to load this publication. Please try again shortly.')
+          : (language === 'ar' ? 'الإصدار غير موجود.' : 'Publication not found.')}</div>
       </PublicSiteShell>
     )
   }
