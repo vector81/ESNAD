@@ -20,6 +20,8 @@ assert.equal(shell.buildAbsoluteUrl('/en/library/9547512'), canonical)
 assert.equal(shell.buildAbsoluteUrl('/en'), 'https://esnads.net')
 assert.equal(shell.buildAbsoluteUrl('/energy'), 'https://esnads.net/energy')
 assert.equal(shell.getCanonicalPath(pub, 'en', 'library'), '/library/9547512')
+assert.equal(shell.getCanonicalPath({ ...pub, kind: 'book' }, 'en', 'books'), '/books/9547512')
+assert.equal(shell.buildAbsoluteUrl('/en/books/9547512'), 'https://esnads.net/books/9547512')
 
 function checkHead(html, url) {
   assert.ok(html.includes(`<link rel="canonical" href="${url}"`), `canonical ${url}`)
