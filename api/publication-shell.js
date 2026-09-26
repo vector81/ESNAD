@@ -491,6 +491,7 @@ function optimizeOgImage(url) {
 }
 
 function buildAbsoluteUrl(path = '/') {
+  path = path.replace(/^\/en(?=\/|$)/, '') || '/'
   if (!path || path === '/') return DEFAULT_SITE_URL
   const segments = path
     .split('/')
@@ -507,8 +508,7 @@ function getPublicationSection(pub, requestedSection = 'library') {
 
 function getCanonicalPath(pub, language = 'ar', requestedSection = 'library') {
   const section = getPublicationSection(pub, requestedSection)
-  const prefix = language === 'en' ? '/en' : ''
-  return `${prefix}/${section}/${getPublicPublicationId(pub)}`
+  return `/${section}/${getPublicPublicationId(pub)}`
 }
 
 function sendPublicationJson(response, pub, language, requestedSection) {
@@ -583,7 +583,8 @@ function filterCatalogPublications(publications, section) {
 }
 
 function getCatalogItemPath(pub, language) {
-  return getCanonicalPath(pub, language, getPublicationSection(pub))
+  const path = getCanonicalPath(pub, language, getPublicationSection(pub))
+  return language === 'en' ? `/en${path}` : path
 }
 
 function renderCatalogNavigation(language) {
@@ -658,9 +659,7 @@ function renderCatalogJsonLd(items, meta, language) {
 function renderCatalogHtml({ lang, section, publications }) {
   const meta = getCatalogMeta(section, lang)
   const title = meta.title === DEFAULT_SITE_TITLE ? meta.title : `${meta.title} | ${DEFAULT_SITE_NAME}`
-  const alternatePath = lang === 'en'
-    ? meta.path.replace(/^\/en$/, '/').replace(/^\/en\//, '/')
-    : meta.path === '/' ? '/en' : `/en${meta.path}`
+  const canonicalUrl = buildAbsoluteUrl(meta.path)
 
   return `<!doctype html>
 <html dir="${lang === 'en' ? 'ltr' : 'rtl'}" lang="${lang}">
@@ -671,8 +670,8 @@ function renderCatalogHtml({ lang, section, publications }) {
     <meta name="description" content="${escapeHtml(meta.description)}" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="${escapeHtml(buildAbsoluteUrl(meta.path))}" />
-    <link rel="alternate" hreflang="${lang === 'en' ? 'ar' : 'en'}" href="${escapeHtml(buildAbsoluteUrl(alternatePath))}" />
-    <link rel="alternate" hreflang="x-default" href="${escapeHtml(buildAbsoluteUrl(lang === 'en' ? alternatePath : meta.path))}" />
+    <link rel="alternate" hreflang="ar" href="${escapeHtml(canonicalUrl)}" />
+    <link rel="alternate" hreflang="x-default" href="${escapeHtml(canonicalUrl)}" />
     <link rel="stylesheet" href="${ENTRY_CSS}" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="${escapeHtml(DEFAULT_SITE_NAME)}" />

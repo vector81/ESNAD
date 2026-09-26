@@ -100,9 +100,12 @@ export function usePageMeta(language: AppLanguage, meta: PageMeta | null) {
     upsertMeta('name', 'twitter:description', pageDescription)
 
     if (path) {
-      const url = path === '/' ? SITE_URL : `${SITE_URL}${path}`
+      const canonicalPath = path.replace(/^\/en(?=\/|$)/, '') || '/'
+      const url = canonicalPath === '/' ? SITE_URL : `${SITE_URL}${canonicalPath}`
       upsertLink('canonical', url)
       upsertMeta('property', 'og:url', url)
+      document.head.querySelectorAll('link[rel="alternate"][hreflang="en"]').forEach((link) => link.remove())
+      document.head.querySelectorAll('link[rel="alternate"][hreflang="ar"], link[rel="alternate"][hreflang="x-default"]').forEach((link) => link.setAttribute('href', url))
     }
     if (image) {
       upsertMeta('property', 'og:image', image)

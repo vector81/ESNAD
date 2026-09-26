@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
+import { usePageMeta } from '../../hooks/usePageMeta'
 import { getPublicationBySlug } from '../../lib/publications'
 import { listReadableChapters } from '../../studio/lib/chapters'
 import { ArticleReader } from '../components/ArticleReader'
@@ -8,6 +9,8 @@ import type { Publication } from '../../types/publication'
 import type { Chapter } from '../../types/studio'
 
 export function ReaderPage() {
+  const { pathname } = useLocation()
+  usePageMeta(pathname.startsWith('/en/') ? 'en' : 'ar', { path: pathname })
   const { slug } = useParams<{ slug: string }>()
   const currentSlug = slug ?? ''
   const [readerState, setReaderState] = useState<{

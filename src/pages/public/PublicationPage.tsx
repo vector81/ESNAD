@@ -116,6 +116,7 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
 
   useEffect(() => {
     if (!publication || !slug) return
+    if (language === 'en') return
     const canonicalSlug = getShareSlug(publication)
     if (slug === canonicalSlug) return
     const section = publication.kind === 'book' ? '/books' : '/library'

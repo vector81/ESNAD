@@ -42,7 +42,7 @@ Public pages are intended for indexing.
 
 Login, registration, dashboard, admin, account, draft, private, and API routes are not intended for indexing.
 
-Published publication detail URLs use the publication numeric ID as the canonical path, for example `/library/6759921`, `/books/6759921`, `/en/library/6759921`, and `/en/books/6759921`. Legacy Arabic and Latin title-slug URLs may redirect to the canonical numeric ID URL.
+Published publication detail URLs use the publication numeric ID as the canonical path, for example `/library/6759921` and `/books/6759921`. English `/en` views remain accessible and canonicalize to the equivalent path without `/en`; they are not listed in the sitemap. Legacy title-slug URLs on Arabic routes may redirect to the canonical numeric ID URL.
 
 Published publications are listed dynamically in the sitemap with Arabic/English alternates where available.
 

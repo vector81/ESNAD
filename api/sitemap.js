@@ -3,17 +3,11 @@ const SITE_LASTMOD = '2026-06-14T00:21:14.000Z'
 
 const STATIC_URLS = [
   { path: '/', language: 'ar', alternateGroup: 'home', changefreq: 'daily', priority: '1.0', lastmod: SITE_LASTMOD },
-  { path: '/en', language: 'en', alternateGroup: 'home', changefreq: 'daily', priority: '0.9', lastmod: SITE_LASTMOD },
   { path: '/library', language: 'ar', alternateGroup: 'library', changefreq: 'daily', priority: '0.9', lastmod: SITE_LASTMOD },
-  { path: '/en/library', language: 'en', alternateGroup: 'library', changefreq: 'daily', priority: '0.8', lastmod: SITE_LASTMOD },
   { path: '/books', language: 'ar', alternateGroup: 'books', changefreq: 'daily', priority: '0.8', lastmod: SITE_LASTMOD },
-  { path: '/en/books', language: 'en', alternateGroup: 'books', changefreq: 'daily', priority: '0.7', lastmod: SITE_LASTMOD },
   { path: '/articles', language: 'ar', alternateGroup: 'articles', changefreq: 'daily', priority: '0.8', lastmod: SITE_LASTMOD },
-  { path: '/en/articles', language: 'en', alternateGroup: 'articles', changefreq: 'daily', priority: '0.7', lastmod: SITE_LASTMOD },
   { path: '/about', language: 'ar', alternateGroup: 'about', changefreq: 'monthly', priority: '0.8', lastmod: SITE_LASTMOD },
-  { path: '/en/about', language: 'en', alternateGroup: 'about', changefreq: 'monthly', priority: '0.7', lastmod: SITE_LASTMOD },
   { path: '/contact', language: 'ar', alternateGroup: 'contact', changefreq: 'monthly', priority: '0.7', lastmod: SITE_LASTMOD },
-  { path: '/en/contact', language: 'en', alternateGroup: 'contact', changefreq: 'monthly', priority: '0.6', lastmod: SITE_LASTMOD },
   { path: '/llms.txt', changefreq: 'monthly', priority: '0.3', lastmod: SITE_LASTMOD },
 ]
 
@@ -164,12 +158,6 @@ function getPublicationSection(publication) {
   return publication.kind === 'book' ? 'books' : 'library'
 }
 
-function getPublicationLanguages(publication) {
-  if (publication.language_mode === 'ar') return ['ar']
-  if (publication.language_mode === 'en') return ['en']
-  return ['ar', 'en']
-}
-
 function toAbsoluteUrl(path) {
   if (path === '/') return SITE_URL
   return `${SITE_URL}${path}`
@@ -202,14 +190,14 @@ function buildPublicationUrls(publications) {
     const id = encodePathSegment(getPublicPublicationId(publication))
     if (!id) return []
 
-    return getPublicationLanguages(publication).map((language) => ({
-      path: language === 'en' ? `/en/${section}/${id}` : `/${section}/${id}`,
-      language,
+    return [{
+      path: `/${section}/${id}`,
+      language: 'ar',
       alternateGroup: `${section}:${id}`,
       changefreq: 'weekly',
       priority: section === 'books' ? '0.7' : '0.8',
       lastmod: getLastModified(publication.updated_at || publication.published_at),
-    }))
+    }]
   })
 }
 

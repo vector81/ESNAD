@@ -42,6 +42,7 @@ export const config = {
   matcher: [
     '/',
     '/en',
+    '/en/:path*',
     '/articles',
     '/en/articles',
     '/library',
@@ -75,11 +76,31 @@ async function resolveCanonicalPath(request: Request, section: string, language:
   }
 }
 
+// English views remain accessible, but their initial HTML identifies the Arabic
+// URL even on routes that are not handled by the crawler publication renderer.
+async function renderEnglishAppShell(request: Request, pathname: string) {
+  const shell = await fetch(new URL('/index.html', request.url))
+  if (!shell.ok) return new Response('Unable to load page', { status: 503 })
+  const path = pathname.replace(/^\/en(?=\/|$)/, '') || '/'
+  const canonical = `https://esnads.net${path === '/' ? '' : path}`
+    .replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;')
+  const html = (await shell.text())
+    .replace(/<link\b[^>]*hreflang="en"[^>]*>/gi, '')
+    .replace(/(<link\b[^>]*rel="canonical"[^>]*href=")[^"]*/gi, (_match, prefix) => `${prefix}${canonical}`)
+    .replace(/(<meta\b[^>]*property="og:url"[^>]*content=")[^"]*/gi, (_match, prefix) => `${prefix}${canonical}`)
+    .replace(/(<link\b[^>]*hreflang="(?:ar|x-default)"[^>]*href=")[^"]*/gi, (_match, prefix) => `${prefix}${canonical}`)
+  return new Response(html, {
+    status: 200,
+    headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'private, no-store' },
+  })
+}
+
 export default async function middleware(request: Request) {
   const userAgent = request.headers.get('user-agent') || ''
   const normalizedUserAgent = userAgent.toLowerCase()
 
   const requestUrl = new URL(request.url)
+  const isEnglishRoute = /^\/en(?:\/|$)/.test(requestUrl.pathname)
   const isExplicitCrawler = CRAWLER_USER_AGENT_TOKENS.some((token) => normalizedUserAgent.includes(token))
   const isKnownRealBrowser = REAL_BROWSER_USER_AGENT_PATTERN.test(userAgent)
   const shouldServeBrowserApp = !isExplicitCrawler && isKnownRealBrowser
@@ -97,13 +118,13 @@ export default async function middleware(request: Request) {
   const match = requestUrl.pathname.match(ROUTE_PATTERN)
 
   if (!match) {
-    return next()
+    return isEnglishRoute ? renderEnglishAppShell(request, requestUrl.pathname) : next()
   }
 
   const [, languagePrefix, section, slug] = match
   const language = languagePrefix === 'en' ? 'en' : 'ar'
 
-  if (!SHORT_ID_PATTERN.test(slug)) {
+  if (!isEnglishRoute && !SHORT_ID_PATTERN.test(slug)) {
     const canonicalPath = await resolveCanonicalPath(request, section, language, slug)
     if (canonicalPath && canonicalPath !== requestUrl.pathname) {
       const redirectUrl = new URL(canonicalPath, request.url)
@@ -113,7 +134,7 @@ export default async function middleware(request: Request) {
   }
 
   if (shouldServeBrowserApp) {
-    return next()
+    return isEnglishRoute ? renderEnglishAppShell(request, requestUrl.pathname) : next()
   }
 
   const metadataUrl = new URL('/api/publication-shell', request.url)
