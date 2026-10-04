@@ -3,13 +3,18 @@ import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import ts from 'typescript'
 import { renderPageError, sendPageError } from '../api/_lib/page-error.js'
+import * as structuredData from '../src/lib/structuredData.js'
+import * as seoMetadata from '../src/lib/seoMetadata.js'
+import * as seoTopics from '../src/lib/seoTopics.js'
+import * as articleImages from '../src/lib/articleImages.js'
+import { getPublicPublicationId } from '../api/_lib/publications.js'
 
 // Exercise the real renderers without connecting to production databases.
 function loadFunctions(file, names, globals = {}) {
   const source = readFileSync(file, 'utf8')
     .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
     .replace('export default async function handler', 'async function handler')
-  return vm.runInNewContext(`${source}\n;({${names.join(',')}})`, { console: { error() {} }, ...globals })
+  return vm.runInNewContext(`${source}\n;({${names.join(',')}})`, { console: { error() {} }, ...structuredData, ...seoMetadata, ...seoTopics, ...globals })
 }
 
 const shell = loadFunctions('api/publication-shell.js', [
@@ -18,7 +23,7 @@ const shell = loadFunctions('api/publication-shell.js', [
 const pub = { id: '9547512', kind: 'article', title_ar: 'عنوان', status: 'published' }
 const canonical = 'https://esnads.net/library/9547512'
 assert.equal(shell.buildAbsoluteUrl('/en/library/9547512'), canonical)
-assert.equal(shell.buildAbsoluteUrl('/en'), 'https://esnads.net')
+assert.equal(shell.buildAbsoluteUrl('/en'), 'https://esnads.net/en')
 assert.equal(shell.buildAbsoluteUrl('/energy'), 'https://esnads.net/energy')
 assert.equal(shell.getCanonicalPath(pub, 'en', 'library'), '/library/9547512')
 assert.equal(shell.getCanonicalPath(pub, 'ar', 'books'), '/library/9547512')
@@ -30,18 +35,63 @@ assert.equal(shell.buildAbsoluteUrl('/en/books/9547512'), 'https://esnads.net/bo
 function checkHead(html, url) {
   assert.ok(html.includes(`<link rel="canonical" href="${url}"`), `canonical ${url}`)
   assert.ok(html.includes(`<meta property="og:url" content="${url}"`), `og:url ${url}`)
-  assert.doesNotMatch(html, /hreflang="en"/)
+  if (['https://esnads.net', 'https://esnads.net/en'].includes(url)) assert.match(html, /hreflang="en" href="https:\/\/esnads.net\/en"/)
+  else assert.doesNotMatch(html, /hreflang="en"/)
   assert.doesNotMatch(html, /noindex/)
+  assert.match(html, /property="og:site_name" content="مركز إسناد للدراسات والأبحاث"/)
 }
 for (const lang of ['ar', 'en']) {
   for (const section of ['home', 'library', 'articles', 'books']) {
-    const url = `https://esnads.net${section === 'home' ? '' : `/${section}`}`
+    const url = `https://esnads.net${section === 'home' ? (lang === 'en' ? '/en' : '') : `/${section}`}`
     checkHead(shell.renderCatalogHtml({ lang, section, publications: [pub] }), url)
   }
   checkHead(shell.renderHtml({lang, title: 'Title', description: 'Description', image: '', url: canonical, ogType: 'article'}), canonical)
 }
 
-const sitemap = loadFunctions('api/sitemap.js', ['buildPublicationUrls', 'renderSitemap'])
+// Keep the public Arabic brand while declaring Latin and Arabic spelling aliases.
+for (const html of [
+  shell.renderCatalogHtml({ lang: 'ar', section: 'home', publications: [pub] }),
+  readFileSync('sites/public/index.html', 'utf8'),
+]) {
+  assert.match(html, /<title>مركز إسناد للدراسات والأبحاث<\/title>/)
+  const data = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])
+  const website = data['@graph'].find(node => node['@type'] === 'WebSite')
+  const organization = data['@graph'].find(node => node['@type'] === 'Organization')
+  assert.equal(website.url, 'https://esnads.net')
+  assert.ok(website.alternateName.includes('Esnad'))
+  assert.equal(website.name, 'إسناد')
+  assert.ok(website.alternateName.includes('اسناد'))
+  assert.deepEqual(website.alternateName, structuredData.SEO_ALTERNATE_NAMES)
+  assert.deepEqual(organization.alternateName, structuredData.SEO_ALTERNATE_NAMES)
+  assert.deepEqual(organization.sameAs, [])
+  assert.equal(organization.logo, 'https://esnads.net/newlogo.png')
+  assert.ok(data['@graph'].some(node => node['@id'] === website.publisher['@id']))
+}
+const articleData = JSON.parse(shell.renderArticleJsonLd({ pub, language: 'ar', url: canonical }))
+assert.ok(articleData.publisher.alternateName.includes('Esnad'))
+assert.equal(articleData.publisher['@id'], 'https://esnads.net/#organization')
+const datedPub = { ...pub, headline_ar: 'العنوان المختصر', author_ar: 'اسم الباحث',
+  published_at: '2026-09-22T11:57:41.896Z', updated_at: '2026-09-22T12:40:57.035Z',
+  cover_image: 'https://example.com/article-cover.png' }
+for (const language of ['ar', 'en']) {
+  const data = JSON.parse(shell.renderArticleJsonLd({ pub: datedPub, language, url: canonical }))
+  assert.equal(data.inLanguage, 'ar')
+  assert.equal(data.headline, datedPub.headline_ar)
+  assert.equal(data.datePublished, datedPub.published_at)
+  assert.equal(data.dateModified, datedPub.updated_at)
+  assert.equal(data.author.name, datedPub.author_ar)
+  assert.deepEqual(data.image, [datedPub.cover_image])
+}
+const fallbackPub = { ...datedPub, id: 'd713e358-d198-49fb-8f46-e23c1ee60950', cover_image: '',
+  updated_at: 'invalid-date', author_ar: 'مركز إسناد' }
+const fallbackData = structuredData.createArticleStructuredData(fallbackPub, { url: canonical })
+assert.match(fallbackData.image[0], /^https:\/\/esnads.net\/assets\/article-covers\//)
+assert.equal(fallbackData.dateModified, datedPub.published_at)
+assert.equal(fallbackData.author['@type'], 'Organization')
+assert.equal(fallbackData.author['@id'], fallbackData.publisher['@id'])
+assert.doesNotMatch(structuredData.serializeStructuredData({ headline: '</script><script>bad</script>' }), /<\/script>/)
+
+const sitemap = loadFunctions('api/sitemap.js', ['buildPublicationUrls', 'renderSitemap'], { getPublicPublicationId })
 const urls = sitemap.buildPublicationUrls(['ar', 'en', 'both'].map((language_mode, i) => ({...pub, id: String(1000000 + i), language_mode})))
 assert.equal(urls.length, 3)
 const xml = sitemap.renderSitemap(urls)
@@ -49,7 +99,7 @@ assert.doesNotMatch(xml, /esnads\.net\/en(?:\/|<)/)
 assert.doesNotMatch(xml, /hreflang="en"/)
 assert.match(xml, /hreflang="ar"/)
 assert.match(xml, /hreflang="x-default"/)
-assert.doesNotMatch(readFileSync('api/sitemap.js', 'utf8'), /path: '\/en/)
+assert.match(readFileSync('api/sitemap.js', 'utf8'), /path: '\/en'/)
 assert.doesNotMatch(readFileSync('sites/public/index.html', 'utf8'), /hreflang="en"/)
 assert.doesNotMatch(readFileSync('sites/public/index.html', 'utf8'), /hreflang=/)
 
@@ -59,10 +109,16 @@ const middlewareSource = ts.transpileModule(readFileSync('middleware.ts', 'utf8'
 }).outputText.replace(/^import .*$/gm, '').replace('export const config', 'const config').replace('export default async function middleware', 'async function middleware')
 let lookupStatus = 200
 const middleware = vm.runInNewContext(`${middlewareSource}\n;middleware`, {
+  ...articleImages,
   URL, Response, AbortSignal, process: { env: {} }, renderPageError,
+  serializeStructuredData: structuredData.serializeStructuredData,
+  PAGE_SEO: seoMetadata.PAGE_SEO,
   fetch: async url => {
     if (new URL(url).pathname === '/api/publication-shell') {
-      return new Response(JSON.stringify({canonicalPath: '/library/9547512'}), {status: lookupStatus})
+      if (new URL(url).searchParams.get('mode') === 'catalog') return new Response(JSON.stringify({meta: {title:'Esnad Center for Studies and Research', description:'Research'}, publications:[], jsonLd:{}}), {status:lookupStatus})
+      return new Response(JSON.stringify({canonicalPath: '/library/9547512',
+        articleJsonLd: structuredData.createArticleStructuredData(datedPub, {url:canonical}),
+      }), {status: lookupStatus})
     }
     assert.equal(new URL(url).pathname, '/index.html')
     return new Response(template)
@@ -74,11 +130,20 @@ for (const path of ['/en', '/en/about', '/en/contact', '/en/reader/9547512', '/e
   const response = await middleware(new Request(`https://esnads.net${path}`, { headers: { 'user-agent': 'Chrome/140' } }))
   assert.equal(response.status, 200)
   assert.equal(response.headers.get('location'), null)
-  checkHead(await response.text(), `https://esnads.net${/\/(library|reader)\//.test(path) ? '/library/9547512' : path.replace(/^\/en/, '')}`)
+  checkHead(await response.text(), `https://esnads.net${/\/(library|reader)\//.test(path) ? '/library/9547512' : path === '/en' ? '/en' : path.replace(/^\/en/, '')}`)
 }
 const crawler = await middleware(new Request('https://esnads.net/en/library/legacy-slug', {headers:{'user-agent':'Googlebot'}}))
 assert.match(crawler.rewrite, /lang=en/)
 assert.match(crawler.rewrite, /slug=legacy-slug/)
+for (const path of ['/library/9547512', '/en/library/9547512', '/reader/9547512', '/en/reader/9547512']) {
+  const response = await middleware(new Request(`https://esnads.net${path}`, {headers:{'user-agent':'Chrome/140'}}))
+  assert.equal(response.status, 200)
+  const html = await response.text()
+  const data = JSON.parse(html.match(/<script id="publication-jsonld" type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])
+  assert.equal(data['@type'], 'Article')
+  assert.equal(data.inLanguage, 'ar')
+  assert.equal(data.dateModified, datedPub.updated_at)
+}
 
 for (const status of [404, 503]) {
   lookupStatus = status

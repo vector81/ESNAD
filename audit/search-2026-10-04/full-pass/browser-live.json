@@ -1,0 +1,232 @@
+{
+  "checkedAt": "2026-10-04T08:57:10.074Z",
+  "pages": [
+    {
+      "h1": [
+        "مكتبة بحثية عربية للدراسات والأوراق والكتب"
+      ],
+      "nonArabicAlts": [],
+      "related": [],
+      "schemas": [
+        {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@id": "https://esnads.net/#organization",
+              "@type": "Organization",
+              "alternateName": [
+                "اسناد",
+                "مركز اسناد",
+                "مركز إسناد",
+                "Esnads",
+                "Esnad",
+                "esnads.net"
+              ],
+              "logo": "https://esnads.net/newlogo.png",
+              "name": "مركز إسناد للدراسات والأبحاث",
+              "sameAs": [],
+              "url": "https://esnads.net"
+            },
+            {
+              "@id": "https://esnads.net/#website",
+              "@type": "WebSite",
+              "alternateName": [
+                "اسناد",
+                "مركز اسناد",
+                "مركز إسناد",
+                "Esnads",
+                "Esnad",
+                "esnads.net"
+              ],
+              "inLanguage": [
+                "ar",
+                "en"
+              ],
+              "name": "إسناد",
+              "publisher": {
+                "@id": "https://esnads.net/#organization"
+              },
+              "url": "https://esnads.net"
+            },
+            {
+              "@type": "CollectionPage",
+              "description": "مركز إسناد للدراسات والأبحاث، المعروف أيضاً باسم مركز اسناد: مكتبة عربية للدراسات السياسية والقانونية والمقالات والكتب.",
+              "inLanguage": "ar",
+              "isPartOf": {
+                "@id": "https://esnads.net/#website"
+              },
+              "mainEntity": {
+                "@type": "ItemList",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "name": "قطر تغادر مقعد الوسيط في اليمن:  وتخندق «الجزيرة» في المعسكر السعودي",
+                    "position": 1,
+                    "url": "https://esnads.net/library/9547512"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "name": "الجيش الإسرائيلي يستهلك الموازنة: من يدفع ثمن الحرب؟ من أزمة تمويل المؤسسة العسكرية إلى أزمة بنيوية في الاقتصاد والسياسة والمجتمع",
+                    "position": 2,
+                    "url": "https://esnads.net/library/1306259"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "name": "الملف القانوني الدولي الموحّد  الجرائم المرتكبة في جنوب لبنان  ملف الإثبات والتكييف القانوني والمسارات القضائية أمام محكمة العدل الدولية والمحكمة الجنائية الدولية",
+                    "position": 3,
+                    "url": "https://esnads.net/library/2630263"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "name": "بين انتصار آب 2006 وصمود آب 2026: قراءة في خطاب الشيخ نعيم قاسم ومعادلات المرحلة المقبلة",
+                    "position": 4,
+                    "url": "https://esnads.net/library/8541485"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "name": "الخيانة القيادية المدركة وتآكل الثقة في سياق حرب ممتدة  دراسة تفسيرية أولية للمغادرة الجماعية في كتيبة «تسابر» في ضوء نظرية جوناثان شاي",
+                    "position": 5,
+                    "url": "https://esnads.net/library/1532792"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "name": "بين المصالحة اللاهوتية والنقد السياسي  موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل",
+                    "position": 6,
+                    "url": "https://esnads.net/library/9928005"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "name": "الاتفاقيّات الإبراهيميّة بين خطاب التّعايش ومشاريع الهيمنة دراسة نقديّة في توظيف الدّين والسياسة في إعادة تشكيل الشّرق الأوسط",
+                    "position": 7,
+                    "url": "https://esnads.net/library/3697624"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "name": "تشييع الإمام علي الخامنئي بين الإرث الكربلائي والنظريات الحديثة قراءة في الدلالات والتحولات والمآلات",
+                    "position": 8,
+                    "url": "https://esnads.net/library/8806359"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "name": "نحو تجريم الصمت وكسر الهيمنة: «المجلس العالمي» يدعو للمواجهة الشاملة",
+                    "position": 9,
+                    "url": "https://esnads.net/library/5441862"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "name": "الإنسان والقيم في خطاب السيد حسن نصر الله قراءة تحليلية في جدلية سلطة القيم وإغراء المنفعة",
+                    "position": 10,
+                    "url": "https://esnads.net/library/8960095"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "name": "ستار لينك في العراق بعد زيارة واشنطن: خدمة مدنية أم بنية اتصالات لمرحلة إقليمية جديدة؟ قراءة نقدية في توقيت التشغيل، وغموض الاتفاقيات، واحتمالات الاستخدام الأمني والعسكري",
+                    "position": 11,
+                    "url": "https://esnads.net/library/9955621"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "name": "احتمالات التدخّل السوري في لبنان: تحليل جيوسياسي لمعادلة القدرة والمصلحة والكلفة في سياق الضغوط الأميركية والحرب بالوكالة",
+                    "position": 12,
+                    "url": "https://esnads.net/library/4280300"
+                  }
+                ],
+                "numberOfItems": 12
+              },
+              "name": "مركز إسناد للدراسات والأبحاث",
+              "publisher": {
+                "@id": "https://esnads.net/#organization"
+              },
+              "url": "https://esnads.net"
+            }
+          ]
+        }
+      ],
+      "siteName": "مركز إسناد للدراسات والأبحاث",
+      "title": "مركز إسناد للدراسات والأبحاث",
+      "url": "https://esnads.net/",
+      "logs": []
+    },
+    {
+      "h1": [
+        "بين المصالحة اللاهوتية والنقد السياسي  موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل"
+      ],
+      "nonArabicAlts": [],
+      "related": [
+        "/library/3697624",
+        "/library/1306259",
+        "/library/4070119",
+        "/library/5143394"
+      ],
+      "schemas": [
+        {
+          "@context": "https://schema.org",
+          "@id": "https://esnads.net/library/9928005#article",
+          "@type": "Article",
+          "author": {
+            "@type": "Person",
+            "name": "عبدالله بدوي"
+          },
+          "dateModified": "2026-08-15T13:00:05.073Z",
+          "datePublished": "2026-08-02T18:54:05.180Z",
+          "description": "دراسة في موقف الكنيسة الكاثوليكية من اليهودية والصهيونية وإسرائيل، والمصالحة اللاهوتية والنقد السياسي، مع مراجع بينها أعمال ماسيمو فاجيولي.",
+          "headline": "بين المصالحة اللاهوتية والنقد السياسي  موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل",
+          "image": [
+            "https://esnads.net/assets/article-covers/6d6b83d5-be1a-41da-b562-4d8e5f92596c.png"
+          ],
+          "inLanguage": "ar",
+          "mainEntityOfPage": {
+            "@id": "https://esnads.net/library/9928005",
+            "@type": "WebPage"
+          },
+          "name": "بين المصالحة اللاهوتية والنقد السياسي  موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل",
+          "publisher": {
+            "@id": "https://esnads.net/#organization",
+            "@type": "Organization",
+            "alternateName": [
+              "اسناد",
+              "مركز اسناد",
+              "مركز إسناد",
+              "Esnads",
+              "Esnad",
+              "esnads.net"
+            ],
+            "logo": "https://esnads.net/newlogo.png",
+            "name": "مركز إسناد للدراسات والأبحاث",
+            "sameAs": [],
+            "url": "https://esnads.net"
+          },
+          "url": "https://esnads.net/library/9928005"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "item": "https://esnads.net",
+              "name": "الرئيسية",
+              "position": 1
+            },
+            {
+              "@type": "ListItem",
+              "item": "https://esnads.net/library",
+              "name": "المكتبة البحثية",
+              "position": 2
+            },
+            {
+              "@type": "ListItem",
+              "item": "https://esnads.net/library/9928005",
+              "name": "بين المصالحة اللاهوتية والنقد السياسي  موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل",
+              "position": 3
+            }
+          ]
+        }
+      ],
+      "siteName": "مركز إسناد للدراسات والأبحاث",
+      "title": "موقف الكنيسة الكاثوليكية من إسرائيل والصهيونية | إسناد",
+      "url": "https://esnads.net/library/9928005",
+      "logs": []
+    }
+  ]
+}

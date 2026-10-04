@@ -8,15 +8,8 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import {
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
-  updateProfile,
-} from 'firebase/auth'
-import { auth, isFirebaseConfigured } from '../lib/firebase'
-import { getLibrarySnapshot } from '../lib/library'
+import { loadPublicAuth } from '../lib/publicAuth'
+import { isFirebaseConfigured } from '../lib/firebaseConfig'
 import type { LibrarySnapshot, SessionUser } from '../types/publication'
 
 const DEMO_USER_STORAGE_KEY = 'esnad_demo_public_user'
@@ -80,22 +73,29 @@ function mapFirebaseUser(user: {
 
 export function PublicSessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(() =>
-    !auth || !isFirebaseConfigured ? getDemoUser() : null,
+    !isFirebaseConfigured ? getDemoUser() : null,
   )
   const [library, setLibrary] = useState<LibrarySnapshot>(() => emptyLibrarySnapshot())
-  const [loading, setLoading] = useState(() => Boolean(auth && isFirebaseConfigured))
+  const [loading, setLoading] = useState(() => Boolean(isFirebaseConfigured))
 
   const refreshLibrary = useCallback(async () => {
+    const { getLibrarySnapshot } = await import('../lib/library')
     const snapshot = user ? await getLibrarySnapshot(user) : emptyLibrarySnapshot()
     setLibrary(snapshot)
   }, [user])
 
   useEffect(() => {
-    if (!auth || !isFirebaseConfigured) {
+    if (!isFirebaseConfigured) {
       return undefined
     }
-
-    return onAuthStateChanged(auth, (nextUser) => {
+    let cancelled = false
+    let unsubscribe: (() => void) | undefined
+    let idleId: number | undefined
+    let timerId: number | undefined
+    const restoreSession = async () => {
+      const [instance, { onAuthStateChanged }] = await Promise.all([loadPublicAuth(), import('firebase/auth')])
+      if (cancelled || !instance) return
+      unsubscribe = onAuthStateChanged(instance, (nextUser) => {
       if (nextUser) {
         setUser(mapFirebaseUser(nextUser))
       } else {
@@ -104,13 +104,31 @@ export function PublicSessionProvider({ children }: { children: ReactNode }) {
       }
       setLoading(false)
     })
+    }
+    const restore = () => void restoreSession().catch(error => {
+      console.warn('[esnad] Session restoration unavailable', error)
+      if (!cancelled) setLoading(false)
+    })
+    const schedule = () => {
+      if (typeof window.requestIdleCallback === 'function') idleId = window.requestIdleCallback(restore, { timeout: 1500 })
+      else timerId = window.setTimeout(restore, 0)
+    }
+    if (document.readyState === 'complete') schedule()
+    else window.addEventListener('load', schedule, { once: true })
+    return () => {
+      cancelled = true
+      unsubscribe?.()
+      window.removeEventListener('load', schedule)
+      if (idleId !== undefined) window.cancelIdleCallback(idleId)
+      if (timerId !== undefined) window.clearTimeout(timerId)
+    }
   }, [])
 
   useEffect(() => {
     if (!user) return undefined
 
     let cancelled = false
-    void getLibrarySnapshot(user)
+    void import('../lib/library').then(({ getLibrarySnapshot }) => getLibrarySnapshot(user))
       .then((snapshot) => {
         if (!cancelled) setLibrary(snapshot)
       })
@@ -124,7 +142,7 @@ export function PublicSessionProvider({ children }: { children: ReactNode }) {
   }, [user])
 
   const signInUser = useCallback(async (email: string, password: string) => {
-    if (!auth || !isFirebaseConfigured) {
+    if (!isFirebaseConfigured) {
       const demoUser = {
         uid: `demo-${email.toLowerCase()}`,
         email: email.toLowerCase(),
@@ -135,12 +153,14 @@ export function PublicSessionProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    const credentials = await signInWithEmailAndPassword(auth, email, password)
+    const [instance, { signInWithEmailAndPassword }] = await Promise.all([loadPublicAuth(), import('firebase/auth')])
+    if (!instance) throw new Error('تعذر تحميل تسجيل الدخول.')
+    const credentials = await signInWithEmailAndPassword(instance, email, password)
     setUser(mapFirebaseUser(credentials.user))
   }, [])
 
   const registerUser = useCallback(async (name: string, email: string, password: string) => {
-    if (!auth || !isFirebaseConfigured) {
+    if (!isFirebaseConfigured) {
       const demoUser = {
         uid: `demo-${email.toLowerCase()}`,
         email: email.toLowerCase(),
@@ -151,7 +171,9 @@ export function PublicSessionProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    const credentials = await createUserWithEmailAndPassword(auth, email, password)
+    const [instance, { createUserWithEmailAndPassword, updateProfile }] = await Promise.all([loadPublicAuth(), import('firebase/auth')])
+    if (!instance) throw new Error('تعذر تحميل تسجيل الدخول.')
+    const credentials = await createUserWithEmailAndPassword(instance, email, password)
     await updateProfile(credentials.user, {
       displayName: name.trim(),
     })
@@ -159,14 +181,15 @@ export function PublicSessionProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signOutUser = useCallback(async () => {
-    if (!auth || !isFirebaseConfigured) {
+    if (!isFirebaseConfigured) {
       setDemoUser(null)
       setUser(null)
       setLibrary(emptyLibrarySnapshot())
       return
     }
 
-    await signOut(auth)
+    const [instance, { signOut }] = await Promise.all([loadPublicAuth(), import('firebase/auth')])
+    if (instance) await signOut(instance)
     setUser(null)
     setLibrary(emptyLibrarySnapshot())
   }, [])

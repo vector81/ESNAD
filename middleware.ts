@@ -1,5 +1,8 @@
 import { next, rewrite } from '@vercel/functions'
 import { renderPageError } from './api/_lib/page-error.js'
+import { serializeStructuredData, getPublicationImage } from './src/lib/structuredData.js'
+import { PAGE_SEO } from './src/lib/seoMetadata.js'
+import { articleImageUrl, priorityArticleImage, articleImageSrcSet, ARTICLE_IMAGE_SIZES } from './src/lib/articleImages.js'
 
 const CRAWLER_USER_AGENT_TOKENS = [
   'GPTBot',
@@ -67,26 +70,45 @@ async function resolvePublication(request: Request, section: string, language: s
     if (response.status === 404) return { status: 404 as const, canonicalPath: '' }
     if (!response.ok) return { status: 503 as const, canonicalPath: '' }
 
-    const payload = await response.json() as { canonicalPath?: string }
+    const payload = await response.json() as { canonicalPath?: string; articleJsonLd?: Record<string, unknown>; breadcrumbJsonLd?: Record<string, unknown>; title?: string; description?: string; image?: string; publication?: Record<string, unknown>; initialHtml?: string }
     if (!payload.canonicalPath) return { status: 503 as const, canonicalPath: '' }
-    return { status: 200 as const, canonicalPath: payload.canonicalPath }
+    return { status: 200 as const, ...payload, canonicalPath: payload.canonicalPath }
   } catch {
     return { status: 503 as const, canonicalPath: '' }
   }
 }
 
 // Render route-specific canonical metadata before the client app starts.
-async function renderAppShell(request: Request, pathname: string, language = 'en') {
+async function renderAppShell(request: Request, pathname: string, language = 'en', articleJsonLd?: Record<string, unknown>, metadata?: {title?: string; description?: string; image?: string; breadcrumbJsonLd?: Record<string, unknown>; publication?: Record<string, unknown>; publications?: unknown[]; jsonLd?: Record<string, unknown>; initialHtml?: string}) {
   const shell = await fetch(new URL('/index.html', request.url)).catch(() => null)
   if (!shell?.ok) return pageError(503, language)
-  const path = pathname.replace(/^\/en(?=\/|$)/, '') || '/'
+  const path = pathname === '/en' ? '/en' : pathname.replace(/^\/en(?=\/|$)/, '') || '/'
+  const meta: typeof metadata = metadata || PAGE_SEO[path]
+  const escape = (value: string) => value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;')
   const canonical = `https://esnads.net${path === '/' ? '' : path}`
     .replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;')
-  const html = (await shell.text())
-    .replace(/<link\b[^>]*hreflang="en"[^>]*>/gi, '')
+  let html = (await shell.text())
+    .replace(/<link\b[^>]*hreflang="[^"]*"[^>]*>/gi, '')
     .replace(/(<link\b[^>]*rel="canonical"[^>]*href=")[^"]*/gi, (_match, prefix) => `${prefix}${canonical}`)
     .replace(/(<meta\b[^>]*property="og:url"[^>]*content=")[^"]*/gi, (_match, prefix) => `${prefix}${canonical}`)
     .replace(/(<link\b[^>]*hreflang="(?:ar|x-default)"[^>]*href=")[^"]*/gi, (_match, prefix) => `${prefix}${canonical}`)
+  if (metadata?.jsonLd || (path !== '/' && path !== '/en')) html = html.replace(/<script\b[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/g, '')
+  if (meta?.title) html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${escape(meta.title)}</title>`).replace(/(<meta\b[^>]*(?:property="og:title"|name="twitter:title")[^>]*content=")[^"]*/g, (_match, prefix) => `${prefix}${escape(meta.title!)}`)
+  if (meta?.description) html = html.replace(/(<meta\b[^>]*(?:name="description"|property="og:description"|name="twitter:description")[^>]*content=")[^"]*/g, (_match, prefix) => `${prefix}${escape(meta.description!)}`)
+  if (meta?.image) html = html.replace(/(<meta\b[^>]*(?:property="og:image"|name="twitter:image")[^>]*content=")[^"]*/g, (_match, prefix) => `${prefix}${escape(meta.image!)}`)
+  if (articleJsonLd) html = html.replace('property="og:type" content="website"', 'property="og:type" content="article"')
+  const publications = metadata?.publications as Array<{ id?: string; cover_image?: string; featured?: boolean }> | undefined
+  const feature = path === '/' || path === '/en' ? publications?.find(pub => pub.featured) || publications?.[0] : metadata?.publication
+  const homeImage = !metadata?.publication && feature ? getPublicationImage(feature) : ''
+  let preloadImage = homeImage ? articleImageUrl(homeImage, true) : ''
+  const firstArticleImage = priorityArticleImage(metadata?.publication?.content_json)
+  if (firstArticleImage) preloadImage = articleImageUrl(firstArticleImage, true)
+  const responsiveImage = articleImageSrcSet(firstArticleImage || homeImage)
+  const responsiveSizes = homeImage ? '(max-width: 800px) calc(100vw - 58px), 480px' : ARTICLE_IMAGE_SIZES
+  if (preloadImage) html = html.replace('</head>', `<link rel="preload" as="image" fetchpriority="high" href="${escape(preloadImage)}"${responsiveImage ? ` imagesrcset="${escape(responsiveImage)}" imagesizes="${escape(responsiveSizes)}"` : ''} /></head>`)
+  const extra = `${articleJsonLd ? `<script id="publication-jsonld" type="application/ld+json">${serializeStructuredData(articleJsonLd)}</script>` : ''}${metadata?.breadcrumbJsonLd ? `<script id="publication-breadcrumb-jsonld" type="application/ld+json">${serializeStructuredData(metadata.breadcrumbJsonLd)}</script>` : ''}${metadata?.jsonLd ? `<script type="application/ld+json">${serializeStructuredData(metadata.jsonLd)}</script>` : ''}${metadata?.publications ? `<script id="initial-catalog-data" type="application/json">${serializeStructuredData(metadata.publications)}</script>` : ''}${metadata?.publication ? `<script id="initial-publication-data" type="application/json">${serializeStructuredData(metadata.publication)}</script>` : ''}${path === '/' || path === '/en' ? '<link rel="alternate" hreflang="ar" href="https://esnads.net" /><link rel="alternate" hreflang="en" href="https://esnads.net/en" /><link rel="alternate" hreflang="x-default" href="https://esnads.net" />' : ''}`
+  html = html.replace('</head>', `${extra}</head>`).replace('<html lang="ar">', `<html lang="${language}" dir="${language === 'ar' ? 'rtl' : 'ltr'}">`)
+  if (metadata?.initialHtml && !/^\/(?:en\/)?reader\//.test(new URL(request.url).pathname)) html = html.replace('<div id="root"></div>', `<div id="root">${metadata.initialHtml}</div><script>try { if (localStorage.getItem('esnad_analytics_consent_v2') === 'accepted') document.querySelector('#root > .cookie-modal')?.remove() } catch {}</script>`)
   return new Response(html, {
     status: 200,
     headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'private, no-store' },
@@ -101,22 +123,28 @@ export default async function middleware(request: Request) {
 
   const requestUrl = new URL(request.url)
   if (/^\/(?:api|assets|data|_vercel)(?:\/|$)/.test(requestUrl.pathname) ||
-      /^\/(?:index\.html|favicon\.svg|logo\.png|newlogo\.png|robots\.txt|sitemap\.xml|llms?\.(?:txt|text))$/.test(requestUrl.pathname)) return next()
+      /^\/(?:index\.html|favicon\.svg|logo\.png|newlogo\.png|robots\.txt|sitemap\.xml|feed\.xml|[a-f0-9]{32}\.txt|llms?\.(?:txt|text))$/.test(requestUrl.pathname)) return next()
   const isEnglishRoute = /^\/en(?:\/|$)/.test(requestUrl.pathname)
   const isExplicitCrawler = CRAWLER_USER_AGENT_TOKENS.some((token) => normalizedUserAgent.includes(token))
   const isKnownRealBrowser = REAL_BROWSER_USER_AGENT_PATTERN.test(userAgent)
   const shouldServeBrowserApp = !isExplicitCrawler && isKnownRealBrowser
 
+  const topicMatch = requestUrl.pathname.match(/^\/topics\/([a-z-]+)\/?$/)
   const catalogMatch = requestUrl.pathname.match(CATALOG_ROUTE_PATTERN)
-  if (catalogMatch) {
-    const [, languagePrefix, section] = catalogMatch
+  if (catalogMatch || topicMatch) {
+    const [, languagePrefix, section] = catalogMatch || []
     const metadataUrl = new URL('/api/publication-shell', request.url)
     metadataUrl.searchParams.set('mode', 'catalog')
     metadataUrl.searchParams.set('lang', languagePrefix === 'en' ? 'en' : 'ar')
-    metadataUrl.searchParams.set('section', section?.toLowerCase() || 'home')
+    metadataUrl.searchParams.set('section', topicMatch?.[1] || section?.toLowerCase() || 'home')
     if (!shouldServeBrowserApp) return rewrite(metadataUrl)
+    metadataUrl.searchParams.set('format', 'json')
     const catalog = await fetch(metadataUrl, { signal: AbortSignal.timeout(20000) }).catch(() => null)
+    if (catalog?.status === 404) return pageError(404, 'ar')
     if (!catalog?.ok) return pageError(503, isEnglishRoute ? 'en' : 'ar')
+    const data = await catalog.json() as { meta: {title:string; description:string}; publications: unknown[]; jsonLd: Record<string, unknown>; initialHtml?: string }
+    const title = data.meta.title.includes(' | ') || /^(?:مركز إسناد|Esnad Center)/.test(data.meta.title) ? data.meta.title : `${data.meta.title} | إسناد`
+    return renderAppShell(request, requestUrl.pathname, isEnglishRoute ? 'en' : 'ar', undefined, { ...data.meta, title, publications: data.publications, jsonLd: data.jsonLd, initialHtml: data.initialHtml })
   }
 
   const match = requestUrl.pathname.match(ROUTE_PATTERN)
@@ -126,11 +154,11 @@ export default async function middleware(request: Request) {
     if (reader) {
       const result = await resolvePublication(request, 'library', isEnglishRoute ? 'en' : 'ar', reader[1])
       if (result.status !== 200) return pageError(result.status, isEnglishRoute ? 'en' : 'ar')
-      return renderAppShell(request, result.canonicalPath, isEnglishRoute ? 'en' : 'ar')
+      return renderAppShell(request, result.canonicalPath, isEnglishRoute ? 'en' : 'ar', result.articleJsonLd, result)
     } else if (!catalogMatch && !/^\/(?:en\/)?(?:about|contact|login|register|dashboard)\/?$/.test(requestUrl.pathname)) {
       return pageError(404, isEnglishRoute ? 'en' : 'ar')
     }
-    return isEnglishRoute ? renderAppShell(request, requestUrl.pathname) : next()
+    return renderAppShell(request, requestUrl.pathname, isEnglishRoute ? 'en' : 'ar')
   }
 
   const [, languagePrefix, section, slug] = match
@@ -149,7 +177,7 @@ export default async function middleware(request: Request) {
   }
 
   if (shouldServeBrowserApp) {
-    return isEnglishRoute ? renderAppShell(request, `/en${result.canonicalPath}`) : next()
+    return renderAppShell(request, result.canonicalPath, language, result.articleJsonLd, result)
   }
 
   const metadataUrl = new URL('/api/publication-shell', request.url)

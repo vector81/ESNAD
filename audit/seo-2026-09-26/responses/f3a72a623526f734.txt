@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>الصفحة غير موجودة | إسناد</title><meta name="robots" content="noindex, follow">
+<link rel="stylesheet" href="/assets/index.css"></head>
+<body><main class="container"><section class="panel" style="margin-top:48px">
+<h1>الصفحة غير موجودة</h1><p>تعذر العثور على الصفحة أو الإصدار المطلوب.</p>
+<a href="/">العودة إلى الرئيسية</a>
+</section></main></body></html>

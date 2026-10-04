@@ -1,0 +1,2 @@
+import {readFile} from 'node:fs/promises';import {priorityArticleImage} from '../../../src/lib/articleImages.js';
+const pubs=JSON.parse(await readFile('audit/search-2026-10-04/full-pass/content-before.json','utf8'));const images=[...new Set(pubs.map(p=>priorityArticleImage(p.content_json)).filter(Boolean))];console.log('Images near the top:',images.length);console.log(images.map(u=>new URL(u).hostname));

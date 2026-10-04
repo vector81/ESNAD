@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';
+const results=[];const jobs=[];
+for(const agent of ['Googlebot','Mozilla/5.0 Chrome/140.0.0.0 Safari/537.36']) for(const path of ["/en/library/9547512","/en/books/9547512","/library/9547512","/books/9547512","/library/999999999999","/en/library/999999999999","/books/999999999999","/reader/999999999999","/seo-audit-missing-20260926","/en/seo-audit-missing-20260926","/reader/9547512","/en/reader/9547512","/en/about","/assets/index.js","/robots.txt"]) jobs.push({agent,path});
+await Promise.all(Array.from({length:3},async()=>{while(jobs.length){const {agent,path}=jobs.shift();const r=await fetch('https://esnads.net'+path,{headers:{'user-agent':agent},redirect:'manual',signal:AbortSignal.timeout(30000)});const html=await r.text();results.push({agent,path,status:r.status,location:r.headers.get('location'),canonical:html.match(/<link rel="canonical" href="([^"]*)"/)?.[1],ogUrl:html.match(/<meta property="og:url" content="([^"]*)"/)?.[1],robots:html.match(/<meta name="robots" content="([^"]*)"/)?.[1],robotsHeader:r.headers.get('x-robots-tag'),enHreflang:/hreflang="en"/.test(html)});}}));
+const xml=await fetch('https://esnads.net/sitemap.xml').then(r=>r.text());const sitemap={urls:[...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(m=>m[1]),enHreflang:/hreflang="en"/.test(xml)};
+fs.writeFileSync('audit/seo-2026-09-26/p1-production-checks.json',JSON.stringify({checkedAt:new Date().toISOString(),results,sitemap},null,2));
+for(const x of results){
+if(x.path.includes('999999')||x.path.includes('seo-audit-missing')){assert.equal(x.status,404,x.path);assert.match(x.robots,/noindex/,x.path);assert.match(x.robotsHeader,/noindex/,x.path);}
+else if(x.path==='/books/9547512'){assert.equal(x.status,301);assert.equal(new URL(x.location,'https://esnads.net').href,'https://esnads.net/library/9547512');}
+else {assert.equal(x.status,200,x.path);assert.equal(x.location,null,x.path);if(!x.path.startsWith('/assets/'))assert.equal(x.enHreflang,false,x.path);if(x.path.includes('9547512') && !(x.path==='/library/9547512' && x.agent!=='Googlebot')){assert.equal(x.canonical,'https://esnads.net/library/9547512',x.path);assert.equal(x.ogUrl,x.canonical);assert.doesNotMatch(x.robots,/noindex/);}}
+}
+assert.equal(sitemap.enHreflang,false);assert.ok(sitemap.urls.length>7);assert.ok(sitemap.urls.every(u=>!new URL(u).pathname.startsWith('/en')));console.log(JSON.stringify({checks:results.length,sitemapUrls:sitemap.urls.length,result:'PASS'}));

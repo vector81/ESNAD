@@ -1,6 +1,7 @@
 import { PUBLICATION_ID_MAP } from './publication-id-map.js'
 import { getBearerToken } from './http.js'
 import { isAllowedAdminEmail } from './admin-auth.js'
+import { cachedPublicationRead, quotaPublications, recordBackendStatus } from './publication-cache.js'
 
 const DOCUMENT_ID_PATTERN = /^[A-Za-z0-9_-]{6,120}$/
 const SLUG_FIELDS = ['slug', 'slug_ar', 'slugAr', 'slug_latin', 'slugLatin', 'slug_en', 'slugEn']
@@ -118,6 +119,7 @@ async function firestoreQuery(projectId, apiKey, body) {
   )
 
   if (!response.ok) {
+    recordBackendStatus(response.status)
     throw new Error(`Firestore query failed (${response.status})`)
   }
 
@@ -133,6 +135,7 @@ async function firestoreGetPublication(projectId, apiKey, id) {
 
   if (response.status === 403 || response.status === 404) return null
   if (!response.ok) {
+    recordBackendStatus(response.status)
     throw new Error(`Firestore document fetch failed (${response.status})`)
   }
 
@@ -362,12 +365,14 @@ async function listPublishedPublicationsFromRest() {
   )
 }
 
-export async function listPublishedPublications() {
+async function readPublishedPublications() {
+  if (quotaPublications()) return quotaPublications()
   if (hasRestConfig()) {
     try {
       return await listPublishedPublicationsFromRest()
     } catch (error) {
       console.error('[esnad/publications] REST list failed; falling back to admin', error)
+      if (quotaPublications()) return quotaPublications()
     }
   }
 
@@ -380,6 +385,10 @@ export async function listPublishedPublications() {
   }
 
   throw new Error('Publication backend unavailable')
+}
+
+export function listPublishedPublications() {
+  return cachedPublicationRead('published', readPublishedPublications)
 }
 
 async function getPublishedPublicationByIdFromAdmin(id) {
@@ -503,12 +512,15 @@ async function getPublicationByReferenceFromRest(reference) {
   return publications.find((publication) => publicationMatchesReference(publication, trimmedReference)) || null
 }
 
-export async function getPublicationByReference(reference) {
+async function readPublicationByReference(reference) {
+  const fallback = () => quotaPublications()?.find(pub => publicationMatchesReference(pub, reference)) || null
+  if (quotaPublications()) return fallback()
   if (hasRestConfig()) {
     try {
       return await getPublicationByReferenceFromRest(reference)
     } catch (error) {
       console.error('[esnad/publications] REST reference lookup failed; falling back to admin', error)
+      if (quotaPublications()) return fallback()
     }
   }
 
@@ -521,6 +533,10 @@ export async function getPublicationByReference(reference) {
   }
 
   throw new Error('Publication backend unavailable')
+}
+
+export function getPublicationByReference(reference) {
+  return cachedPublicationRead(`reference:${reference}`, () => readPublicationByReference(reference))
 }
 
 export async function getRequestIdentity(request) {

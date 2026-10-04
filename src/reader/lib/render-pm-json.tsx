@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
+import { articleImageSize, articleImageUrl, priorityArticleImage, articleImageSrcSet, ARTICLE_IMAGE_SIZES } from '../../lib/articleImages.js'
 
 interface PmNode {
   type: string
@@ -71,42 +72,52 @@ function renderMarks(text: string, marks?: PmNode['marks']): ReactNode {
   }, text)
 }
 
-function renderNode(node: PmNode, index: number): ReactNode {
+function renderNode(node: PmNode, index: number, priorityImage = ''): ReactNode {
+  const imageSrc = String(node.attrs?.src || '')
+  const priority = Boolean(imageSrc && imageSrc === priorityImage)
+  const dimensions = articleImageSize(imageSrc)
   switch (node.type) {
     case 'text':
       return <span key={index}>{renderMarks(node.text || '', node.marks)}</span>
     case 'paragraph':
-      return <p key={index}>{node.content?.map((n, i) => renderNode(n, i))}</p>
+      return <p key={index}>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</p>
     case 'heading':
       switch (node.attrs?.level) {
         case 1:
-          return <h1 key={index}>{node.content?.map((n, i) => renderNode(n, i))}</h1>
+          return <h2 key={index}>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</h2>
         case 2:
-          return <h2 key={index}>{node.content?.map((n, i) => renderNode(n, i))}</h2>
+          return <h2 key={index}>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</h2>
         case 3:
-          return <h3 key={index}>{node.content?.map((n, i) => renderNode(n, i))}</h3>
+          return <h3 key={index}>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</h3>
         case 4:
-          return <h4 key={index}>{node.content?.map((n, i) => renderNode(n, i))}</h4>
+          return <h4 key={index}>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</h4>
         default:
-          return <h2 key={index}>{node.content?.map((n, i) => renderNode(n, i))}</h2>
+          return <h2 key={index}>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</h2>
       }
     case 'bulletList':
-      return <ul key={index}>{node.content?.map((n, i) => renderNode(n, i))}</ul>
+      return <ul key={index}>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</ul>
     case 'orderedList':
-      return <ol key={index}>{node.content?.map((n, i) => renderNode(n, i))}</ol>
+      return <ol key={index}>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</ol>
     case 'listItem':
-      return <li key={index}>{node.content?.map((n, i) => renderNode(n, i))}</li>
+      return <li key={index}>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</li>
     case 'blockquote':
-      return <blockquote key={index}>{node.content?.map((n, i) => renderNode(n, i))}</blockquote>
+      return <blockquote key={index}>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</blockquote>
     case 'codeBlock':
-      return <pre key={index}><code>{node.content?.map((n, i) => renderNode(n, i))}</code></pre>
+      return <pre key={index}><code>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</code></pre>
     case 'image':
       return (
         <img
           key={index}
-          src={String(node.attrs?.src || '')}
-          alt={String(node.attrs?.alt || '')}
-          style={{ maxWidth: '100%', borderRadius: 8, margin: '1em 0' }}
+          src={articleImageUrl(imageSrc, priority)}
+          srcSet={priority ? articleImageSrcSet(imageSrc) || undefined : undefined}
+          sizes={priority && articleImageSrcSet(imageSrc) ? ARTICLE_IMAGE_SIZES : undefined}
+          alt={/[\u0600-\u06ff]/.test(String(node.attrs?.alt || '')) ? String(node.attrs?.alt) : 'صورة توضيحية ضمن المقال'}
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : undefined}
+          width={dimensions.width}
+          height={dimensions.height}
+          decoding="async"
+          style={{ maxWidth: '100%', height: 'auto', borderRadius: 8, margin: '1em 0' }}
         />
       )
     case 'hardBreak':
@@ -114,21 +125,21 @@ function renderNode(node: PmNode, index: number): ReactNode {
     case 'table':
       return (
         <table key={index} style={{ width: '100%', borderCollapse: 'collapse', margin: '1em 0' }}>
-          <tbody>{node.content?.map((n, i) => renderNode(n, i))}</tbody>
+          <tbody>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</tbody>
         </table>
       )
     case 'tableRow':
-      return <tr key={index}>{node.content?.map((n, i) => renderNode(n, i))}</tr>
+      return <tr key={index}>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</tr>
     case 'tableHeader':
       return (
         <th key={index} style={{ border: '1px solid #e5e5e5', padding: '10px 12px', background: '#f7f7f5' }}>
-          {node.content?.map((n, i) => renderNode(n, i))}
+          {node.content?.map((n, i) => renderNode(n, i, priorityImage))}
         </th>
       )
     case 'tableCell':
       return (
         <td key={index} style={{ border: '1px solid #e5e5e5', padding: '10px 12px' }}>
-          {node.content?.map((n, i) => renderNode(n, i))}
+          {node.content?.map((n, i) => renderNode(n, i, priorityImage))}
         </td>
       )
     case 'equation':
@@ -148,9 +159,16 @@ function renderNode(node: PmNode, index: number): ReactNode {
       return (
         <figure key={index} style={{ margin: '1.2em 0', textAlign: 'center' }}>
           <img
-            src={String(node.attrs?.src || '')}
-            alt={String(node.attrs?.alt || '')}
-            style={{ maxWidth: '100%', borderRadius: 8 }}
+            src={articleImageUrl(imageSrc, priority)}
+            srcSet={priority ? articleImageSrcSet(imageSrc) || undefined : undefined}
+            sizes={priority && articleImageSrcSet(imageSrc) ? ARTICLE_IMAGE_SIZES : undefined}
+            alt={/[\u0600-\u06ff]/.test(String(node.attrs?.alt || '')) ? String(node.attrs?.alt) : String(node.attrs?.caption || 'صورة توضيحية ضمن المقال')}
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : undefined}
+            width={dimensions.width}
+            height={dimensions.height}
+            decoding="async"
+            style={{ maxWidth: '100%', height: 'auto', borderRadius: 8 }}
           />
           {node.attrs?.caption ? (
             <figcaption style={{ marginTop: 8, fontSize: 14, color: 'var(--text-muted)' }}>
@@ -184,7 +202,7 @@ function renderNode(node: PmNode, index: number): ReactNode {
         </div>
       )
     default:
-      return <div key={index}>{node.content?.map((n, i) => renderNode(n, i))}</div>
+      return <div key={index}>{node.content?.map((n, i) => renderNode(n, i, priorityImage))}</div>
   }
 }
 
@@ -192,5 +210,6 @@ export function renderPmJson(content: Record<string, unknown> | null | undefined
   if (!content) return null
   const doc = content as unknown as PmNode
   if (!doc.content) return null
-  return <>{doc.content.map((node, index) => renderNode(node, index))}</>
+  const priorityImage = priorityArticleImage(doc)
+  return <>{doc.content.map((node, index) => renderNode(node, index, priorityImage))}</>
 }

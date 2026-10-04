@@ -1,0 +1,133 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://esnads.net/#organization",
+      "name": "مركز إسناد للدراسات والأبحاث",
+      "alternateName": [
+        "اسناد",
+        "مركز اسناد",
+        "مركز إسناد",
+        "Esnads",
+        "Esnad",
+        "esnads.net"
+      ],
+      "url": "https://esnads.net",
+      "logo": "https://esnads.net/newlogo.png",
+      "sameAs": []
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://esnads.net/#website",
+      "name": "إسناد",
+      "alternateName": [
+        "اسناد",
+        "مركز اسناد",
+        "مركز إسناد",
+        "Esnads",
+        "Esnad",
+        "esnads.net"
+      ],
+      "url": "https://esnads.net",
+      "publisher": {
+        "@id": "https://esnads.net/#organization"
+      },
+      "inLanguage": [
+        "ar",
+        "en"
+      ]
+    },
+    {
+      "@type": "CollectionPage",
+      "name": "مركز إسناد للدراسات والأبحاث",
+      "description": "مركز إسناد للدراسات والأبحاث، المعروف أيضاً باسم مركز اسناد: مكتبة عربية للدراسات السياسية والقانونية والمقالات والكتب.",
+      "url": "https://esnads.net",
+      "inLanguage": "ar",
+      "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": 12,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "قطر تغادر مقعد الوسيط في اليمن:  وتخندق «الجزيرة» في المعسكر السعودي",
+            "url": "https://esnads.net/library/9547512"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "الجيش الإسرائيلي يستهلك الموازنة: من يدفع ثمن الحرب؟ من أزمة تمويل المؤسسة العسكرية إلى أزمة بنيوية في الاقتصاد والسياسة والمجتمع",
+            "url": "https://esnads.net/library/1306259"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "الملف القانوني الدولي الموحّد  الجرائم المرتكبة في جنوب لبنان  ملف الإثبات والتكييف القانوني والمسارات القضائية أمام محكمة العدل الدولية والمحكمة الجنائية الدولية",
+            "url": "https://esnads.net/library/2630263"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "بين انتصار آب 2006 وصمود آب 2026: قراءة في خطاب الشيخ نعيم قاسم ومعادلات المرحلة المقبلة",
+            "url": "https://esnads.net/library/8541485"
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "name": "الخيانة القيادية المدركة وتآكل الثقة في سياق حرب ممتدة  دراسة تفسيرية أولية للمغادرة الجماعية في كتيبة «تسابر» في ضوء نظرية جوناثان شاي",
+            "url": "https://esnads.net/library/1532792"
+          },
+          {
+            "@type": "ListItem",
+            "position": 6,
+            "name": "بين المصالحة اللاهوتية والنقد السياسي  موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل",
+            "url": "https://esnads.net/library/9928005"
+          },
+          {
+            "@type": "ListItem",
+            "position": 7,
+            "name": "الاتفاقيّات الإبراهيميّة بين خطاب التّعايش ومشاريع الهيمنة دراسة نقديّة في توظيف الدّين والسياسة في إعادة تشكيل الشّرق الأوسط",
+            "url": "https://esnads.net/library/3697624"
+          },
+          {
+            "@type": "ListItem",
+            "position": 8,
+            "name": "تشييع الإمام علي الخامنئي بين الإرث الكربلائي والنظريات الحديثة قراءة في الدلالات والتحولات والمآلات",
+            "url": "https://esnads.net/library/8806359"
+          },
+          {
+            "@type": "ListItem",
+            "position": 9,
+            "name": "نحو تجريم الصمت وكسر الهيمنة: «المجلس العالمي» يدعو للمواجهة الشاملة",
+            "url": "https://esnads.net/library/5441862"
+          },
+          {
+            "@type": "ListItem",
+            "position": 10,
+            "name": "الإنسان والقيم في خطاب السيد حسن نصر الله قراءة تحليلية في جدلية سلطة القيم وإغراء المنفعة",
+            "url": "https://esnads.net/library/8960095"
+          },
+          {
+            "@type": "ListItem",
+            "position": 11,
+            "name": "ستار لينك في العراق بعد زيارة واشنطن: خدمة مدنية أم بنية اتصالات لمرحلة إقليمية جديدة؟ قراءة نقدية في توقيت التشغيل، وغموض الاتفاقيات، واحتمالات الاستخدام الأمني والعسكري",
+            "url": "https://esnads.net/library/9955621"
+          },
+          {
+            "@type": "ListItem",
+            "position": 12,
+            "name": "احتمالات التدخّل السوري في لبنان: تحليل جيوسياسي لمعادلة القدرة والمصلحة والكلفة في سياق الضغوط الأميركية والحرب بالوكالة",
+            "url": "https://esnads.net/library/4280300"
+          }
+        ]
+      },
+      "publisher": {
+        "@id": "https://esnads.net/#organization"
+      },
+      "isPartOf": {
+        "@id": "https://esnads.net/#website"
+      }
+    }
+  ]
+}

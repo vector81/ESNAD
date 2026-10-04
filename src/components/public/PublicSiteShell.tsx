@@ -224,7 +224,7 @@ export function PublicSiteShell({
       <footer className="footer">
         <div className="container footer__inner">
           <div className="footer__brand">
-            <strong>Esnad</strong>
+            <strong>{language === 'ar' ? 'إسناد' : 'Esnad'}</strong>
             <p>
               {language === 'ar'
                 ? 'مركز إسناد للدراسات والأبحاث'
@@ -232,6 +232,7 @@ export function PublicSiteShell({
             </p>
           </div>
           <div className="footer__links">
+            <a href="/feed.xml">{language === 'ar' ? 'خلاصة الإصدارات' : 'RSS feed'}</a>
             <Link to={buildLocalizedPath(language, '/library')}>
               {language === 'ar' ? 'المكتبة' : 'Library'}
             </Link>

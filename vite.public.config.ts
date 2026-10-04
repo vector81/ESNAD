@@ -11,12 +11,13 @@ export default defineConfig({
   publicDir: resolve(rootDir, 'public'),
   root: resolve(rootDir, 'sites/public'),
   build: {
+    cssCodeSplit: false,
     manifest: true,
     outDir: resolve(rootDir, 'dist/public'),
     emptyOutDir: true,
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/index.js',
+        entryFileNames: 'assets/index-[hash].js',
         chunkFileNames: 'assets/chunks/[name]-[hash].js',
         assetFileNames: (assetInfo) =>
           assetInfo.name?.endsWith('.css') ? 'assets/index.css' : 'assets/[name]-[hash][extname]',

@@ -1,14 +1,3 @@
-import anyAscii from 'any-ascii'
-import {
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  setDoc,
-  where,
-} from 'firebase/firestore'
 import type {
   AccessTier,
   AppLanguage,
@@ -17,9 +6,9 @@ import type {
   PublicationInput,
   PublicationKind,
 } from '../types/publication'
-import { auth, db, isFirebaseConfigured, logFirebaseDebug, waitForAuthenticatedUser } from './firebase'
+import { isFirebaseConfigured } from './firebaseConfig'
+import { auth } from './publicAuth'
 import { PUBLICATION_ID_MAP } from './publicationIdMap'
-import { uploadFileToFirebaseStorage } from './storageAssets'
 
 export const PUBLICATION_CATEGORIES: Array<{
   id: PublicationCategory
@@ -64,6 +53,12 @@ export interface PublicationFilters {
 
 const LOCAL_STORAGE_KEY = 'esnad_publications_catalog'
 const shouldUsePublicApi = isFirebaseConfigured && typeof fetch !== 'undefined' && !import.meta.env.DEV
+let transliterate: ((value: string) => string) | null = null
+let transliterationReady: Promise<void> | null = null
+function loadTransliteration() {
+  transliterationReady ??= import('any-ascii').then(module => { transliterate = module.default })
+  return transliterationReady
+}
 
 function slugify(value: string) {
   return value
@@ -78,7 +73,7 @@ function slugify(value: string) {
 }
 
 function slugifyLatin(value: string) {
-  return anyAscii(value)
+  return (transliterate ? transliterate(value) : value)
     .trim()
     .toLowerCase()
     .replace(/['"`´]+/g, '')
@@ -275,6 +270,9 @@ function filterPublication(publication: Publication, filters: PublicationFilters
 }
 
 async function listPublishedPublicationsFromFirestore() {
+  const { db } = await import('./firebase')
+  const { collection, getDocs, query, where } = await import('firebase/firestore')
+  await loadTransliteration()
   if (!db || !isFirebaseConfigured) {
     return sortByPublished(readLocalPublications()).filter(isPublicationPublic)
   }
@@ -330,6 +328,11 @@ async function getPublicApiHeaders() {
 }
 
 async function listPublicationsFromApi() {
+  const initial = document.getElementById('initial-catalog-data')?.textContent
+  if (initial && !auth?.currentUser) {
+    const parsed = JSON.parse(initial) as Publication[]
+    if (Array.isArray(parsed)) return parsed
+  }
   const response = await fetch('/api/publications', {
     headers: await getPublicApiHeaders(),
   })
@@ -343,6 +346,11 @@ async function listPublicationsFromApi() {
 }
 
 async function getPublicationFromApi(reference: string) {
+  const initial = document.getElementById('initial-publication-data')?.textContent
+  if (initial && !auth?.currentUser) {
+    const parsed = JSON.parse(initial) as Publication
+    if ([parsed.id, getPublicPublicationId(parsed), parsed.slug, parsed.slug_ar, parsed.slug_en].includes(reference)) return parsed
+  }
   const params = new URLSearchParams({ reference })
   const response = await fetch(`/api/publications?${params.toString()}`, {
     headers: await getPublicApiHeaders(),
@@ -432,13 +440,13 @@ export function formatCurrency(amount: number, language: AppLanguage) {
 }
 
 export async function listPublications(filters: PublicationFilters = {}) {
-  if (!db || !isFirebaseConfigured) {
+  if (!isFirebaseConfigured) {
     return sortByPublished(readLocalPublications()).filter((item) => filterPublication(item, filters))
   }
 
   if (shouldUsePublicApi) {
     const publications = await listPublicationsFromApi().catch((error) => {
-      logFirebaseDebug('listPublications:api-fallback', error)
+      console.warn('[esnad] Publication API unavailable', error)
       return listPublishedPublicationsFromFirestore()
     })
     return publications.filter((item) => filterPublication(item, filters))
@@ -449,6 +457,9 @@ export async function listPublications(filters: PublicationFilters = {}) {
 }
 
 async function getPublishedPublicationDocumentById(id: string) {
+  const { db } = await import('./firebase')
+  const { doc, getDoc } = await import('firebase/firestore')
+  await loadTransliteration()
   if (!db) return null
 
   try {
@@ -480,13 +491,14 @@ export async function getPublicationBySlug(slug: string) {
       .map((candidate) => candidate?.trim())
       .includes(trimmedSlug)
 
-  if (!db || !isFirebaseConfigured) {
+  if (!isFirebaseConfigured) {
+    await loadTransliteration()
     return readLocalPublications().find(matchSlug) ?? null
   }
 
   if (shouldUsePublicApi) {
     return getPublicationFromApi(trimmedSlug).catch((error) => {
-      logFirebaseDebug('getPublicationBySlug:api-fallback', error)
+      console.warn('[esnad] Publication API unavailable', error)
       return getPublicationBySlugFromFirestore(trimmedSlug)
     })
   }
@@ -495,6 +507,9 @@ export async function getPublicationBySlug(slug: string) {
 }
 
 async function getPublicationBySlugFromFirestore(trimmedSlug: string) {
+  const { db, logFirebaseDebug } = await import('./firebase')
+  const { collection, getDocs, query, where } = await import('firebase/firestore')
+  await loadTransliteration()
   if (!db) return null
 
   const matchSlug = (item: Publication) =>
@@ -552,7 +567,8 @@ async function getPublicationBySlugFromFirestore(trimmedSlug: string) {
 }
 
 export async function getPublicationById(id: string) {
-  if (!db || !isFirebaseConfigured) {
+  const { waitForAuthenticatedUser } = await import('./firebase')
+  if (!isFirebaseConfigured) {
     return readLocalPublications().find((item) => item.id === id) ?? null
   }
 
@@ -561,6 +577,9 @@ export async function getPublicationById(id: string) {
 }
 
 async function getPublicationByIdFromFirestore(id: string) {
+  const { db } = await import('./firebase')
+  const { doc, getDoc } = await import('firebase/firestore')
+  await loadTransliteration()
   if (!db) return null
 
   const snapshot = await getDoc(doc(db, 'publications', id))
@@ -569,6 +588,9 @@ async function getPublicationByIdFromFirestore(id: string) {
 }
 
 export async function listAdminPublications() {
+  const { db } = await import('./firebase')
+  const { collection, getDocs } = await import('firebase/firestore')
+  await loadTransliteration()
   if (!db || !isFirebaseConfigured) {
     return sortByPublished(readLocalPublications())
   }
@@ -579,6 +601,9 @@ export async function listAdminPublications() {
 }
 
 export async function savePublication(input: PublicationInput, id?: string) {
+  const { db, waitForAuthenticatedUser } = await import('./firebase')
+  const { doc, setDoc } = await import('firebase/firestore')
+  await loadTransliteration()
   const now = new Date().toISOString()
   const normalized = normalizePublication(id || crypto.randomUUID(), {
     ...input,
@@ -601,10 +626,15 @@ export async function savePublication(input: PublicationInput, id?: string) {
   }
 
   await setDoc(doc(db, 'publications', normalized.id), normalized, { merge: true })
+  if (normalized.status === 'published') {
+    void currentUser.getIdToken().then(token => fetch('/api/indexnow', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ reference: getPublicPublicationId(normalized) }) })).then(response => { if (!response.ok) console.warn('IndexNow notification failed; the next public deployment will retry.') }).catch(() => console.warn('IndexNow notification failed; the next public deployment will retry.'))
+  }
   return normalized.id
 }
 
 export async function deletePublication(id: string) {
+  const { db, waitForAuthenticatedUser } = await import('./firebase')
+  const { deleteDoc, doc } = await import('firebase/firestore')
   if (!db || !isFirebaseConfigured) {
     const next = readLocalPublications().filter((item) => item.id !== id)
     writeLocalPublications(next)
@@ -620,5 +650,6 @@ export async function deletePublication(id: string) {
 }
 
 export async function uploadPublicationPdf(file: File) {
+  const { uploadFileToFirebaseStorage } = await import('./storageAssets')
   return uploadFileToFirebaseStorage(file, `publications/pdfs/${Date.now()}-${file.name}`)
 }

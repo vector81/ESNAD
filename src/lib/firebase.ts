@@ -1,17 +1,10 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
+import { initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence, onAuthStateChanged, type User } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-}
+import { firebaseConfig, isFirebaseConfigured } from './firebaseConfig'
+export { isFirebaseConfigured } from './firebaseConfig'
 
 function parseAdminEmails(value: string | undefined): string[] {
   if (!value) return []
@@ -36,11 +29,14 @@ export function isAdminEmail(email: string | null | undefined): boolean {
   return adminEmails.includes(email.trim().toLowerCase())
 }
 export const firebaseProjectId = firebaseConfig.projectId?.trim() ?? ''
-export const isFirebaseConfigured = Object.values(firebaseConfig).every(Boolean)
 
 const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null
 
-export const auth = app ? getAuth(app) : null
+// The site uses email/password authentication. Retain the existing persistence
+// order without preloading an unused popup/redirect iframe on mobile readers.
+export const auth = app ? initializeAuth(app, {
+  persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence],
+}) : null
 export const db = app ? getFirestore(app) : null
 export const storage = app ? getStorage(app) : null
 

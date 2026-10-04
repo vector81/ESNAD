@@ -1,0 +1,17 @@
+HTTP/1.1 200 OK
+Age: 0
+Cache-Control: public, max-age=0
+Content-Length: 14908
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.firebasestorage.app; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.stripe.com https://*.cloudfunctions.net https://api.cloudinary.com https://*.cloudinary.com https://us.i.posthog.com https://us.posthog.com https://*.posthog.com; frame-src 'self' https://js.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.firebasestorage.app; object-src 'none'; base-uri 'self'
+Content-Type: application/xml; charset=utf-8
+Date: Sat, 26 Sep 2026 11:33:54 GMT
+Etag: W/"3a3c-OPFduaniBuZzNwVfyIkFBUPQ/6g"
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Referrer-Policy: strict-origin-when-cross-origin
+Server: Vercel
+Strict-Transport-Security: max-age=63072000
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-Vercel-Cache: MISS
+X-Vercel-Id: syd1::iad1::h2zh2-1790422432515-0e80e123d4f5
+

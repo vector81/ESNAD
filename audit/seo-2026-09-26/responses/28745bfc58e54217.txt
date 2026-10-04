@@ -1,0 +1,217 @@
+<!doctype html>
+<html dir="rtl" lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>مركز إسناد للدراسات والأبحاث</title>
+    <meta name="description" content="منصة عربية لنشر وأرشفة وبيع الدراسات والأوراق البحثية والكتب." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://esnads.net" />
+    <link rel="alternate" hreflang="ar" href="https://esnads.net" />
+    <link rel="alternate" hreflang="x-default" href="https://esnads.net" />
+    <link rel="stylesheet" href="/assets/index.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="إسناد" />
+    <meta property="og:title" content="مركز إسناد للدراسات والأبحاث" />
+    <meta property="og:description" content="منصة عربية لنشر وأرشفة وبيع الدراسات والأوراق البحثية والكتب." />
+    <meta property="og:url" content="https://esnads.net" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"مركز إسناد للدراسات والأبحاث","description":"منصة عربية لنشر وأرشفة وبيع الدراسات والأوراق البحثية والكتب.","url":"https://esnads.net","inLanguage":"ar","mainEntity":{"@type":"ItemList","numberOfItems":12,"itemListElement":[{"@type":"ListItem","position":1,"name":"قطر تغادر مقعد الوسيط في اليمن:  وتخندق «الجزيرة» في المعسكر السعودي","url":"https://esnads.net/library/9547512"},{"@type":"ListItem","position":2,"name":"الجيش الإسرائيلي يستهلك الموازنة: من يدفع ثمن الحرب؟ من أزمة تمويل المؤسسة العسكرية إلى أزمة بنيوية في الاقتصاد والسياسة والمجتمع","url":"https://esnads.net/library/1306259"},{"@type":"ListItem","position":3,"name":"الملف القانوني الدولي الموحّد  الجرائم المرتكبة في جنوب لبنان  ملف الإثبات والتكييف القانوني والمسارات القضائية أمام محكمة العدل الدولية والمحكمة الجنائية الدولية","url":"https://esnads.net/library/2630263"},{"@type":"ListItem","position":4,"name":"بين انتصار آب 2006 وصمود آب 2026: قراءة في خطاب الشيخ نعيم قاسم ومعادلات المرحلة المقبلة","url":"https://esnads.net/library/8541485"},{"@type":"ListItem","position":5,"name":"الخيانة القيادية المدركة وتآكل الثقة في سياق حرب ممتدة  دراسة تفسيرية أولية للمغادرة الجماعية في كتيبة «تسابر» في ضوء نظرية جوناثان شاي","url":"https://esnads.net/library/1532792"},{"@type":"ListItem","position":6,"name":"بين المصالحة اللاهوتية والنقد السياسي  موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل","url":"https://esnads.net/library/9928005"},{"@type":"ListItem","position":7,"name":"الاتفاقيّات الإبراهيميّة بين خطاب التّعايش ومشاريع الهيمنة دراسة نقديّة في توظيف الدّين والسياسة في إعادة تشكيل الشّرق الأوسط","url":"https://esnads.net/library/3697624"},{"@type":"ListItem","position":8,"name":"تشييع الإمام علي الخامنئي بين الإرث الكربلائي والنظريات الحديثة قراءة في الدلالات والتحولات والمآلات","url":"https://esnads.net/library/8806359"},{"@type":"ListItem","position":9,"name":"نحو تجريم الصمت وكسر الهيمنة: «المجلس العالمي» يدعو للمواجهة الشاملة","url":"https://esnads.net/library/5441862"},{"@type":"ListItem","position":10,"name":"الإنسان والقيم في خطاب السيد حسن نصر الله قراءة تحليلية في جدلية سلطة القيم وإغراء المنفعة","url":"https://esnads.net/library/8960095"},{"@type":"ListItem","position":11,"name":"ستار لينك في العراق بعد زيارة واشنطن: خدمة مدنية أم بنية اتصالات لمرحلة إقليمية جديدة؟ قراءة نقدية في توقيت التشغيل، وغموض الاتفاقيات، واحتمالات الاستخدام الأمني والعسكري","url":"https://esnads.net/library/9955621"},{"@type":"ListItem","position":12,"name":"احتمالات التدخّل السوري في لبنان: تحليل جيوسياسي لمعادلة القدرة والمصلحة والكلفة في سياق الضغوط الأميركية والحرب بالوكالة","url":"https://esnads.net/library/4280300"}]}}</script>
+    <style>
+      body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f2933; background: #fff; }
+      main { max-width: 1120px; margin: 0 auto; padding: 32px 20px 56px; }
+      nav { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 28px; }
+      nav a, article a { color: #9f1d20; text-decoration: none; }
+      h1 { font-size: 32px; line-height: 1.2; margin: 0 0 10px; }
+      .lede { max-width: 780px; color: #53606f; margin: 0 0 28px; line-height: 1.8; }
+      .catalog-item { display: grid; grid-template-columns: minmax(160px, 260px) 1fr; gap: 20px; padding: 22px 0; border-top: 1px solid #e5e7eb; }
+      .catalog-item img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: #f3f4f6; }
+      .catalog-item h2 { margin: 4px 0 8px; font-size: 22px; line-height: 1.45; }
+      .catalog-item p { margin: 0 0 10px; line-height: 1.75; }
+      .catalog-item .meta { display: flex; flex-wrap: wrap; gap: 10px; color: #687385; font-size: 14px; }
+      .catalog-item .full-title { font-weight: 600; }
+      @media (max-width: 700px) { .catalog-item { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <nav aria-label="Primary navigation"><a href="/">الرئيسية</a><a href="/articles">المقالات</a><a href="/library">المكتبة</a><a href="/books">الكتب</a><a href="/llms.txt">LLMS</a><a href="/sitemap.xml">Sitemap</a></nav>
+      <header>
+        <h1>مركز إسناد للدراسات والأبحاث</h1>
+        <p class="lede">منصة عربية لنشر وأرشفة وبيع الدراسات والأوراق البحثية والكتب.</p>
+      </header>
+      <section aria-label="مركز إسناد للدراسات والأبحاث">
+        <article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/library/9547512"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1790080853/esnad/m8bvupmziyi163mjjofe.jpg" alt="قطر تغادر مقعد الوسيط في اليمن:  وتخندق «الجزيرة» في المعسكر السعودي" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله م. بدوي</span>
+        <time datetime="2026-09-22" itemprop="datePublished">2026-09-22</time>
+        <span>opinion-article</span>
+      </p>
+      <h2 itemprop="headline"><a href="/library/9547512">قطر تغادر مقعد الوسيط في اليمن:  وتخندق «الجزيرة» في المعسكر السعودي</a></h2>
+      
+      <p itemprop="description">خبرت قطر اليمن جيداً من مقعد الوسيط. في 2007 دخلت الدوحة بين الحكومة اليمنية والحوثيين لوقف حرب صعدة، ثم عادت إلى الوساطة في 2008 و2009 و2010. وهذه ليست رواية خصومها؛ وزارة الخارجية القطرية نفسها تضع </p>
+      <p><a href="/library/9547512">قراءة الإصدار</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/library/1306259"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1790078668/esnad/nbrrrcph4kgxezi4vpkb.jpg" alt="الجيش الإسرائيلي يستهلك الموازنة: من يدفع ثمن الحرب؟ من أزمة تمويل المؤسسة العسكرية إلى أزمة بنيوية في الاقتصاد والسياسة والمجتمع" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">د.عبدالله م. بدوي -  أ.أمير بدوي</span>
+        <time datetime="2026-09-17" itemprop="datePublished">2026-09-17</time>
+        <span>studies</span>
+      </p>
+      <h2 itemprop="headline"><a href="/library/1306259">الجيش الإسرائيلي يستهلك الموازنة: من يدفع ثمن الحرب؟ من أزمة تمويل المؤسسة العسكرية إلى أزمة بنيوية في الاقتصاد والسياسة والمجتمع</a></h2>
+      
+      <p itemprop="description">تبحث الدراسة في انتقال أزمة تمويل الجيش الإسرائيلي خلال 2026 من خلاف على مخصصات إضافية إلى ضغط بنيوي يطال المالية العامة والائتلاف السياسي وسوق العمل وشبكات الدعم الخارجي. تنطلق من مطالبة بنيامين نتني</p>
+      <p><a href="/library/1306259">قراءة الإصدار</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">الدكتور عبد الله بدوي - الأستاذ أمير بدوي</span>
+        <time datetime="2026-08-17" itemprop="datePublished">2026-08-17</time>
+        <span>legal-paper</span>
+      </p>
+      <h2 itemprop="headline"><a href="/library/2630263">الملف القانوني الدولي الموحّد  الجرائم المرتكبة في جنوب لبنان  ملف الإثبات والتكييف القانوني والمسارات القضائية أمام محكمة العدل الدولية والمحكمة الجنائية الدولية</a></h2>
+      
+      <p itemprop="description">يتضمن النص العبري المضبوط للتصريحات الرسمية، والخرائط الفضائية، والمواد الحكومية والأممية ذات الصلة وثيقة قانونية موثقة معدّة للإيداع والاستناد من الجهات المخوّلة قانونًا محدّث وموثّق حتى 13 آب/أغسطس </p>
+      <p><a href="/library/2630263">قراءة الإصدار</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/library/8541485"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1786960408/esnad/yk8zu0rzr5o3r17azkqw.jpg" alt="بين انتصار آب 2006 وصمود آب 2026: قراءة في خطاب الشيخ نعيم قاسم ومعادلات المرحلة المقبلة" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله بدوي</span>
+        <time datetime="2026-08-17" itemprop="datePublished">2026-08-17</time>
+        <span>opinion-article</span>
+      </p>
+      <h2 itemprop="headline"><a href="/library/8541485">بين انتصار آب 2006 وصمود آب 2026: قراءة في خطاب الشيخ نعيم قاسم ومعادلات المرحلة المقبلة</a></h2>
+      
+      <p itemprop="description">بين آب 2006 وآب 2026، لا تحضر الذاكرة بوصفها حنينًا إلى الماضي فقط. ففي آب من كل عام تعود ذكرى انتصار 2006، لا كحدث مكتمل أُغلق في زمنه، بل كلحظة يعاد من خلالها النظر إلى الحاضر وقياس المسافة بين ما ك</p>
+      <p><a href="/library/8541485">قراءة الإصدار</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">الدكتور عبد الله بدوي[1]</span>
+        <time datetime="2026-08-17" itemprop="datePublished">2026-08-17</time>
+        <span>studies</span>
+      </p>
+      <h2 itemprop="headline"><a href="/library/1532792">الخيانة القيادية المدركة وتآكل الثقة في سياق حرب ممتدة  دراسة تفسيرية أولية للمغادرة الجماعية في كتيبة «تسابر» في ضوء نظرية جوناثان شاي</a></h2>
+      
+      <p itemprop="description">تبحث هذه الدراسة في المغادرة الجماعية غير المأذونة التي نسبت إلى جنود وقادة ميدانيين من كتيبة «تسابر» في قاعدة «سديه تيمان» خلال تموز/يوليو ٢٠٢٦، بوصفها حالة أولية لاختبار معقولية تفسير يجعل الخيانة ا</p>
+      <p><a href="/library/1532792">قراءة الإصدار</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله بدوي</span>
+        <time datetime="2026-08-02" itemprop="datePublished">2026-08-02</time>
+        <span>studies</span>
+      </p>
+      <h2 itemprop="headline"><a href="/library/9928005">بين المصالحة اللاهوتية والنقد السياسي  موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل</a></h2>
+      
+      <p itemprop="description">عبدالله بدوي/ تبحث هذه الورقة في موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل، انطلاقًا من ضرورة التمييز بين الدين والحركة السياسية والدولة. وتبيّن أن وثيقة «في عصرنا» أسست لمصالحة لا</p>
+      <p><a href="/library/9928005">قراءة الإصدار</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">د. عبدالله م. بدوي</span>
+        <time datetime="2026-07-31" itemprop="datePublished">2026-07-31</time>
+        <span>studies</span>
+      </p>
+      <h2 itemprop="headline"><a href="/library/3697624">الاتفاقيّات الإبراهيميّة بين خطاب التّعايش ومشاريع الهيمنة دراسة نقديّة في توظيف الدّين والسياسة في إعادة تشكيل الشّرق الأوسط</a></h2>
+      
+      <p itemprop="description">عبدالله بدوي/يهدف هذا البحث إلى دراسة الاتفاقيّات الإبراهيميّة التي وُقّعت العام 2020 بين إسرائيل وعدد من الدّول العربيّة، لا بوصفها اتفاقيات سياسيّة فحسب، بل كظاهرة ثقافيّة رمزيّة ذات بعدٍ ديني وفكري</p>
+      <p><a href="/library/3697624">قراءة الإصدار</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">د. عبد الله م. بدوي</span>
+        <time datetime="2026-07-31" itemprop="datePublished">2026-07-31</time>
+        <span>studies</span>
+      </p>
+      <h2 itemprop="headline"><a href="/library/8806359">تشييع الإمام علي الخامنئي بين الإرث الكربلائي والنظريات الحديثة قراءة في الدلالات والتحولات والمآلات</a></h2>
+      
+      <p itemprop="description">عبدالله م. بدوي/ يدرس هذا البحث تشييع السيد علي الخامنئي بوصفه حدثًا رمزيًّا وإسلاميًّا جامعًا، لا يختزل في وداع جنائزي ولا في تغطية سياسية عابرة. ينطلق البحث من فلسفة الشهادة كما تتجلى في القرآن الكر</p>
+      <p><a href="/library/8806359">قراءة الإصدار</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله م. بدوي</span>
+        <time datetime="2026-07-31" itemprop="datePublished">2026-07-31</time>
+        <span>opinion-article</span>
+      </p>
+      <h2 itemprop="headline"><a href="/library/5441862">نحو تجريم الصمت وكسر الهيمنة: «المجلس العالمي» يدعو للمواجهة الشاملة</a></h2>
+      
+      <p itemprop="description">عبدالله م. بدوي/ في لحظة تاريخية فارقة ومثقلة بالتحولات الجيوسياسية الكبرى، تتكشف أمام أنظار الإنسانية أعمق أزمات المنظومة الدولية وأكثرها تجذراً. ففي حين تبلغ آلة التوحش العسكري ذروة الإبادة الجماعية</p>
+      <p><a href="/library/5441862">قراءة الإصدار</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">د. عبد الله م. بدوي</span>
+        <time datetime="2026-07-31" itemprop="datePublished">2026-07-31</time>
+        <span>studies</span>
+      </p>
+      <h2 itemprop="headline"><a href="/library/8960095">الإنسان والقيم في خطاب السيد حسن نصر الله قراءة تحليلية في جدلية سلطة القيم وإغراء المنفعة</a></h2>
+      
+      <p itemprop="description">عبدالله م. بدوي/ يدرس البحث صورة الإنسان ومنظومة القيم في خطاب السيد حسن نصر الله، من خلال العلاقة بين السلطة المعيارية للقيمة وضغوط المنفعة الفردية والسياسية. ويعتمد تحليلًا مفاهيميًا وموضوعاتيًا وسي</p>
+      <p><a href="/library/8960095">قراءة الإصدار</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله .م بدوي</span>
+        <time datetime="2026-07-31" itemprop="datePublished">2026-07-31</time>
+        <span>strategic-estimate</span>
+      </p>
+      <h2 itemprop="headline"><a href="/library/9955621">ستار لينك في العراق بعد زيارة واشنطن: خدمة مدنية أم بنية اتصالات لمرحلة إقليمية جديدة؟ قراءة نقدية في توقيت التشغيل، وغموض الاتفاقيات، واحتمالات الاستخدام الأمني والعسكري</a></h2>
+      
+      <p itemprop="description">لم يعد إدخال خدمة «ستارلينك» إلى العراق مجرد مسألة تقنية تتعلق بتحسين سرعة الإنترنت في القرى والمناطق النائية. فالطريقة التي أُنجز بها الترخيص، وتزامنه مع زيارة رئيس الوزراء العراقي علي فالح الزيدي إل</p>
+      <p><a href="/library/9955621">قراءة الإصدار</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/library/4280300"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1784887460/esnad/m2pcxjtz6bfj150wyoe1.png" alt="احتمالات التدخّل السوري في لبنان: تحليل جيوسياسي لمعادلة القدرة والمصلحة والكلفة في سياق الضغوط الأميركية والحرب بالوكالة" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله م. بدوي</span>
+        <time datetime="2026-07-23" itemprop="datePublished">2026-07-23</time>
+        <span>policy-paper</span>
+      </p>
+      <h2 itemprop="headline"><a href="/library/4280300">احتمالات التدخّل السوري في لبنان: تحليل جيوسياسي لمعادلة القدرة والمصلحة والكلفة في سياق الضغوط الأميركية والحرب بالوكالة</a></h2>
+      
+      <p itemprop="description">تدرس هذه الورقة احتمال دخول قوات سورية إلى لبنان في ضوء التحولات الإقليمية الجارية حتى 21 تموز/يوليو 2026، وتتعامل مع المسألة بوصفها سؤالاً في العقلانية الاستراتيجية لا في القدرة المجردة على عبور الحد</p>
+      <p><a href="/library/4280300">قراءة الإصدار</a></p>
+    </div>
+  </article>
+      </section>
+    </main>
+    <div id="root" hidden></div>
+    <script type="module" src="/assets/index.js"></script>
+  </body>
+</html>

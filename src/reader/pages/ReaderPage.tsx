@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { usePageMeta } from '../../hooks/usePageMeta'
+import { publicationSeo } from '../../lib/seoMetadata.js'
+import { useArticleStructuredData } from '../../hooks/useArticleStructuredData'
 import { getPublicationBySlug, getShareSlug } from '../../lib/publications'
 import { listReadableChapters } from '../../studio/lib/chapters'
 import { ArticleReader } from '../components/ArticleReader'
@@ -68,9 +70,11 @@ export function ReaderPage() {
 
   const loading = Boolean(currentSlug) && readerState.slug !== currentSlug
   const publication = readerState.slug === currentSlug ? readerState.publication : null
+  useArticleStructuredData(publication)
   const chapters = readerState.slug === currentSlug ? readerState.chapters : []
   const error = currentSlug ? readerState.error : 'الإصدار غير موجود.'
   usePageMeta(pathname.startsWith('/en/') ? 'en' : 'ar', {
+    ...(publication ? publicationSeo(publication) : {}),
     path: publication
       ? `/${publication.kind === 'book' ? 'books' : 'library'}/${getShareSlug(publication)}`
       : pathname.replace(/^\/en(?=\/|$)/, '').replace(/^\/reader\//, '/library/'),

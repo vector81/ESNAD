@@ -1,0 +1,39 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://esnads.net/library/9928005#article",
+  "headline": "بين المصالحة اللاهوتية والنقد السياسي  موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل",
+  "name": "بين المصالحة اللاهوتية والنقد السياسي  موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل",
+  "description": "دراسة في موقف الكنيسة الكاثوليكية من اليهودية والصهيونية وإسرائيل، والمصالحة اللاهوتية والنقد السياسي، مع مراجع بينها أعمال ماسيمو فاجيولي.",
+  "inLanguage": "ar",
+  "url": "https://esnads.net/library/9928005",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://esnads.net/library/9928005"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://esnads.net/#organization",
+    "name": "مركز إسناد للدراسات والأبحاث",
+    "alternateName": [
+      "اسناد",
+      "مركز اسناد",
+      "مركز إسناد",
+      "Esnads",
+      "Esnad",
+      "esnads.net"
+    ],
+    "url": "https://esnads.net",
+    "logo": "https://esnads.net/newlogo.png",
+    "sameAs": []
+  },
+  "author": {
+    "@type": "Person",
+    "name": "عبدالله بدوي"
+  },
+  "image": [
+    "https://esnads.net/assets/article-covers/6d6b83d5-be1a-41da-b562-4d8e5f92596c.png"
+  ],
+  "datePublished": "2026-08-02T18:54:05.180Z",
+  "dateModified": "2026-08-15T13:00:05.073Z"
+}

@@ -1,11 +1,13 @@
 import { useEffect } from 'react'
 import type { AppLanguage } from '../types/publication'
+import { SEO_SITE_NAME } from '../lib/structuredData.js'
+import { PAGE_SEO, HOME_DESCRIPTION, breadcrumbs } from '../lib/seoMetadata.js'
 
 const SITE_NAME = 'إسناد'
 const SITE_URL = 'https://esnads.net'
 const DEFAULT_TITLE_AR = 'مركز إسناد للدراسات والأبحاث'
 const DEFAULT_TITLE_EN = 'Esnad Center for Studies and Research'
-const DEFAULT_DESCRIPTION_AR = 'منصة عربية لنشر وأرشفة وبيع الدراسات والأوراق البحثية والكتب.'
+const DEFAULT_DESCRIPTION_AR = HOME_DESCRIPTION
 const DEFAULT_DESCRIPTION_EN =
   'A bilingual platform for studies, research papers, books, and analytical articles.'
 
@@ -41,6 +43,7 @@ export function getRouteMeta(pathname: string, language: AppLanguage): PageMeta 
   const isEnglish = language === 'en'
   const base = pathname.replace(/^\/en(?=\/|$)/, '') || '/'
   const meta: PageMeta = { path: pathname }
+  if (!isEnglish && PAGE_SEO[base]) return { ...PAGE_SEO[base], path: pathname }
 
   if (base.startsWith('/library')) {
     meta.title = isEnglish ? 'Research library' : 'المكتبة البحثية'
@@ -87,7 +90,7 @@ export function usePageMeta(language: AppLanguage, meta: PageMeta | null) {
   useEffect(() => {
     if (!hasMeta) return
     const defaultTitle = language === 'en' ? DEFAULT_TITLE_EN : DEFAULT_TITLE_AR
-    const pageTitle = title ? `${title} | ${SITE_NAME}` : defaultTitle
+    const pageTitle = title ? (title.includes(' | ') || title === DEFAULT_TITLE_AR ? title : `${title} | ${SITE_NAME}`) : defaultTitle
     const pageDescription =
       description || (language === 'en' ? DEFAULT_DESCRIPTION_EN : DEFAULT_DESCRIPTION_AR)
 
@@ -95,17 +98,29 @@ export function usePageMeta(language: AppLanguage, meta: PageMeta | null) {
     upsertMeta('name', 'description', pageDescription)
     upsertMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow')
     upsertMeta('property', 'og:title', title || defaultTitle)
+    upsertMeta('property', 'og:site_name', SEO_SITE_NAME)
     upsertMeta('property', 'og:description', pageDescription)
     upsertMeta('name', 'twitter:title', title || defaultTitle)
     upsertMeta('name', 'twitter:description', pageDescription)
 
     if (path) {
-      const canonicalPath = path.replace(/^\/en(?=\/|$)/, '') || '/'
+      const basePath = path.replace(/^\/en(?=\/|$)/, '') || '/'
+      const canonicalPath = path === '/en' ? '/en' : basePath
       const url = canonicalPath === '/' ? SITE_URL : `${SITE_URL}${canonicalPath}`
       upsertLink('canonical', url)
       upsertMeta('property', 'og:url', url)
-      document.head.querySelectorAll('link[rel="alternate"][hreflang="en"]').forEach((link) => link.remove())
-      document.head.querySelectorAll('link[rel="alternate"][hreflang="ar"], link[rel="alternate"][hreflang="x-default"]').forEach((link) => link.setAttribute('href', url))
+      document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach((link) => link.remove())
+      if (basePath === '/') {
+        for (const [lang, href] of [['ar', SITE_URL], ['en', `${SITE_URL}/en`], ['x-default', SITE_URL]]) {
+          const link = document.createElement('link'); link.rel = 'alternate'; link.hreflang = lang; link.href = href; document.head.appendChild(link)
+        }
+      }
+      const oldBreadcrumb = document.getElementById('route-breadcrumb-jsonld')
+      oldBreadcrumb?.remove()
+      if (['/library', '/articles', '/books'].includes(basePath)) {
+        const script = document.createElement('script'); script.id = 'route-breadcrumb-jsonld'; script.type = 'application/ld+json'
+        script.textContent = JSON.stringify(breadcrumbs([['الرئيسية', '/'], [title || 'المكتبة', basePath]])); document.head.appendChild(script)
+      }
     }
     if (image) {
       upsertMeta('property', 'og:image', image)

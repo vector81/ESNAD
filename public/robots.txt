@@ -16,4 +16,4 @@ Sitemap: https://esnads.net/sitemap.xml
 Host: https://esnads.net
 
 # AI/crawler context document.
-LLMS: https://esnads.net/llms.txt
+# Context document: https://esnads.net/llms.txt

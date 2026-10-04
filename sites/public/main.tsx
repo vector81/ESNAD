@@ -1,10 +1,18 @@
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 import '../../src/index.css'
-import PublicApp from '../../src/apps/public/PublicApp'
+import '../../src/public-fonts.css'
+import PublicApp, { preloadPublicRoute } from '../../src/apps/public/PublicApp'
 
-createRoot(document.getElementById('root')!).render(
+async function mountApp() {
+await preloadPublicRoute(window.location.pathname)
+const root = document.getElementById('root')!
+const app = (
   <StrictMode>
     <PublicApp />
-  </StrictMode>,
+  </StrictMode>
 )
+if (root.hasChildNodes()) hydrateRoot(root, app)
+else createRoot(root).render(app)
+}
+void mountApp()

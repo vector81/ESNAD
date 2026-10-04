@@ -1,0 +1,47 @@
+{
+  "home": {
+    "before": {
+      "time": "2026-10-04T07:21:05.578Z",
+      "performance": 35,
+      "accessibility": 98,
+      "bestPractices": 92,
+      "seo": 92,
+      "lcp": 12639.220100000002,
+      "cls": 1.203526264043114,
+      "tbt": 6
+    },
+    "after": {
+      "time": "2026-10-04T09:07:38.249Z",
+      "performance": 98,
+      "accessibility": 100,
+      "bestPractices": 100,
+      "seo": 100,
+      "lcp": 2081.325,
+      "cls": 0,
+      "tbt": 0
+    }
+  },
+  "article": {
+    "url": "https://esnads.net/library/9547512",
+    "before": {
+      "time": "2026-10-04T07:23:42.338Z",
+      "performance": 53,
+      "accessibility": 96,
+      "bestPractices": 92,
+      "seo": 92,
+      "lcp": 12463.657500000001,
+      "cls": 0.1830508754443335,
+      "tbt": 11
+    },
+    "after": {
+      "time": "2026-10-04T08:57:01.703Z",
+      "performance": 99,
+      "accessibility": 100,
+      "bestPractices": 100,
+      "seo": 100,
+      "lcp": 1818.205,
+      "cls": 0,
+      "tbt": 0
+    }
+  }
+}

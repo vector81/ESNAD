@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found | إسناد</title><meta name="robots" content="noindex, follow">
+<link rel="stylesheet" href="/assets/index.css"></head>
+<body><main class="container"><section class="panel" style="margin-top:48px">
+<h1>Page not found</h1><p>This page or publication could not be found.</p>
+<a href="/en">Return home</a>
+</section></main></body></html>

@@ -2,7 +2,11 @@ import type { FormEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PublicSiteShell } from '../../components/public/PublicSiteShell'
-import { optimizeCloudinaryUrl } from '../../lib/cloudinary'
+import { HomeHero } from '../../components/public/HomeHero'
+import { displayImage } from '../../lib/initialPageHtml.js'
+import { articleImageSrcSet } from '../../lib/articleImages.js'
+import { getPublicationImage } from '../../lib/structuredData.js'
+import { SEO_TOPICS } from '../../lib/seoTopics.js'
 import { buildLocalizedPath, buildPublicationPath } from '../../lib/navigation'
 import {
   PUBLICATION_CATEGORIES,
@@ -67,8 +71,8 @@ function computeStats(items: Publication[], language: AppLanguage): SiteStats {
   }
 }
 
-export function ResearchHomePage({ language }: { language: AppLanguage }) {
-  const [items, setItems] = useState<Publication[]>([])
+export function ResearchHomePage({ language, initialPublications }: { language: AppLanguage; initialPublications?: Publication[] }) {
+  const [items, setItems] = useState<Publication[]>(() => initialPublications || (typeof document !== 'undefined' ? JSON.parse(document.getElementById('initial-catalog-data')?.textContent || '[]') as Publication[] : []))
   const [activeCategory, setActiveCategory] = useState<PublicationCategory | 'all'>('all')
   const [email, setEmail] = useState('')
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
@@ -87,8 +91,8 @@ export function ResearchHomePage({ language }: { language: AppLanguage }) {
   const latest = useMemo(() => items.slice(0, 4), [items])
 
   const filteredCategories = useMemo(
-    () => PUBLICATION_CATEGORIES.slice(0, 9),
-    [],
+    () => PUBLICATION_CATEGORIES.filter(category => Boolean(SEO_TOPICS[category.id]) && items.some(item => item.category === category.id)),
+    [items],
   )
 
   const statsLabels = getStatsLabels(language)
@@ -118,62 +122,7 @@ export function ResearchHomePage({ language }: { language: AppLanguage }) {
 
   return (
     <PublicSiteShell language={language}>
-      <section className="home-hero">
-        <div className="home-hero__copy">
-          <span className="home-badge">
-            {language === 'ar' ? 'مركز إسناد للدراسات والأبحاث' : 'Esnad Center for Studies and Research'}
-          </span>
-          <h1 className="home-hero__title">
-            {language === 'ar'
-              ? 'مكتبة بحثية عربية للدراسات والأوراق والكتب'
-              : 'An Arabic research library for studies, papers, and books'}
-          </h1>
-          <p className="home-hero__sub">
-            {language === 'ar'
-              ? 'منصة متخصصة في نشر وأرشفة وبيع الإصدارات البحثية. تجمع بين الوصول المفتوح والمحتوى المدفوع في تجربة تصفح نظيفة ومركزة.'
-              : 'A specialized platform for publishing, archiving, and selling research publications.'}
-          </p>
-          <div className="home-hero__actions">
-            <Link className="btn btn--brand" to={buildLocalizedPath(language, '/library')}>
-              {language === 'ar' ? 'تصفح المكتبة' : 'Browse library'}
-            </Link>
-            <Link className="btn btn--brand-outline" to={buildLocalizedPath(language, '/articles')}>
-              {language === 'ar' ? 'استكشف المقالات' : 'Explore articles'}
-            </Link>
-          </div>
-        </div>
-
-        {heroFeature ? (
-          <Link
-            className="home-hero__card"
-            to={buildPublicationPath(heroFeature, language)}
-          >
-            <div className="home-hero__card-media">
-              {heroFeature.cover_image ? (
-                <img
-                  alt={getPublicationTitle(heroFeature, language)}
-                  src={optimizeCloudinaryUrl(heroFeature.cover_image, { width: 1600 })}
-                  decoding="async"
-                  fetchPriority="high"
-                  style={{ objectPosition: getCoverObjectPosition(heroFeature) }}
-                />
-              ) : (
-                <div className="home-hero__card-media-placeholder" />
-              )}
-            </div>
-            <div className="home-hero__card-body">
-              <span className="home-tag">
-                {getPublicationCategoryLabel(heroFeature.category, language)}
-              </span>
-              <h3 className="home-hero__card-title">
-                {getPublicationTitle(heroFeature, language)}
-              </h3>
-            </div>
-          </Link>
-        ) : (
-          <div className="home-hero__card home-hero__card--empty" />
-        )}
-      </section>
+      <HomeHero publication={heroFeature} language={language} />
 
       <section className="categories-strip" aria-label={language === 'ar' ? 'التصنيفات' : 'Categories'}>
         <Link
@@ -187,7 +136,7 @@ export function ResearchHomePage({ language }: { language: AppLanguage }) {
           <Link
             key={category.id}
             className={`category-pill${activeCategory === category.id ? ' category-pill--active' : ''}`}
-            to={buildLocalizedPath(language, `/library?category=${category.id}`)}
+            to={`/topics/${category.id}`}
             onClick={() => setActiveCategory(category.id)}
           >
             {getPublicationCategoryLabel(category.id, language)}
@@ -212,10 +161,12 @@ export function ResearchHomePage({ language }: { language: AppLanguage }) {
               to={buildPublicationPath(publication, language)}
             >
               <div className="latest-card__media">
-                {publication.cover_image ? (
-                  <img
+                {getPublicationImage(publication) ? (
+                  <img width="800" height="450"
                     alt={getPublicationTitle(publication, language)}
-                    src={optimizeCloudinaryUrl(publication.cover_image, { width: 800 })}
+                    src={displayImage(publication, 800)}
+                    srcSet={articleImageSrcSet(getPublicationImage(publication))}
+                    sizes="(max-width: 800px) calc(100vw - 58px), 360px"
                     loading="lazy"
                     decoding="async"
                     style={{ objectPosition: getCoverObjectPosition(publication) }}
@@ -241,10 +192,12 @@ export function ResearchHomePage({ language }: { language: AppLanguage }) {
         <section className="spotlight-band">
           <div className="container spotlight-band__inner">
             <div className="spotlight-band__media">
-              {spotlight.cover_image ? (
-                <img
+              {getPublicationImage(spotlight) ? (
+                <img width="1200" height="675"
                   alt={getPublicationTitle(spotlight, language)}
-                  src={optimizeCloudinaryUrl(spotlight.cover_image, { width: 1200 })}
+                  src={displayImage(spotlight, 1200)}
+                  srcSet={articleImageSrcSet(getPublicationImage(spotlight))}
+                  sizes="(max-width: 800px) calc(100vw - 58px), 600px"
                   loading="lazy"
                   decoding="async"
                   style={{ objectPosition: getCoverObjectPosition(spotlight) }}

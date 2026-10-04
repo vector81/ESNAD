@@ -1,0 +1,174 @@
+{
+  "deployment": "dpl_7HxvQXPoQL1RCBWLCDCEnypTMVEk",
+  "checkedAt": "2026-09-26T11:09:59.778Z",
+  "results": [
+    {
+      "agent": "googlebot",
+      "path": "/en/library/9547512",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/library/9547512",
+      "ogUrl": "https://esnads.net/library/9547512",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "googlebot",
+      "path": "/en",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net",
+      "ogUrl": "https://esnads.net",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "googlebot",
+      "path": "/en/library",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/library",
+      "ogUrl": "https://esnads.net/library",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "googlebot",
+      "path": "/en/articles",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/articles",
+      "ogUrl": "https://esnads.net/articles",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "googlebot",
+      "path": "/en/books",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/books",
+      "ogUrl": "https://esnads.net/books",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "googlebot",
+      "path": "/en/about",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/about",
+      "ogUrl": "https://esnads.net/about",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "googlebot",
+      "path": "/en/contact",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/contact",
+      "ogUrl": "https://esnads.net/contact",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "googlebot",
+      "path": "/en/reader/9547512",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/reader/9547512",
+      "ogUrl": "https://esnads.net/reader/9547512",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "browser",
+      "path": "/en/library/9547512",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/library/9547512",
+      "ogUrl": "https://esnads.net/library/9547512",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "browser",
+      "path": "/en",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net",
+      "ogUrl": "https://esnads.net",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "browser",
+      "path": "/en/library",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/library",
+      "ogUrl": "https://esnads.net/library",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "browser",
+      "path": "/en/articles",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/articles",
+      "ogUrl": "https://esnads.net/articles",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "browser",
+      "path": "/en/books",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/books",
+      "ogUrl": "https://esnads.net/books",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "browser",
+      "path": "/en/about",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/about",
+      "ogUrl": "https://esnads.net/about",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "browser",
+      "path": "/en/contact",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/contact",
+      "ogUrl": "https://esnads.net/contact",
+      "enHreflang": false,
+      "noindex": false
+    },
+    {
+      "agent": "browser",
+      "path": "/en/reader/9547512",
+      "status": 200,
+      "location": null,
+      "canonical": "https://esnads.net/reader/9547512",
+      "ogUrl": "https://esnads.net/reader/9547512",
+      "enHreflang": false,
+      "noindex": false
+    }
+  ],
+  "sitemap": {
+    "status": 200,
+    "urls": 41,
+    "enUrls": 0,
+    "enHreflang": 0,
+    "arHreflang": 40,
+    "xDefault": 40
+  }
+}

@@ -10,6 +10,7 @@ import {
   getShareSlug,
 } from '../../lib/publications'
 import { optimizeCloudinaryUrl } from '../../lib/cloudinary'
+import { getPublicationImage } from '../../lib/structuredData.js'
 import type { AppLanguage, Publication } from '../../types/publication'
 
 function getPublicationPath(publication: Publication, language: AppLanguage) {
@@ -27,17 +28,20 @@ export function PublicationCard({
 }) {
   const publishedDate = new Intl.DateTimeFormat(language === 'ar' ? 'ar-EG' : 'en-AU', {
     dateStyle: 'medium',
+    timeZone: 'UTC',
   }).format(new Date(publication.published_at))
 
   return (
     <article className="card">
       <Link className="card__link" to={getPublicationPath(publication, language)}>
         <div className="card__media">
-          {publication.cover_image ? (
+          {getPublicationImage(publication) ? (
             <img
               alt={getPublicationTitle(publication, language)}
-              src={optimizeCloudinaryUrl(publication.cover_image, { width: 800 })}
+              src={optimizeCloudinaryUrl(getPublicationImage(publication), { width: 800 })}
               loading="lazy"
+              width="800"
+              height="450"
               decoding="async"
               style={{ objectPosition: getCoverObjectPosition(publication) }}
             />
@@ -53,7 +57,7 @@ export function PublicationCard({
                 fontWeight: 600,
               }}
             >
-              Esnad
+              {language === 'ar' ? 'إسناد' : 'Esnad'}
             </div>
           )}
         </div>

@@ -1,0 +1,83 @@
+[
+  {
+    "url": "http://esnads.net/library/9547512",
+    "status": 308,
+    "location": "https://esnads.net/library/9547512",
+    "bytes": 14,
+    "type": "text/plain",
+    "encoding": null
+  },
+  {
+    "url": "https://www.esnads.net/library/9547512",
+    "error": "fetch failed"
+  },
+  {
+    "url": "https://esnads.net/assets/index.js",
+    "status": 200,
+    "location": null,
+    "bytes": 1882591,
+    "type": "application/javascript; charset=utf-8",
+    "encoding": "br"
+  },
+  {
+    "url": "https://esnads.net/assets/index.css",
+    "status": 200,
+    "location": null,
+    "bytes": 99449,
+    "type": "text/css; charset=utf-8",
+    "encoding": "br"
+  },
+  {
+    "url": "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https%3A%2F%2Fesnads.net%2F&strategy=mobile&category=performance&category=seo",
+    "status": 429,
+    "location": null,
+    "bytes": 1346,
+    "type": "application/json; charset=UTF-8",
+    "encoding": "gzip",
+    "result": {
+      "error": {
+        "code": 429,
+        "message": "Quota exceeded for quota metric 'Queries' and limit 'Queries per day' of service 'pagespeedonline.googleapis.com' for consumer 'project_number:583797351490'.",
+        "errors": [
+          {
+            "message": "Quota exceeded for quota metric 'Queries' and limit 'Queries per day' of service 'pagespeedonline.googleapis.com' for consumer 'project_number:583797351490'.",
+            "domain": "global",
+            "reason": "rateLimitExceeded"
+          }
+        ],
+        "status": "RESOURCE_EXHAUSTED",
+        "details": [
+          {
+            "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+            "reason": "RATE_LIMIT_EXCEEDED",
+            "domain": "googleapis.com",
+            "metadata": {
+              "quota_metric": "pagespeedonline.googleapis.com/default",
+              "quota_limit": "defaultPerDayPerProject",
+              "quota_location": "global",
+              "quota_limit_value": "0",
+              "service": "pagespeedonline.googleapis.com",
+              "quota_unit": "1/d/{project}",
+              "consumer": "projects/583797351490"
+            }
+          },
+          {
+            "@type": "type.googleapis.com/google.rpc.Help",
+            "links": [
+              {
+                "description": "Request a higher quota limit.",
+                "url": "https://cloud.google.com/docs/quotas/help/request_increase"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "url": "https://www.esnads.net",
+    "followup": "DNS resolution succeeded; HTTPS validation failed",
+    "errorCode": "ERR_TLS_CERT_ALTNAME_INVALID",
+    "error": "Hostname/IP does not match certificate altnames; certificate lists DNS:esnads.net"
+  }
+]

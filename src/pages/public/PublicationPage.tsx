@@ -3,8 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { PublicationCard } from '../../components/public/PublicationCard'
 import { PublicSiteShell } from '../../components/public/PublicSiteShell'
 import { usePublicSession } from '../../contexts/PublicSessionContext'
-import { auth, isFirebaseConfigured } from '../../lib/firebase'
-import { toggleSavedItem } from '../../lib/library'
+import { auth } from '../../lib/publicAuth'
+import { isFirebaseConfigured } from '../../lib/firebaseConfig'
 import { buildLocalizedPath } from '../../lib/navigation'
 import { createCheckoutSession, downloadPurchasedPublicationPdf } from '../../lib/payments'
 import { optimizeCloudinaryUrl } from '../../lib/cloudinary'
@@ -25,6 +25,9 @@ import {
 } from '../../lib/publications'
 import { getPublicSiteUrl } from '../../lib/siteLinks'
 import { usePageMeta } from '../../hooks/usePageMeta'
+import { useArticleStructuredData } from '../../hooks/useArticleStructuredData'
+import { getPublicationImage } from '../../lib/structuredData.js'
+import { publicationSeo, relatedPublications } from '../../lib/seoMetadata.js'
 import {
   getAnalyticsConsentStatus,
   subscribeAnalyticsConsent,
@@ -53,14 +56,14 @@ function getCurrentScrollDepth() {
   return Math.max(0, Math.min(100, ((scrollTop + viewportHeight) / scrollHeight) * 100))
 }
 
-export function PublicationPage({ language }: { language: AppLanguage }) {
+export function PublicationPage({ language, initialPublication }: { language: AppLanguage; initialPublication?: Publication }) {
   const { slug } = useParams()
   const navigate = useNavigate()
   const { user, library, refreshLibrary, loading: sessionLoading } = usePublicSession()
-  const [publication, setPublication] = useState<Publication | null>(null)
+  const [publication, setPublication] = useState<Publication | null>(() => initialPublication || (typeof document !== 'undefined' ? JSON.parse(document.getElementById('initial-publication-data')?.textContent || 'null') as Publication | null : null))
   const [related, setRelated] = useState<Publication[]>([])
   const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => !initialPublication && (typeof document === 'undefined' || !document.getElementById('initial-publication-data')))
   const [loadFailed, setLoadFailed] = useState(false)
   const [analyticsConsentStatus, setAnalyticsConsentStatus] = useState(() => getAnalyticsConsentStatus())
   const trackedViewRef = useRef<string | null>(null)
@@ -70,23 +73,25 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
     const abstract = getPublicationAbstract(publication, language) || ''
     const section = publication.kind === 'book' ? '/books' : '/library'
     return {
-      title: getPublicationTitle(publication, language),
-      description: abstract.replace(/\s+/g, ' ').trim().slice(0, 200) || undefined,
+      title: publicationSeo(publication).title,
+      description: publicationSeo(publication).description || abstract,
       path: buildLocalizedPath(language, `${section}/${getShareSlug(publication)}`),
-      image: publication.cover_image
-        ? optimizeCloudinaryUrl(publication.cover_image, { width: 1200 })
+      image: getPublicationImage(publication)
+        ? optimizeCloudinaryUrl(getPublicationImage(publication), { width: 1200 })
         : undefined,
     }
   }, [language, publication, loading])
   usePageMeta(language, pageMeta)
+  useArticleStructuredData(publication)
 
   useEffect(() => {
     if (!slug) return
-    if (sessionLoading) return
     let cancelled = false
-    setLoading(true)
+    const initial = JSON.parse(document.getElementById('initial-publication-data')?.textContent || 'null') as Publication | null
+    const hasInitial = Boolean(initial && [initial.id, getShareSlug(initial), initial.slug].includes(slug))
+    setLoading(!hasInitial)
     setLoadFailed(false)
-    setPublication(null)
+    if (!hasInitial) setPublication(null)
     setRelated([])
     getPublicationBySlug(slug)
       .then((item) => {
@@ -99,11 +104,8 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
           if (!cancelled) setRelated([])
           return
         }
-        return listPublications({
-          kind: item.kind,
-          category: item.category,
-        }).then((items) => {
-          if (!cancelled) setRelated(items.filter((entry) => entry.id !== item.id).slice(0, 3))
+        return listPublications({ kind: 'all' }).then((items) => {
+          if (!cancelled) setRelated(relatedPublications(item, items))
         }).catch(() => { /* Related items do not determine publication availability. */ })
       })
       .catch(() => { if (!cancelled) setLoadFailed(true) })
@@ -209,6 +211,7 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
       publication
         ? new Intl.DateTimeFormat(language === 'ar' ? 'ar-EG' : 'en-AU', {
             dateStyle: 'long',
+            timeZone: 'UTC',
           }).format(new Date(publication.published_at))
         : '',
     [language, publication],
@@ -220,6 +223,7 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
       navigate(buildLocalizedPath(language, '/login'))
       return
     }
+    const { toggleSavedItem } = await import('../../lib/library')
     await toggleSavedItem(user, publication.id, !isSaved)
     await refreshLibrary()
     setMessage(
@@ -593,10 +597,14 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
         </div>
 
         <aside className="detail-sidebar">
-          {publication.cover_image ? (
+          {getPublicationImage(publication) ? (
             <img
               alt={getPublicationTitle(publication, language)}
-              src={optimizeCloudinaryUrl(publication.cover_image, { width: 1200 })}
+              src={optimizeCloudinaryUrl(getPublicationImage(publication), { width: 1200 })}
+              width="1200"
+              height="675"
+              loading="lazy"
+              fetchPriority="auto"
               decoding="async"
               style={{ objectPosition: getCoverObjectPosition(publication) }}
             />
@@ -737,7 +745,7 @@ export function PublicationPage({ language }: { language: AppLanguage }) {
           <dl className="detail-meta">
             <div>
               <dt>{language === 'ar' ? 'التصنيف' : 'Category'}</dt>
-              <dd>{getPublicationCategoryLabel(publication.category, language)}</dd>
+              <dd><Link to={`/topics/${publication.category}`}>{getPublicationCategoryLabel(publication.category, 'ar')}</Link></dd>
             </div>
             <div>
               <dt>{language === 'ar' ? 'الموضوع' : 'Topic'}</dt>

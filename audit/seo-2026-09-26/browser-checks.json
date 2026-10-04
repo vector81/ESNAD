@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-26",
+  "method": "Rendered DOM inspected through connected Brave browser; unauthenticated public views.",
+  "observations": [
+    {
+      "url": "https://esnads.net/library/9547512",
+      "title": "قطر تغادر مقعد الوسيط في اليمن: وتخندق «الجزيرة» في المعسكر السعودي | إسناد",
+      "canonical": "https://esnads.net/library/9547512",
+      "lang": "ar",
+      "h1Count": 1,
+      "bodyChars": 5959,
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "hreflang": {
+        "ar": "https://esnads.net",
+        "en": "https://esnads.net/en",
+        "x-default": "https://esnads.net"
+      }
+    },
+    {
+      "url": "https://esnads.net/en/library/9547512",
+      "lang": "en",
+      "bodyChars": 6004,
+      "headlineAndPrimaryBodyLanguage": "ar",
+      "interfaceLanguage": "en"
+    },
+    {
+      "url": "https://esnads.net/library/999999999999",
+      "title": "المكتبة البحثية | إسناد",
+      "robots": "index, follow",
+      "visibleMessage": "الإصدار غير موجود."
+    },
+    {
+      "url": "https://esnads.net/reader/9547512",
+      "title": "مركز إسناد للدراسات والأبحاث",
+      "canonical": "https://esnads.net",
+      "robots": "index, follow",
+      "bodyChars": 4701,
+      "h1Count": 1,
+      "jsonLdCount": 0
+    }
+  ]
+}

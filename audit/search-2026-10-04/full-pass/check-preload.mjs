@@ -1,0 +1,1 @@
+const r=await fetch('https://esnads.net/library/9547512',{headers:{'User-Agent':'Mozilla/5.0 Chrome/131.0.0.0 Safari/537.36'}});const s=await r.text();console.log(s.match(/<link rel="preload"[^>]+>/g));console.log(s.match(/<img[^>]*bshoh[^>]*>/g));console.log(s.match(/<script[^>]+src=[^>]+>/g));

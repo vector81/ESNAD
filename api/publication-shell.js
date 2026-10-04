@@ -1,16 +1,23 @@
 import { sendPageError } from './_lib/page-error.js'
 import { PUBLICATION_ID_MAP } from './_lib/publication-id-map.js'
 import {
+  createOrganizationStructuredData, createWebsiteStructuredData,
+  createArticleStructuredData, serializeStructuredData, getPublicationImage, SEO_SITE_NAME,
+} from '../src/lib/structuredData.js'
+import {
   getPublicationByReference as getPublicationByReferenceFromAdmin,
   listPublishedPublications,
+  sanitizePublication,
 } from './_lib/publications.js'
+import { publicationSeo, publicationBreadcrumbs, breadcrumbs, relatedPublications, HOME_DESCRIPTION, shortText } from '../src/lib/seoMetadata.js'
+import { SEO_TOPICS } from '../src/lib/seoTopics.js'
+import { renderPublicPage } from './_generated/public-render.js'
 
 const DEFAULT_SITE_TITLE = 'مركز إسناد للدراسات والأبحاث'
 const DEFAULT_SITE_DESCRIPTION =
-  'منصة عربية لنشر وأرشفة وبيع الدراسات والأوراق البحثية والكتب.'
+  HOME_DESCRIPTION
 const DEFAULT_SITE_URL = 'https://esnads.net'
 const DEFAULT_SITE_NAME = 'إسناد'
-const ENTRY_JS = '/assets/index.js'
 const ENTRY_CSS = '/assets/index.css'
 const OG_IMAGE_WIDTH = 1200
 const OG_IMAGE_HEIGHT = 675
@@ -455,7 +462,7 @@ function getAbstract(pub, language) {
   // Last-resort fallback so WhatsApp/Twitter previews never show the generic site
   // description on a real article: pull a snippet from the body.
   if (!value && pub.content_json) value = extractContentText(pub.content_json)
-  return String(value).replace(/\s+/g, ' ').trim().slice(0, 200)
+  return shortText(value, 154)
 }
 
 // WhatsApp's preview crawler skips images larger than ~2 MB and is happiest
@@ -468,7 +475,7 @@ function optimizeOgImage(url) {
 }
 
 function buildAbsoluteUrl(path = '/') {
-  path = path.replace(/^\/en(?=\/|$)/, '') || '/'
+  path = path === '/en' ? '/en' : path.replace(/^\/en(?=\/|$)/, '') || '/'
   if (!path || path === '/') return DEFAULT_SITE_URL
   const segments = path
     .split('/')
@@ -506,14 +513,21 @@ function sendPublicationJson(response, pub, language, requestedSection) {
     canonicalUrl: buildAbsoluteUrl(canonicalPath),
     section: getPublicationSection(pub),
     language,
-    title: getTitle(pub, language),
-    description: getAbstract(pub, language),
-    image: optimizeOgImage(pub.cover_image || ''),
+    title: publicationSeo(pub).title,
+    description: publicationSeo(pub).description,
+    breadcrumbJsonLd: publicationBreadcrumbs(pub),
+    publication: sanitizePublication(pub, false),
+    initialHtml: renderPublicPage({path: language === 'en' ? `/en${canonicalPath}` : canonicalPath, language, publication: sanitizePublication(pub, false)}),
+    image: optimizeOgImage(getPublicationImage(pub)),
+    articleJsonLd: createArticleStructuredData(pub, {
+      url: buildAbsoluteUrl(canonicalPath), image: optimizeOgImage(getPublicationImage(pub)),
+    }),
   })
 }
 
 function getCatalogMeta(section, language) {
   const isEnglish = language === 'en'
+  if (SEO_TOPICS[section]) return { title: SEO_TOPICS[section].title, heading: SEO_TOPICS[section].title, description: SEO_TOPICS[section].intro, path: `/topics/${section}` }
   if (section === 'articles') {
     return {
       title: isEnglish ? 'Articles' : 'المقالات',
@@ -555,6 +569,7 @@ function getCatalogMeta(section, language) {
 }
 
 function filterCatalogPublications(publications, section) {
+  if (SEO_TOPICS[section]) return publications.filter(pub => pub.category === section)
   if (section === 'articles') return publications.filter((pub) => pub.kind === 'article')
   if (section === 'books') return publications.filter((pub) => pub.kind === 'book')
   if (section === 'library') return publications.filter((pub) => pub.kind !== 'book')
@@ -599,7 +614,7 @@ function renderCatalogPublication(pub, language) {
   const author = language === 'en' ? pub.author_en || pub.author_ar : pub.author_ar || pub.author_en
 
   return `<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
-    ${pub.cover_image ? `<a href="${escapeHtml(path)}"><img src="${escapeHtml(optimizeOgImage(pub.cover_image))}" alt="${escapeHtml(title)}" loading="lazy" itemprop="image" /></a>` : ''}
+    ${getPublicationImage(pub) ? `<a href="${escapeHtml(path)}"><img src="${escapeHtml(optimizeOgImage(getPublicationImage(pub)))}" alt="${escapeHtml(title)}" loading="lazy" itemprop="image" /></a>` : ''}
     <div>
       <p class="meta">
         ${author ? `<span itemprop="author">${escapeHtml(author)}</span>` : ''}
@@ -615,8 +630,8 @@ function renderCatalogPublication(pub, language) {
 }
 
 function renderCatalogJsonLd(items, meta, language) {
-  return JSON.stringify({
-    '@context': 'https://schema.org',
+  const organization = createOrganizationStructuredData()
+  const page = {
     '@type': 'CollectionPage',
     name: meta.heading,
     description: meta.description,
@@ -632,13 +647,23 @@ function renderCatalogJsonLd(items, meta, language) {
         url: buildAbsoluteUrl(getCatalogItemPath(pub, language)),
       })),
     },
-  }).replace(/</g, '\\u003c')
+    publisher: { '@id': organization['@id'] },
+    isPartOf: { '@id': `${DEFAULT_SITE_URL}/#website` },
+  }
+  return serializeStructuredData({
+    '@context': 'https://schema.org',
+    '@graph': [
+      organization,
+      ...(['/','/en'].includes(meta.path) ? [createWebsiteStructuredData()] : []),
+      page,
+      ...(meta.path !== '/' && meta.path !== '/en' ? [breadcrumbs([['الرئيسية', '/'], [meta.heading, meta.path.replace(/^\/en/, '')]])] : []),
+    ],
+  })
 }
 
 function renderCatalogHtml({ lang, section, publications }) {
   const meta = getCatalogMeta(section, lang)
   const title = meta.title === DEFAULT_SITE_TITLE ? meta.title : `${meta.title} | ${DEFAULT_SITE_NAME}`
-  const canonicalUrl = buildAbsoluteUrl(meta.path)
 
   return `<!doctype html>
 <html dir="${lang === 'en' ? 'ltr' : 'rtl'}" lang="${lang}">
@@ -649,11 +674,11 @@ function renderCatalogHtml({ lang, section, publications }) {
     <meta name="description" content="${escapeHtml(meta.description)}" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="${escapeHtml(buildAbsoluteUrl(meta.path))}" />
-    <link rel="alternate" hreflang="ar" href="${escapeHtml(canonicalUrl)}" />
-    <link rel="alternate" hreflang="x-default" href="${escapeHtml(canonicalUrl)}" />
+    ${section === 'home' ? '<link rel="alternate" hreflang="ar" href="https://esnads.net" /><link rel="alternate" hreflang="en" href="https://esnads.net/en" /><link rel="alternate" hreflang="x-default" href="https://esnads.net" />' : ''}
+    <link rel="alternate" type="application/rss+xml" title="إصدارات مركز إسناد" href="https://esnads.net/feed.xml" />
     <link rel="stylesheet" href="${ENTRY_CSS}" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="${escapeHtml(DEFAULT_SITE_NAME)}" />
+    <meta property="og:site_name" content="${escapeHtml(SEO_SITE_NAME)}" />
     <meta property="og:title" content="${escapeHtml(meta.title)}" />
     <meta property="og:description" content="${escapeHtml(meta.description)}" />
     <meta property="og:url" content="${escapeHtml(buildAbsoluteUrl(meta.path))}" />
@@ -678,6 +703,7 @@ function renderCatalogHtml({ lang, section, publications }) {
   <body>
     <main>
       ${renderCatalogNavigation(lang)}
+      <nav aria-label="تصنيفات المكتبة">${[...new Set(publications.map(pub => pub.category))].filter(category => SEO_TOPICS[category]).map(category => `<a href="/topics/${category}">${escapeHtml(SEO_TOPICS[category].title)}</a>`).join('')}</nav>
       <header>
         <h1>${escapeHtml(meta.heading)}</h1>
         <p class="lede">${escapeHtml(meta.description)}</p>
@@ -689,33 +715,18 @@ function renderCatalogHtml({ lang, section, publications }) {
       </section>
     </main>
     <div id="root" hidden></div>
-    <script type="module" src="${ENTRY_JS}"></script>
+
   </body>
 </html>`
 }
 
-function renderArticleJsonLd({ pub, language, url, image }) {
-  const author = language === 'en' ? pub.author_en || pub.author_ar : pub.author_ar || pub.author_en
-  return JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: getHeadline(pub, language) || getTitle(pub, language),
-    name: getTitle(pub, language),
-    description: getAbstract(pub, language),
-    inLanguage: language,
-    url,
-    mainEntityOfPage: url,
-    publisher: { '@type': 'Organization', name: DEFAULT_SITE_TITLE, url: DEFAULT_SITE_URL },
-    ...(image ? { image: [image] } : {}),
-    ...(author ? { author: { '@type': 'Person', name: author } } : {}),
-    ...(pub.published_at ? { datePublished: new Date(pub.published_at).toISOString() } : {}),
-    ...(pub.updated_at ? { dateModified: new Date(pub.updated_at).toISOString() } : {}),
-  }).replace(/</g, '\\u003c')
+function renderArticleJsonLd({ pub, url, image }) {
+  return serializeStructuredData(createArticleStructuredData(pub, { url, image }))
 }
 
-function renderHtml({ lang, title, description, image, url, ogType, articleTitle, articleAuthor, articlePublishedAt, articleBodyHtml, jsonLd }) {
+function renderHtml({ lang, title, description, image, url, ogType, articleTitle, articleAuthor, articlePublishedAt, articleBodyHtml, jsonLd, breadcrumbJsonLd, relatedHtml }) {
   const pageTitle =
-    title && title !== DEFAULT_SITE_TITLE ? `${title} | ${DEFAULT_SITE_NAME}` : DEFAULT_SITE_TITLE
+    title && title !== DEFAULT_SITE_TITLE ? (title.includes(' | ') ? title : `${title} | ${DEFAULT_SITE_NAME}`) : DEFAULT_SITE_TITLE
   const pageDescription = description || DEFAULT_SITE_DESCRIPTION
   const imageMetadata = image
     ? `
@@ -733,12 +744,13 @@ function renderHtml({ lang, title, description, image, url, ogType, articleTitle
     <meta name="description" content="${escapeHtml(pageDescription)}" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="${escapeHtml(url)}" />
+    <link rel="alternate" type="application/rss+xml" title="إصدارات مركز إسناد" href="https://esnads.net/feed.xml" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/logo.png" />
     <link rel="stylesheet" href="${ENTRY_CSS}" />
     <meta property="og:type" content="${ogType}" />
-    <meta property="og:site_name" content="${escapeHtml(DEFAULT_SITE_NAME)}" />
+    <meta property="og:site_name" content="${escapeHtml(SEO_SITE_NAME)}" />
     <meta property="og:title" content="${escapeHtml(title || DEFAULT_SITE_TITLE)}" />
     <meta property="og:description" content="${escapeHtml(pageDescription)}" />
     <meta property="og:image" content="${escapeHtml(image || '')}" />
@@ -750,7 +762,8 @@ ${imageMetadata}
     <meta name="twitter:description" content="${escapeHtml(pageDescription)}" />
     <meta name="twitter:image" content="${escapeHtml(image || '')}" />
     <meta name="theme-color" content="#c4302b" />
-    ${jsonLd ? `<script type="application/ld+json">${jsonLd}</script>` : ''}
+    ${jsonLd ? `<script id="publication-jsonld" type="application/ld+json">${jsonLd}</script>` : ''}
+    ${breadcrumbJsonLd ? `<script id="publication-breadcrumb-jsonld" type="application/ld+json">${serializeStructuredData(breadcrumbJsonLd)}</script>` : ''}
   </head>
   <body>
     <main>
@@ -763,9 +776,10 @@ ${imageMetadata}
         }
         ${articleBodyHtml || ''}
       </article>
+      ${relatedHtml || ''}
     </main>
     <div id="root" hidden></div>
-    <script type="module" src="${ENTRY_JS}"></script>
+
   </body>
 </html>`
 }
@@ -783,7 +797,16 @@ export default async function handler(request, response) {
 
   if (wantsCatalog) {
     try {
-      const publications = filterCatalogPublications(await listPublishedPublications(), section)
+      const all = await listPublishedPublications()
+      const publications = filterCatalogPublications(all, section)
+      if (section !== 'home' && !['library', 'articles', 'books'].includes(section) && (!SEO_TOPICS[section] || !publications.length)) { sendPageError(response, 404, language); return }
+      if (wantsJson) {
+        const meta = getCatalogMeta(section, language)
+        response.setHeader('cache-control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=600')
+        const safePublications = all.map(pub => sanitizePublication(pub, false, { includeContent: false }))
+        response.status(200).json({ meta, publications: safePublications, jsonLd: JSON.parse(renderCatalogJsonLd(publications, meta, language)), initialHtml: section === 'home' ? renderPublicPage({path:meta.path,language,publications:safePublications}) : '' })
+        return
+      }
       response.setHeader('content-type', 'text/html; charset=utf-8')
       response.setHeader('cache-control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=600')
       response.status(200).send(renderCatalogHtml({ lang: language, section, publications }))
@@ -817,20 +840,22 @@ export default async function handler(request, response) {
         // title when the editor hasn't set one. The article page itself still
         // renders the long academic title in its h1 — only outbound metadata
         // uses the headline.
-        title: getHeadline(pub, language) || getTitle(pub, language),
-        description: getAbstract(pub, language),
-        image: optimizeOgImage(pub.cover_image || ''),
+        title: publicationSeo(pub).title,
+        description: publicationSeo(pub).description,
+        image: optimizeOgImage(getPublicationImage(pub)),
         url: buildAbsoluteUrl(canonicalPath),
         ogType: 'article',
         articleTitle: getTitle(pub, language),
         articleAuthor: language === 'en' ? pub.author_en || pub.author_ar : pub.author_ar || pub.author_en,
         articlePublishedAt: pub.published_at ? new Date(pub.published_at).toISOString().slice(0, 10) : '',
-        articleBodyHtml: getArticleBodyHtml(pub, language),
+        articleBodyHtml: getArticleBodyHtml(pub, language).replace(/<h1\b/g, '<h2').replace(/<\/h1>/g, '</h2>').replace(/alt=""/g, `alt="${escapeHtml(`صورة توضيحية: ${pub.title_ar}`)}"`),
+        breadcrumbJsonLd: publicationBreadcrumbs(pub),
+        relatedHtml: `<section aria-label="مقالات ذات صلة"><h2>مقالات ذات صلة</h2>${relatedPublications(pub, await listPublishedPublications()).map(item => `<p><a href="${escapeHtml(getCanonicalPath(item))}">${escapeHtml(item.title_ar)}</a></p>`).join('')}</section>`,
         jsonLd: renderArticleJsonLd({
           pub,
           language,
           url: buildAbsoluteUrl(canonicalPath),
-          image: optimizeOgImage(pub.cover_image || ''),
+          image: optimizeOgImage(getPublicationImage(pub)),
         }),
       }),
     )

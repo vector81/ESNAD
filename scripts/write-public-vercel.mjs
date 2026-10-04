@@ -4,7 +4,6 @@ import { dirname, resolve } from 'node:path'
 
 const targetPath = resolve('dist/public/vercel.json')
 const indexPath = resolve('dist/public/index.html')
-const entryJsPath = resolve('dist/public/assets/index.js')
 const entryCssPath = resolve('dist/public/assets/index.css')
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -14,7 +13,7 @@ const securityHeaders = [
   {
     key: 'Content-Security-Policy',
     value:
-      "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.firebasestorage.app; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.stripe.com https://*.cloudfunctions.net https://api.cloudinary.com https://*.cloudinary.com https://us.i.posthog.com https://us.posthog.com https://*.posthog.com; frame-src 'self' https://js.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.firebasestorage.app; object-src 'none'; base-uri 'self'",
+      "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.firebasestorage.app; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.stripe.com https://*.cloudfunctions.net https://api.cloudinary.com https://*.cloudinary.com https://us.i.posthog.com https://us.posthog.com https://*.posthog.com; frame-src 'self' https://*.firebaseapp.com https://js.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.firebasestorage.app; object-src 'none'; base-uri 'self'",
   },
 ]
 
@@ -24,14 +23,12 @@ async function getFileHash(path) {
 }
 
 async function versionFixedEntryAssets() {
-  const [html, jsHash, cssHash] = await Promise.all([
+  const [html, cssHash] = await Promise.all([
     readFile(indexPath, 'utf8'),
-    getFileHash(entryJsPath),
     getFileHash(entryCssPath),
   ])
 
   const nextHtml = html
-    .replace(/\/assets\/index\.js(?:\?v=[a-f0-9]+)?/g, `/assets/index.js?v=${jsHash}`)
     .replace(/\/assets\/index\.css(?:\?v=[a-f0-9]+)?/g, `/assets/index.css?v=${cssHash}`)
 
   if (nextHtml !== html) {
@@ -82,6 +79,8 @@ const config = {
     },
   ],
   rewrites: [
+    { source: '/feed.xml', destination: '/api/feed' },
+    { source: '/a76bd284326d4836b7472e30deee31f5.txt', destination: '/a76bd284326d4836b7472e30deee31f5.txt' },
     {
       source: '/api/:path*',
       destination: '/api/:path*',

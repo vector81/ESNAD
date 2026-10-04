@@ -1,0 +1,83 @@
+{
+  "verifiedAt": "2026-10-04T06:51:45.309Z",
+  "results": [
+    {
+      "path": "/",
+      "userAgent": "Googlebot",
+      "status": 200,
+      "canonical": "https://esnads.net",
+      "title": "مركز إسناد للدراسات والأبحاث",
+      "bytes": 17208,
+      "schemaTypes": [
+        "Organization",
+        "WebSite",
+        "CollectionPage"
+      ]
+    },
+    {
+      "path": "/",
+      "userAgent": "Mozilla/5.0 Chrome/140.0.0.0 Safari/537.36",
+      "status": 200,
+      "canonical": "https://esnads.net",
+      "title": "مركز إسناد للدراسات والأبحاث",
+      "bytes": 2383,
+      "schemaTypes": [
+        "WebSite",
+        "Organization"
+      ]
+    },
+    {
+      "path": "/en",
+      "userAgent": "Googlebot",
+      "status": 200,
+      "canonical": "https://esnads.net",
+      "title": "Esnad Center for Studies and Research | إسناد",
+      "bytes": 17540,
+      "schemaTypes": [
+        "Organization",
+        "WebSite",
+        "CollectionPage"
+      ]
+    },
+    {
+      "path": "/articles",
+      "userAgent": "Googlebot",
+      "status": 200,
+      "canonical": "https://esnads.net/articles",
+      "title": "المقالات | إسناد",
+      "bytes": 19803,
+      "schemaTypes": [
+        "Organization",
+        "CollectionPage"
+      ]
+    },
+    {
+      "path": "/library",
+      "userAgent": "Googlebot",
+      "status": 200,
+      "canonical": "https://esnads.net/library",
+      "title": "المكتبة البحثية | إسناد",
+      "bytes": 42513,
+      "schemaTypes": [
+        "Organization",
+        "CollectionPage"
+      ]
+    },
+    {
+      "path": "/library/9547512",
+      "userAgent": "Googlebot",
+      "status": 200,
+      "canonical": "https://esnads.net/library/9547512",
+      "title": "قطر تغادر مقعد الوسيط في اليمن:  وتخندق «الجزيرة» في المعسكر السعودي | إسناد",
+      "bytes": 8931,
+      "schemaTypes": [
+        "Article"
+      ]
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": 200,
+      "urls": 41
+    }
+  ]
+}

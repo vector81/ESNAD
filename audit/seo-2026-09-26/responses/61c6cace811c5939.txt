@@ -1,0 +1,259 @@
+<!doctype html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Articles | إسناد</title>
+    <meta name="description" content="Latest public Esnad analytical articles with titles, authors, summaries, dates, and canonical links." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://esnads.net/en/articles" />
+    <link rel="alternate" hreflang="ar" href="https://esnads.net/articles" />
+    <link rel="alternate" hreflang="x-default" href="https://esnads.net/articles" />
+    <link rel="stylesheet" href="/assets/index.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="إسناد" />
+    <meta property="og:title" content="Articles" />
+    <meta property="og:description" content="Latest public Esnad analytical articles with titles, authors, summaries, dates, and canonical links." />
+    <meta property="og:url" content="https://esnads.net/en/articles" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Opinion and analysis articles","description":"Latest public Esnad analytical articles with titles, authors, summaries, dates, and canonical links.","url":"https://esnads.net/en/articles","inLanguage":"en","mainEntity":{"@type":"ItemList","numberOfItems":15,"itemListElement":[{"@type":"ListItem","position":1,"name":"قطر تغادر مقعد الوسيط في اليمن:  وتخندق «الجزيرة» في المعسكر السعودي","url":"https://esnads.net/en/library/9547512"},{"@type":"ListItem","position":2,"name":"بين انتصار آب 2006 وصمود آب 2026: قراءة في خطاب الشيخ نعيم قاسم ومعادلات المرحلة المقبلة","url":"https://esnads.net/en/library/8541485"},{"@type":"ListItem","position":3,"name":"نحو تجريم الصمت وكسر الهيمنة: «المجلس العالمي» يدعو للمواجهة الشاملة","url":"https://esnads.net/en/library/5441862"},{"@type":"ListItem","position":4,"name":"ستار لينك في العراق بعد زيارة واشنطن: خدمة مدنية أم بنية اتصالات لمرحلة إقليمية جديدة؟ قراءة نقدية في توقيت التشغيل، وغموض الاتفاقيات، واحتمالات الاستخدام الأمني والعسكري","url":"https://esnads.net/en/library/9955621"},{"@type":"ListItem","position":5,"name":"الإحباط يلفّ إسرائيل: وإيران تكرّس مبدأ وحدة الساحات فعلياً","url":"https://esnads.net/en/library/8629683"},{"@type":"ListItem","position":6,"name":"هل ولجت السلطة اللبنانية باب الشبهة الكبرى؟","url":"https://esnads.net/en/library/1926718"},{"@type":"ListItem","position":7,"name":"تسليم السلاح بين النقل والعقل","url":"https://esnads.net/en/library/5556057"},{"@type":"ListItem","position":8,"name":"سعدون حمادة... المؤرخ المقاوم الذي صحّح تاريخ لبنان","url":"https://esnads.net/en/library/5171944"},{"@type":"ListItem","position":9,"name":"إيران وإسرائيل ما بعد الحرب: صراع ترميم الجبهة الداخلية ومعركة التعويضات","url":"https://esnads.net/en/library/3001546"},{"@type":"ListItem","position":10,"name":"حين يغدو الوفاء لفلسطين حراسةً للبنان    قراءة في خطاب محمد رعد ومخاطبة الوجدان","url":"https://esnads.net/en/library/9534802"},{"@type":"ListItem","position":11,"name":"عن اليمين الإسرائيلي واليمين اللبناني وقاموس الحرب الأهلية","url":"https://esnads.net/en/library/4297835"},{"@type":"ListItem","position":12,"name":"نموذج خامنئي في القيادة: بين الشرعية الدينية والحوكمة الرشيقة","url":"https://esnads.net/en/library/2663958"},{"@type":"ListItem","position":13,"name":"الشباك لن تنقذهم.. \"الموت بالألياف\" يتسلل من لبنان وأوكرانيا","url":"https://esnads.net/en/library/9893292"},{"@type":"ListItem","position":14,"name":"من غسان سركيس إلى راشيل كرم: لبنان لا يصافح قاتله","url":"https://esnads.net/en/library/3440399"},{"@type":"ListItem","position":15,"name":"دم امال خليل يفضح كذبة الهدنة ويعري نفاق السلطة","url":"https://esnads.net/en/library/8044958"}]}}</script>
+    <style>
+      body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f2933; background: #fff; }
+      main { max-width: 1120px; margin: 0 auto; padding: 32px 20px 56px; }
+      nav { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 28px; }
+      nav a, article a { color: #9f1d20; text-decoration: none; }
+      h1 { font-size: 32px; line-height: 1.2; margin: 0 0 10px; }
+      .lede { max-width: 780px; color: #53606f; margin: 0 0 28px; line-height: 1.8; }
+      .catalog-item { display: grid; grid-template-columns: minmax(160px, 260px) 1fr; gap: 20px; padding: 22px 0; border-top: 1px solid #e5e7eb; }
+      .catalog-item img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: #f3f4f6; }
+      .catalog-item h2 { margin: 4px 0 8px; font-size: 22px; line-height: 1.45; }
+      .catalog-item p { margin: 0 0 10px; line-height: 1.75; }
+      .catalog-item .meta { display: flex; flex-wrap: wrap; gap: 10px; color: #687385; font-size: 14px; }
+      .catalog-item .full-title { font-weight: 600; }
+      @media (max-width: 700px) { .catalog-item { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <nav aria-label="Primary navigation"><a href="/en">Home</a><a href="/en/articles">Articles</a><a href="/en/library">Library</a><a href="/en/books">Books</a><a href="/llms.txt">LLMS</a><a href="/sitemap.xml">Sitemap</a></nav>
+      <header>
+        <h1>Opinion and analysis articles</h1>
+        <p class="lede">Latest public Esnad analytical articles with titles, authors, summaries, dates, and canonical links.</p>
+      </header>
+      <section aria-label="Opinion and analysis articles">
+        <article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/en/library/9547512"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1790080853/esnad/m8bvupmziyi163mjjofe.jpg" alt="قطر تغادر مقعد الوسيط في اليمن:  وتخندق «الجزيرة» في المعسكر السعودي" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله م. بدوي</span>
+        <time datetime="2026-09-22" itemprop="datePublished">2026-09-22</time>
+        <span>opinion-article</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/9547512">قطر تغادر مقعد الوسيط في اليمن:  وتخندق «الجزيرة» في المعسكر السعودي</a></h2>
+      
+      <p itemprop="description">خبرت قطر اليمن جيداً من مقعد الوسيط. في 2007 دخلت الدوحة بين الحكومة اليمنية والحوثيين لوقف حرب صعدة، ثم عادت إلى الوساطة في 2008 و2009 و2010. وهذه ليست رواية خصومها؛ وزارة الخارجية القطرية نفسها تضع </p>
+      <p><a href="/en/library/9547512">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/en/library/8541485"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1786960408/esnad/yk8zu0rzr5o3r17azkqw.jpg" alt="بين انتصار آب 2006 وصمود آب 2026: قراءة في خطاب الشيخ نعيم قاسم ومعادلات المرحلة المقبلة" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله بدوي</span>
+        <time datetime="2026-08-17" itemprop="datePublished">2026-08-17</time>
+        <span>opinion-article</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/8541485">بين انتصار آب 2006 وصمود آب 2026: قراءة في خطاب الشيخ نعيم قاسم ومعادلات المرحلة المقبلة</a></h2>
+      
+      <p itemprop="description">بين آب 2006 وآب 2026، لا تحضر الذاكرة بوصفها حنينًا إلى الماضي فقط. ففي آب من كل عام تعود ذكرى انتصار 2006، لا كحدث مكتمل أُغلق في زمنه، بل كلحظة يعاد من خلالها النظر إلى الحاضر وقياس المسافة بين ما ك</p>
+      <p><a href="/en/library/8541485">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله م. بدوي</span>
+        <time datetime="2026-07-31" itemprop="datePublished">2026-07-31</time>
+        <span>opinion-article</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/5441862">نحو تجريم الصمت وكسر الهيمنة: «المجلس العالمي» يدعو للمواجهة الشاملة</a></h2>
+      
+      <p itemprop="description">عبدالله م. بدوي/ في لحظة تاريخية فارقة ومثقلة بالتحولات الجيوسياسية الكبرى، تتكشف أمام أنظار الإنسانية أعمق أزمات المنظومة الدولية وأكثرها تجذراً. ففي حين تبلغ آلة التوحش العسكري ذروة الإبادة الجماعية</p>
+      <p><a href="/en/library/5441862">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله .م بدوي</span>
+        <time datetime="2026-07-31" itemprop="datePublished">2026-07-31</time>
+        <span>strategic-estimate</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/9955621">ستار لينك في العراق بعد زيارة واشنطن: خدمة مدنية أم بنية اتصالات لمرحلة إقليمية جديدة؟ قراءة نقدية في توقيت التشغيل، وغموض الاتفاقيات، واحتمالات الاستخدام الأمني والعسكري</a></h2>
+      
+      <p itemprop="description">لم يعد إدخال خدمة «ستارلينك» إلى العراق مجرد مسألة تقنية تتعلق بتحسين سرعة الإنترنت في القرى والمناطق النائية. فالطريقة التي أُنجز بها الترخيص، وتزامنه مع زيارة رئيس الوزراء العراقي علي فالح الزيدي إل</p>
+      <p><a href="/en/library/9955621">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/en/library/8629683"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1780946008/esnad/pcfz6s6ryp10utsaoitc.png" alt="الإحباط يلفّ إسرائيل: وإيران تكرّس مبدأ وحدة الساحات فعلياً" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">Esnad Center</span>
+        <time datetime="2026-06-08" itemprop="datePublished">2026-06-08</time>
+        <span>opinion-article</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/8629683">الإحباط يلفّ إسرائيل: وإيران تكرّس مبدأ وحدة الساحات فعلياً</a></h2>
+      
+      <p itemprop="description">عبدالله م. بدوي/ ليست الساعات الأخيرة عادية في المشهد الإسرائيلي. فما يتسرّب من الإعلام العبري، وما يخرج من مواقف سياسية وأمنية متلاحقة، لا يشير فقط إلى خلافات داخلية حول إدارة المواجهة، بل إلى ما هو </p>
+      <p><a href="/en/library/8629683">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله م. بدوي</span>
+        <time datetime="2026-05-24" itemprop="datePublished">2026-05-24</time>
+        <span>studies</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/1926718">هل ولجت السلطة اللبنانية باب الشبهة الكبرى؟</a></h2>
+      
+      <p itemprop="description">الأخبار https://www.al-akhbar.com/NewspaperArticles/topics-opinions/888875 تثبت الوقائع، كما جرى تداولها في المجال العام، وكما أشار إليها صراحةً الرئيس نبيه بري في «الأخبار» أمس بقوله: «ذهبوا إلى الول</p>
+      <p><a href="/en/library/1926718">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">Esnad Center</span>
+        <time datetime="2026-05-24" itemprop="datePublished">2026-05-24</time>
+        <span>studies</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/5556057">تسليم السلاح بين النقل والعقل</a></h2>
+      
+      <p itemprop="description">الاخبار https://www.al-akhbar.com/topics-opinions/854237 عقب إصدار الحكومة اللبنانية قرار حصرية السلاح في يد الدولة، تصاعد النقاش في الأوساط الدينية والفكرية في لبنان والعالميْن العربي والإسلامي حول ا</p>
+      <p><a href="/en/library/5556057">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله م. بدوي</span>
+        <time datetime="2026-05-24" itemprop="datePublished">2026-05-24</time>
+        <span>documents</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/5171944">سعدون حمادة... المؤرخ المقاوم الذي صحّح تاريخ لبنان</a></h2>
+      
+      <p itemprop="description">الأخبار https://www.al-akhbar.com/culture/857562 حين يرحل الكبار، لا يرحلون فرادى. يغادرون ومعهم زمن كامل من الذاكرة والبحث والمعاناة. في الأول من أيلول (سبتمبر) من عام 2025، أغمض المؤرخ الأكاديمي سعد</p>
+      <p><a href="/en/library/5171944">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    
+    <div>
+      <p class="meta">
+        <span itemprop="author">Esnad Center</span>
+        <time datetime="2026-05-24" itemprop="datePublished">2026-05-24</time>
+        <span>studies</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/3001546">إيران وإسرائيل ما بعد الحرب: صراع ترميم الجبهة الداخلية ومعركة التعويضات</a></h2>
+      
+      <p itemprop="description">الأخبار https://www.al-akhbar.com/news/world/891358 لا تُقاس نتائج الحرب بما يجري في الميدان وحده، بل بما تفعله الدولة بعد توقف إطلاق النار: كيف تُسعف المتضررين؟ كيف تداوي أثر خسارة البيت أو المركبة أ</p>
+      <p><a href="/en/library/3001546">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/en/library/9534802"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1779620674/esnad/vb7gch4tazz9a5rwtz4y.png" alt="حين يغدو الوفاء لفلسطين حراسةً للبنان    قراءة في خطاب محمد رعد ومخاطبة الوجدان" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">د.عبدالله م.بدوي</span>
+        <time datetime="2026-05-22" itemprop="datePublished">2026-05-22</time>
+        <span>position-analysis</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/9534802">حين يغدو الوفاء لفلسطين حراسةً للبنان    قراءة في خطاب محمد رعد ومخاطبة الوجدان</a></h2>
+      
+      <p itemprop="description">يفتتح النائب محمد رعد نداءه بالبسملة والحمدلة والصلاة على النبي محمد وآله الطيبين الطاهرين وصحبه الأبرار المنتجبين. وليست هذه البداية مجرد استهلال ديني مألوف، بل هي العتبة الأولى التي يدخل منها الخطاب</p>
+      <p><a href="/en/library/9534802">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/en/library/4297835"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1779444998/esnad/teh60dnp3ao4elxbmoqf.jpg" alt="عن اليمين الإسرائيلي واليمين اللبناني وقاموس الحرب الأهلية" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">Esnad Center</span>
+        <time datetime="2026-05-22" itemprop="datePublished">2026-05-22</time>
+        <span>opinion-article</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/4297835">عن اليمين الإسرائيلي واليمين اللبناني وقاموس الحرب الأهلية</a></h2>
+      
+      <p itemprop="description">حين يطلب اليمين اللبناني من الطائفة الشيعية أن تتخلّى عن خيار المقاومة، لا نكون أمام نقد سياسي لحزب محدّد، بل أمام محاكمة سياسية لطائفة بكاملها. فالسؤال لا يبقى عن سلاح حزب الله أو علاقته بإيران أو مو</p>
+      <p><a href="/en/library/4297835">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/en/library/2663958"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1779444366/esnad/mpeo4nkeotu6japswmx1.jpg" alt="نموذج خامنئي في القيادة: بين الشرعية الدينية والحوكمة الرشيقة" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">عبدالله م.بدوي</span>
+        <time datetime="2026-05-22" itemprop="datePublished">2026-05-22</time>
+        <span>opinion-article</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/2663958">نموذج خامنئي في القيادة: بين الشرعية الدينية والحوكمة الرشيقة</a></h2>
+      
+      <p itemprop="description">كشفت الحرب الأميركية الإسرائيلية على إيران عن مجموعة حقائق مهمة لا بدّ من التوقف عندها، حيث إنه وفي لحظة كان يُفترض فيها أن تنهار طهران، أو على الأقل تتزلزل، بعد الضربات المركّبة التي نفّذتها كلٌّ من </p>
+      <p><a href="/en/library/2663958">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/en/library/9893292"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1777724529/esnad/cspold0btue4iafvj4ax.png" alt="الشباك لن تنقذهم.. &quot;الموت بالألياف&quot; يتسلل من لبنان وأوكرانيا" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">Esnad Center</span>
+        <time datetime="2026-05-01" itemprop="datePublished">2026-05-01</time>
+        <span>situation-assessment</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/9893292">الشباك لن تنقذهم.. &quot;الموت بالألياف&quot; يتسلل من لبنان وأوكرانيا</a></h2>
+      
+      <p itemprop="description">أمير بدوي في تكتيك بدا أقرب إلى يأس الميدان منه إلى حل عسكري، بدأ الجنود الإسرائيليون نصب شباك معدنية وحواجز فوق تحصيناتهم وآلياتهم على الحدود الشمالية، آملاً في إيقاف طائرات &quot;FPV&quot; الانقضاضية التي يطل</p>
+      <p><a href="/en/library/9893292">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/en/library/3440399"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1777461873/esnad/xkbeldixp8el8awkyvwy.png" alt="من غسان سركيس إلى راشيل كرم: لبنان لا يصافح قاتله" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">Esnad Center</span>
+        <time datetime="2026-04-29" itemprop="datePublished">2026-04-29</time>
+        <span>opinion-article</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/3440399">من غسان سركيس إلى راشيل كرم: لبنان لا يصافح قاتله</a></h2>
+      
+      <p itemprop="description">حين تصبح المصافحة اعترافًا، يصبح الموقف سلاحًا... لا يأتي التطبيع دفعة واحدة. لا يطرق الباب باسمه الحقيقي، ولا يعلن منذ اللحظة الأولى أنه يريد جرّ لبنان إلى سلامٍ مع العدو. يأتي بعبارات ناعمة: الواقعي</p>
+      <p><a href="/en/library/3440399">Read publication</a></p>
+    </div>
+  </article>
+<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
+    <a href="/en/library/8044958"><img src="https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1777459358/esnad/mmckjqbaciijo4p16cmu.png" alt="دم امال خليل يفضح كذبة الهدنة ويعري نفاق السلطة" loading="lazy" itemprop="image" /></a>
+    <div>
+      <p class="meta">
+        <span itemprop="author">Esnad Center</span>
+        <time datetime="2026-04-26" itemprop="datePublished">2026-04-26</time>
+        <span>opinion-article</span>
+      </p>
+      <h2 itemprop="headline"><a href="/en/library/8044958">دم امال خليل يفضح كذبة الهدنة ويعري نفاق السلطة</a></h2>
+      
+      <p itemprop="description">https://www.al-akhbar.com/NewspaperArticles/lebanon/889852/دم-آمال-خليل-يفضح-كذبة-الهدنة-ويعري-نفاق-السلطة دم آمال خليل يفضح كذبة الهدنة ويعري نفاق السلطة 💬 جريدة الأخبار لبنان من يقتل صحافية ثم يمنع</p>
+      <p><a href="/en/library/8044958">Read publication</a></p>
+    </div>
+  </article>
+      </section>
+    </main>
+    <div id="root" hidden></div>
+    <script type="module" src="/assets/index.js"></script>
+  </body>
+</html>

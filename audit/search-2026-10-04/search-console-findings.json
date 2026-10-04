@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-10-04T06:46:54.262Z",
+  "domain": "esnads.net",
+  "indexingReport": {
+    "lastUpdated": "2026-09-21",
+    "indexed": 69,
+    "notIndexed": 85,
+    "reasons": {
+      "redirect": 39,
+      "googleChoseDifferentCanonical": 41,
+      "crawledCurrentlyNotIndexed": 5
+    }
+  },
+  "performance": {
+    "period": "2026-06-30 to 2026-09-29",
+    "clicks": 23,
+    "impressions": 745,
+    "ctrPercent": 3.1,
+    "averagePosition": 10.3,
+    "arabicBrandQuery": "مركز اسناد",
+    "arabicBrandClicks": 1,
+    "arabicBrandImpressions": 18
+  },
+  "sitemap": {
+    "url": "https://esnads.net/sitemap.xml",
+    "status": "Success",
+    "submitted": "2026-09-26",
+    "lastRead": "2026-10-04",
+    "discoveredPages": 41
+  },
+  "inspectedIndexed": [
+    "https://esnads.net/",
+    "https://esnads.net/library/9547512",
+    "https://esnads.net/library/1306259"
+  ],
+  "manualActions": "No issues detected",
+  "securityIssues": "No issues detected",
+  "canonicalValidation": {
+    "status": "Started",
+    "started": "2026-10-04"
+  },
+  "homepageRecrawl": "Accepted into priority crawl queue",
+  "deployment": {
+    "id": "dpl_22TF9WSfbdxHVSpNsBFprWp7qP9G",
+    "target": "production"
+  }
+}

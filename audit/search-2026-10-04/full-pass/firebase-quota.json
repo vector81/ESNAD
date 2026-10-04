@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-04T08:43:23.838Z",
+  "firebase": {
+    "status": 429,
+    "message": "Quota exceeded.",
+    "adminDependency": "CommonJS gaxios 6 now resolves compatible uuid 9",
+    "cache": "60 second in-memory reads, deduplicated concurrent requests",
+    "numericIdMap": "All 34 currently published IDs mapped without repeated slug queries",
+    "emergencyFallback": {
+      "source": "Previously verified public/free publications captured this morning",
+      "capturedAt": "2026-10-04T07:27:27.000Z",
+      "expiresAt": "2026-10-05T07:27:27.000Z",
+      "articles": 34,
+      "paidBodies": 0,
+      "liveSourcePreferred": true
+    },
+    "limitations": "Publishing requires the live database. Fallback does not make Firebase writes available. Do not claim a fresh database verification while its quota is exhausted.",
+    "quotaDocumentation": "https://firebase.google.com/docs/firestore/quotas"
+  }
+}

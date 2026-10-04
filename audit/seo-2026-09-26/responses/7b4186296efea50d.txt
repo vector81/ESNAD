@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Keep private/editor-only and internal surfaces out of search results.
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+Disallow: /login
+Disallow: /register
+Disallow: /dashboard
+Disallow: /en/login
+Disallow: /en/register
+Disallow: /en/dashboard
+
+Sitemap: https://esnads.net/sitemap.xml
+Host: https://esnads.net
+
+# AI/crawler context document.
+LLMS: https://esnads.net/llms.txt

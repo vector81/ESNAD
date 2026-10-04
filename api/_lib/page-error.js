@@ -10,6 +10,7 @@ export function renderPageError(status, language = 'ar') {
 <html lang="${english ? 'en' : 'ar'}" dir="${english ? 'ltr' : 'rtl'}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${title} | إسناد</title><meta name="robots" content="noindex, follow">
+<meta property="og:site_name" content="مركز إسناد للدراسات والأبحاث">
 <link rel="stylesheet" href="/assets/index.css"></head>
 <body><main class="container"><section class="panel" style="margin-top:48px">
 <h1>${title}</h1><p>${message}</p>

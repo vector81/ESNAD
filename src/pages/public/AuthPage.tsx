@@ -51,7 +51,7 @@ export function AuthPage({ language }: { language: AppLanguage }) {
         </Link>
         <div className="auth-screen__brand-content">
           <div className="auth-screen__lockup">
-            <img className="auth-screen__logo" src="/newlogo.png" alt="" />
+            <img className="auth-screen__logo" src="/newlogo.png" alt="شعار مركز إسناد" width="160" height="160" />
             <div className="auth-screen__lockup-text">
               <span className="auth-screen__brand-name">
                 {isAr ? 'مركز إسناد' : 'Esnad Center'}

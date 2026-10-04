@@ -1,0 +1,39 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://esnads.net/library/9547512#article",
+  "headline": "قطر تغادر مقعد الوسيط في اليمن:  وتخندق «الجزيرة» في المعسكر السعودي",
+  "name": "قطر تغادر مقعد الوسيط في اليمن:  وتخندق «الجزيرة» في المعسكر السعودي",
+  "description": "",
+  "inLanguage": "ar",
+  "url": "https://esnads.net/library/9547512",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://esnads.net/library/9547512"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://esnads.net/#organization",
+    "name": "مركز إسناد للدراسات والأبحاث",
+    "alternateName": [
+      "اسناد",
+      "مركز اسناد",
+      "مركز إسناد",
+      "Esnads",
+      "Esnad",
+      "esnads.net"
+    ],
+    "url": "https://esnads.net",
+    "logo": "https://esnads.net/newlogo.png",
+    "sameAs": []
+  },
+  "author": {
+    "@type": "Person",
+    "name": "عبدالله م. بدوي"
+  },
+  "image": [
+    "https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_1200,h_675,c_fill,g_auto/v1790080853/esnad/m8bvupmziyi163mjjofe.jpg"
+  ],
+  "datePublished": "2026-09-22T11:57:41.896Z",
+  "dateModified": "2026-09-22T12:40:57.035Z"
+}

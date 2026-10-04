@@ -1,0 +1,42 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://esnads.net/#website",
+      "name": "إسناد",
+      "alternateName": [
+        "اسناد",
+        "مركز اسناد",
+        "مركز إسناد",
+        "Esnads",
+        "Esnad",
+        "esnads.net"
+      ],
+      "url": "https://esnads.net",
+      "publisher": {
+        "@id": "https://esnads.net/#organization"
+      },
+      "inLanguage": [
+        "ar",
+        "en"
+      ]
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://esnads.net/#organization",
+      "name": "مركز إسناد للدراسات والأبحاث",
+      "alternateName": [
+        "اسناد",
+        "مركز اسناد",
+        "مركز إسناد",
+        "Esnads",
+        "Esnad",
+        "esnads.net"
+      ],
+      "url": "https://esnads.net",
+      "logo": "https://esnads.net/newlogo.png",
+      "sameAs": []
+    }
+  ]
+}

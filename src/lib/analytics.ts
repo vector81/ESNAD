@@ -1,5 +1,4 @@
-import posthog from 'posthog-js'
-import type { PostHogConfig } from 'posthog-js'
+import type { PostHog, PostHogConfig } from 'posthog-js'
 import type { AppLanguage, Publication, SessionUser } from '../types/publication'
 import { getPublicationAuthor, getPublicationTitle, getShareSlug } from './publications'
 
@@ -26,7 +25,7 @@ const CONSENT_KEY = 'esnad_analytics_consent_v2'
 const CONSENT_EVENT = 'esnad:analytics-consent'
 let currentDistinctId = ''
 let currentCompanyDomain: string | null = null
-let isPostHogStarted = false
+let postHogReady: Promise<PostHog> | null = null
 
 export type AnalyticsConsentStatus = 'accepted'
 
@@ -46,9 +45,9 @@ export function hasAnalyticsConsent() {
 }
 
 function startPostHog() {
-  if (!isPostHogEnabled || isPostHogStarted || !hasAnalyticsConsent()) return
-
-  posthog.init(POSTHOG_TOKEN, {
+  if (!isPostHogEnabled || postHogReady || !hasAnalyticsConsent()) return
+  postHogReady = import('posthog-js').then(({ default: posthog }) => {
+  posthog.init(POSTHOG_TOKEN!, {
     api_host: POSTHOG_HOST,
     autocapture: true,
     capture_pageview: false,
@@ -57,7 +56,13 @@ function startPostHog() {
     person_profiles: 'identified_only',
   } satisfies Partial<PostHogConfig>)
 
-  isPostHogStarted = true
+  return posthog
+  })
+  void postHogReady.catch(() => { postHogReady = null })
+}
+function withPostHog(action: (sdk: PostHog) => void) {
+  startPostHog()
+  void postHogReady?.then(action).catch(() => { /* Analytics never blocks reading. */ })
 }
 
 export function setAnalyticsConsentStatus(status: AnalyticsConsentStatus) {
@@ -70,7 +75,7 @@ export function setAnalyticsConsentStatus(status: AnalyticsConsentStatus) {
   }
 
   startPostHog()
-  if (isPostHogEnabled) posthog.opt_in_capturing()
+  if (isPostHogEnabled) withPostHog(sdk => sdk.opt_in_capturing())
 
   window.dispatchEvent(new CustomEvent<AnalyticsConsentStatus>(CONSENT_EVENT, { detail: status }))
 }
@@ -132,7 +137,7 @@ async function sendServerEvent(event: string, properties: Record<string, unknown
     }),
   }).catch(() => {
     if (isPostHogEnabled) {
-      posthog.capture(event, properties)
+      withPostHog(sdk => sdk.capture(event, properties))
     }
   })
 }
@@ -145,8 +150,7 @@ export function identifyAnalyticsUser(user: SessionUser | null) {
     currentDistinctId = getAnonymousDistinctId()
     currentCompanyDomain = null
     if (isPostHogEnabled) {
-      posthog.unregister('visitor_company_domain')
-      posthog.reset()
+      withPostHog(sdk => { sdk.unregister('visitor_company_domain'); sdk.reset() })
     }
     return
   }
@@ -157,6 +161,7 @@ export function identifyAnalyticsUser(user: SessionUser | null) {
   currentCompanyDomain = companyDomain
 
   if (isPostHogEnabled) {
+    withPostHog(posthog => {
     posthog.identify(user.uid, {
       email: user.email,
       name: user.displayName,
@@ -171,6 +176,7 @@ export function identifyAnalyticsUser(user: SessionUser | null) {
     } else {
       posthog.unregister('visitor_company_domain')
     }
+    })
   }
 }
 
@@ -232,7 +238,5 @@ export function trackPublicationReadTime(
     url: window.location.href,
   })
 }
-
-export { posthog }
 
 startPostHog()

@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
 
 /* =======================================
    STRICT PALETTE: #E63946 (red) + #5BA3E6 (light blue) + #1B3A7B (dark blue)
@@ -184,7 +183,7 @@ h1, h2, h3, h4, p {
 
 .badge--accent {
   background: var(--accent-soft);
-  color: var(--red);
+  color: var(--red-dark);
   border-color: rgba(230, 57, 70, 0.25);
 }
 
@@ -3985,13 +3984,15 @@ h1, h2, h3, h4, p {
 }
 
 .home-hero__card-media {
+  aspect-ratio: 16 / 9;
   background: transparent;
   overflow: hidden;
 }
 
 .home-hero__card-media img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
@@ -4131,13 +4132,15 @@ h1, h2, h3, h4, p {
 }
 
 .latest-card__media {
+  aspect-ratio: 16 / 9;
   background: transparent;
   overflow: hidden;
 }
 
 .latest-card__media img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 

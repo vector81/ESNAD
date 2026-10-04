@@ -1,0 +1,50 @@
+<!doctype html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Books | إسناد</title>
+    <meta name="description" content="Published Esnad books with metadata, summaries, and canonical links." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://esnads.net/en/books" />
+    <link rel="alternate" hreflang="ar" href="https://esnads.net/books" />
+    <link rel="alternate" hreflang="x-default" href="https://esnads.net/books" />
+    <link rel="stylesheet" href="/assets/index.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="إسناد" />
+    <meta property="og:title" content="Books" />
+    <meta property="og:description" content="Published Esnad books with metadata, summaries, and canonical links." />
+    <meta property="og:url" content="https://esnads.net/en/books" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Books","description":"Published Esnad books with metadata, summaries, and canonical links.","url":"https://esnads.net/en/books","inLanguage":"en","mainEntity":{"@type":"ItemList","numberOfItems":0,"itemListElement":[]}}</script>
+    <style>
+      body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f2933; background: #fff; }
+      main { max-width: 1120px; margin: 0 auto; padding: 32px 20px 56px; }
+      nav { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 28px; }
+      nav a, article a { color: #9f1d20; text-decoration: none; }
+      h1 { font-size: 32px; line-height: 1.2; margin: 0 0 10px; }
+      .lede { max-width: 780px; color: #53606f; margin: 0 0 28px; line-height: 1.8; }
+      .catalog-item { display: grid; grid-template-columns: minmax(160px, 260px) 1fr; gap: 20px; padding: 22px 0; border-top: 1px solid #e5e7eb; }
+      .catalog-item img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: #f3f4f6; }
+      .catalog-item h2 { margin: 4px 0 8px; font-size: 22px; line-height: 1.45; }
+      .catalog-item p { margin: 0 0 10px; line-height: 1.75; }
+      .catalog-item .meta { display: flex; flex-wrap: wrap; gap: 10px; color: #687385; font-size: 14px; }
+      .catalog-item .full-title { font-weight: 600; }
+      @media (max-width: 700px) { .catalog-item { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <nav aria-label="Primary navigation"><a href="/en">Home</a><a href="/en/articles">Articles</a><a href="/en/library">Library</a><a href="/en/books">Books</a><a href="/llms.txt">LLMS</a><a href="/sitemap.xml">Sitemap</a></nav>
+      <header>
+        <h1>Books</h1>
+        <p class="lede">Published Esnad books with metadata, summaries, and canonical links.</p>
+      </header>
+      <section aria-label="Books">
+        <p>No published items are available.</p>
+      </section>
+    </main>
+    <div id="root" hidden></div>
+    <script type="module" src="/assets/index.js"></script>
+  </body>
+</html>
