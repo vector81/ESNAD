@@ -23,11 +23,30 @@ export function shortText(value, limit) {
   const cut = text.slice(0, limit - 1)
   return `${cut.slice(0, cut.lastIndexOf(' ') > limit / 2 ? cut.lastIndexOf(' ') : cut.length)}…`
 }
+const PUBLICATION_TITLE_PHRASES = {
+  "2630263": "الملف القانوني الدولي الموحّد: الجرائم المرتكبة في جنوب لبنان",
+  "2728521": "الحج والوعي السياسي في خطاب السيد مجتبى الخامنئي",
+  "3064572": "ترامب وسيكولوجيا الكذب السلطوي",
+  "4070119": "إسرائيل: تآكل «عقيدة الحسم» وأزمة «الجيش الصغير»",
+  "5143394": "مؤشرات الخراب الثالث في إسرائيل",
+  "7193246": "شهادة قائد سنتكوم أمام الكونغرس",
+  "8541485": "خطاب الشيخ نعيم قاسم: بين آب 2006 وآب 2026",
+  "8629683": "الإحباط يلفّ إسرائيل، وإيران تكرّس مبدأ وحدة الساحات فعلياً",
+  "8866951": "الامتحان الموحد في ظروف تعليمية غير متكافئة",
+  "9534802": "حين يغدو الوفاء لفلسطين حراسةً للبنان: قراءة في خطاب محمد رعد",
+  "9893292": "الشباك لن تنقذهم.. \"الموت بالألياف\" يتسلل من لبنان"
+}
+function completeTitle(value) {
+  const text = String(value || '').replace(/\s+/g, ' ').trim()
+  if (text.length <= 50) return text
+  const breakAt = text.search(/:|\s[-–—]\s|\s(?:دراسة|قراءة|تحليل)(?=\s|$)/u)
+  return breakAt > 0 ? text.slice(0, breakAt).trim() : text
+}
 function contentText(node) { return node?.text || (node?.content || []).map(contentText).join(' ') }
 export function publicationSeo(pub) {
   const override = PUBLICATION_SEO[publicationPublicId(pub)]
   return override || {
-    title: `${shortText(pub.headline_ar || pub.title_ar, 50)} | إسناد`,
+    title: `${PUBLICATION_TITLE_PHRASES[publicationPublicId(pub)] || completeTitle(pub.headline_ar || pub.title_ar)} | إسناد`,
     description: shortText(pub.abstract_ar || pub.description_ar || contentText(pub.content_json) || `قراءة ${pub.title_ar}، من إصدارات مركز إسناد للدراسات والأبحاث.`, 154),
   }
 }

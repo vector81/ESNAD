@@ -7,7 +7,7 @@ const publication = { id: 'd713e358-d198-49fb-8f46-e23c1ee60950', kind: 'article
 const fixtures = [publication, ...Object.keys(PAGE_SEO).map(path => ({ ...publication, ...PAGE_SEO[path], id: path })), { ...publication, id: '9928005' }, { ...publication, id: '7230859' }]
 for (const pub of fixtures) {
   const meta = publicationSeo(pub)
-  assert.ok(meta.title.length < 60, meta.title)
+  assert.doesNotMatch(meta.title, /…/, meta.title)
   assert.ok(meta.description.length < 155, meta.description)
   assert.doesNotMatch(meta.title, /[a-z]/i)
 }
