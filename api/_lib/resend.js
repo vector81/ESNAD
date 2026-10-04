@@ -1,3 +1,4 @@
+import { cleanAuthor } from '../../src/lib/cleanAuthor.js'
 const RESEND_API_URL = 'https://api.resend.com/emails'
 const DEFAULT_FROM_EMAIL = 'إسناد <noreply@esnads.net>'
 const DEFAULT_SITE_URL = 'https://esnads.net'
@@ -83,9 +84,9 @@ function getArticleCategory(article, language) {
 }
 
 function getArticleAuthor(article, language) {
-  return language === 'ar'
+  return cleanAuthor(language === 'ar'
     ? article?.author_ar?.trim() || article?.author_en?.trim() || DEFAULT_SITE_NAME
-    : article?.author_en?.trim() || article?.author_ar?.trim() || 'Esnad'
+    : article?.author_en?.trim() || article?.author_ar?.trim() || 'Esnad')
 }
 
 function getArticleSlug(article, language) {

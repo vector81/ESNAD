@@ -7,6 +7,7 @@ import * as structuredData from '../src/lib/structuredData.js'
 import * as seoMetadata from '../src/lib/seoMetadata.js'
 import * as seoTopics from '../src/lib/seoTopics.js'
 import * as articleImages from '../src/lib/articleImages.js'
+import { cleanAuthor } from '../src/lib/cleanAuthor.js'
 import { getPublicPublicationId } from '../api/_lib/publications.js'
 
 // Exercise the real renderers without connecting to production databases.
@@ -14,7 +15,7 @@ function loadFunctions(file, names, globals = {}) {
   const source = readFileSync(file, 'utf8')
     .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
     .replace('export default async function handler', 'async function handler')
-  return vm.runInNewContext(`${source}\n;({${names.join(',')}})`, { console: { error() {} }, ...structuredData, ...seoMetadata, ...seoTopics, ...globals })
+  return vm.runInNewContext(`${source}\n;({${names.join(',')}})`, { console: { error() {} }, cleanAuthor, ...structuredData, ...seoMetadata, ...seoTopics, ...globals })
 }
 
 const shell = loadFunctions('api/publication-shell.js', [

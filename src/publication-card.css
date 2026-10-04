@@ -32,8 +32,8 @@
 .publication-card .card__link { display: flex; flex-direction: column; width: 100%; }
 .publication-card .card__media { aspect-ratio: 16 / 9; overflow: hidden; flex: none; }
 .publication-card .card__media > img { width: 100%; height: 100%; object-fit: cover; }
-.publication-card .card__body { display: flex; flex-direction: column; gap: 16px; height: 230px; flex: none; padding: 20px; }
-.publication-card .card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; text-overflow: ellipsis; height: 81px; flex: none; }
+.publication-card .card__body { display: flex; flex-direction: column; gap: 8px; height: 200px; flex: none; padding: 20px; }
+.publication-card .card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; text-overflow: ellipsis; max-height: 81px; flex: none; }
 .publication-card .card__meta { flex-wrap: nowrap; }
 .publication-card .badge { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .card__byline { margin-top: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; font-size: 12px; line-height: 1.5; color: var(--text-muted); }

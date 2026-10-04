@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import {
   formatCurrency,
-  getCoverObjectPosition,
   getPublicationAuthor,
   getPublicationCategoryLabel,
   getPublicationTitle,
@@ -41,7 +40,7 @@ export function PublicationCard({
               width="800"
               height="450"
               decoding="async"
-              style={{ objectPosition: getCoverObjectPosition(publication) }}
+              style={{ objectPosition: 'center top' }}
             />
           ) : (
             <div className="card__fallback" data-category={publication.category} dir="rtl" lang="ar">

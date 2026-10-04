@@ -188,6 +188,11 @@ function usePublicSession() {
 	return context;
 }
 //#endregion
+//#region src/lib/cleanAuthor.js
+function cleanAuthor(value) {
+	return String(value || "").replace(/(?:\s*\[[0-9٠-٩۰-۹]+\])+\s*$/u, "").trim();
+}
+//#endregion
 //#region src/lib/publicationIdMap.ts
 var PUBLICATION_ID_MAP = {
 	"5143394": "0c4524af-b0c3-4677-98d6-afd0784505e8",
@@ -559,7 +564,7 @@ function getPublicationDescription(publication, language) {
 	return language === "ar" ? publication.description_ar || publication.description_en : publication.description_en || publication.description_ar;
 }
 function getPublicationAuthor(publication, language) {
-	return language === "ar" ? publication.author_ar || publication.author_en : publication.author_en || publication.author_ar;
+	return cleanAuthor(language === "ar" ? publication.author_ar || publication.author_en : publication.author_en || publication.author_ar);
 }
 function formatCurrency(amount, language) {
 	return new Intl.NumberFormat(language === "ar" ? "ar-EG" : "en-AU", {
@@ -1041,7 +1046,7 @@ function isoDate(value) {
 }
 function createArticleStructuredData(pub, { url, image = getPublicationImage(pub) }) {
 	const organization = createOrganizationStructuredData();
-	const author = pub.author_ar?.trim() || pub.author_en?.trim() || "";
+	const author = cleanAuthor(pub.author_ar?.trim() || pub.author_en?.trim());
 	const datePublished = isoDate(pub.published_at) || isoDate(pub.created_at);
 	const dateModified = isoDate(pub.updated_at) || datePublished;
 	const publicationImage = image || getPublicationImage(pub);
@@ -1731,7 +1736,7 @@ function PublicationCard({ publication, language }) {
 					width: "800",
 					height: "450",
 					decoding: "async",
-					style: { objectPosition: getCoverObjectPosition(publication) }
+					style: { objectPosition: "center top" }
 				}) : /* @__PURE__ */ jsxs("div", {
 					className: "card__fallback",
 					"data-category": publication.category,
@@ -2152,13 +2157,10 @@ var categoryLabels = {
 	documents: "وثائق",
 	"situation-assessment": "تقييم وضعية"
 };
-function imagePosition(pub) {
-	return `${Number.isFinite(Number(pub.cover_position_x)) ? Number(pub.cover_position_x) : 50}% ${Number.isFinite(Number(pub.cover_position_y)) ? Number(pub.cover_position_y) : 50}%`;
-}
 function homeHeroInnerHtml(pub, language = "ar") {
 	const ar = language === "ar", prefix = ar ? "" : "/en";
 	const title = pub ? ar ? pub.title_ar : pub.title_en || pub.title_ar : "";
-	return `<div class="home-hero__copy"><span class="home-badge">${ar ? SEO_SITE_NAME : "Esnad Center for Studies and Research"}</span><h1 class="home-hero__title">${ar ? "مكتبة بحثية عربية للدراسات والأوراق والكتب" : "An Arabic research library for studies, papers, and books"}</h1><p class="home-hero__sub">${ar ? "منصة متخصصة في نشر وأرشفة وبيع الإصدارات البحثية. تجمع بين الوصول المفتوح والمحتوى المدفوع في تجربة تصفح نظيفة ومركزة." : "A specialized platform for publishing, archiving, and selling research publications."}</p><div class="home-hero__actions"><a class="btn btn--brand" href="${prefix}/library">${ar ? "تصفح المكتبة" : "Browse library"}</a><a class="btn btn--brand-outline" href="${prefix}/articles">${ar ? "استكشف المقالات" : "Explore articles"}</a></div></div>${pub ? `<a class="home-hero__card" href="${prefix}${publicationPath(pub)}"><div class="home-hero__card-media">${getPublicationImage(pub) ? `<img alt="${escapeHtml(pub.title_ar)}" src="${escapeHtml(displayImage(pub, 800))}" srcset="${escapeHtml(articleImageSrcSet(getPublicationImage(pub)))}" sizes="(max-width: 800px) calc(100vw - 58px), 480px" width="800" height="450" decoding="async" fetchpriority="high" style="object-position:${imagePosition(pub)}"/>` : "<div class=\"home-hero__card-media-placeholder\"></div>"}</div><div class="home-hero__card-body"><span class="home-tag">${escapeHtml(categoryLabels[pub.category] || SEO_TOPICS[pub.category]?.title || pub.category)}</span><h2 class="home-hero__card-title">${escapeHtml(title)}</h2></div></a>` : "<div class=\"home-hero__card home-hero__card--empty\"></div>"}`;
+	return `<div class="home-hero__copy"><span class="home-badge">${ar ? SEO_SITE_NAME : "Esnad Center for Studies and Research"}</span><h1 class="home-hero__title">${ar ? "مكتبة بحثية عربية للدراسات والأوراق والكتب" : "An Arabic research library for studies, papers, and books"}</h1><p class="home-hero__sub">${ar ? "منصة متخصصة في نشر وأرشفة وبيع الإصدارات البحثية. تجمع بين الوصول المفتوح والمحتوى المدفوع في تجربة تصفح نظيفة ومركزة." : "A specialized platform for publishing, archiving, and selling research publications."}</p><div class="home-hero__actions"><a class="btn btn--brand" href="${prefix}/library">${ar ? "تصفح المكتبة" : "Browse library"}</a><a class="btn btn--brand-outline" href="${prefix}/articles">${ar ? "استكشف المقالات" : "Explore articles"}</a></div></div>${pub ? `<a class="home-hero__card" href="${prefix}${publicationPath(pub)}"><div class="home-hero__card-media">${getPublicationImage(pub) ? `<img alt="${escapeHtml(pub.title_ar)}" src="${escapeHtml(displayImage(pub, 800))}" srcset="${escapeHtml(articleImageSrcSet(getPublicationImage(pub)))}" sizes="(max-width: 800px) calc(100vw - 58px), 480px" width="800" height="450" decoding="async" fetchpriority="high" style="object-position:center top"/>` : "<div class=\"home-hero__card-media-placeholder\"></div>"}</div><div class="home-hero__card-body"><span class="home-tag">${escapeHtml(categoryLabels[pub.category] || SEO_TOPICS[pub.category]?.title || pub.category)}</span><h2 class="home-hero__card-title">${escapeHtml(title)}</h2></div></a>` : "<div class=\"home-hero__card home-hero__card--empty\"></div>"}`;
 }
 //#endregion
 //#region src/components/public/HomeHero.tsx
@@ -2185,7 +2187,7 @@ function computeStats(items, language) {
 	const publicationsCount = items.length;
 	const authors = /* @__PURE__ */ new Set();
 	for (const item of items) {
-		const a = (item.author_ar || item.author_en || "").trim();
+		const a = cleanAuthor(item.author_ar || item.author_en);
 		if (a) authors.add(a);
 	}
 	let earliestYear = (/* @__PURE__ */ new Date()).getFullYear();
@@ -2215,7 +2217,7 @@ function ResearchHomePage({ language, initialPublications }) {
 	}, []);
 	const stats = useMemo(() => computeStats(items, language), [items, language]);
 	const heroFeature = useMemo(() => items.find((item) => item.featured) ?? items[0], [items]);
-	const spotlight = useMemo(() => items.find((item) => item.featured) ?? items[0], [items]);
+	const spotlight = useMemo(() => items.filter((item) => item.featured && item.id !== heroFeature?.id).sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())[0], [items, heroFeature?.id]);
 	const latest = useMemo(() => items.slice(0, 6), [items]);
 	const filteredCategories = useMemo(() => PUBLICATION_CATEGORIES.filter((category) => Boolean(SEO_TOPICS[category.id]) && items.some((item) => item.category === category.id)), [items]);
 	const statsLabels = getStatsLabels(language);
@@ -2296,7 +2298,7 @@ function ResearchHomePage({ language, initialPublications }) {
 							sizes: "(max-width: 800px) calc(100vw - 58px), 600px",
 							loading: "lazy",
 							decoding: "async",
-							style: { objectPosition: getCoverObjectPosition(spotlight) }
+							style: { objectPosition: "center top" }
 						}) : null
 					}), /* @__PURE__ */ jsxs("div", {
 						className: "spotlight-band__copy",

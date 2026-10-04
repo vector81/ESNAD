@@ -8,6 +8,7 @@ import type {
 } from '../types/publication'
 import { isFirebaseConfigured } from './firebaseConfig'
 import { auth } from './publicAuth'
+import { cleanAuthor } from './cleanAuthor.js'
 import { PUBLICATION_ID_MAP } from './publicationIdMap'
 
 export const PUBLICATION_CATEGORIES: Array<{
@@ -422,9 +423,9 @@ export function getPublicationDescription(publication: Publication, language: Ap
 }
 
 export function getPublicationAuthor(publication: Publication, language: AppLanguage) {
-  return language === 'ar'
+  return cleanAuthor(language === 'ar'
     ? publication.author_ar || publication.author_en
-    : publication.author_en || publication.author_ar
+    : publication.author_en || publication.author_ar)
 }
 
 export function getPublicationTopic(publication: Publication, language: AppLanguage) {

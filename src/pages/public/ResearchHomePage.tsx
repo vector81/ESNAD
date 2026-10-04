@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { PublicSiteShell } from '../../components/public/PublicSiteShell'
 import { PublicationCard } from '../../components/public/PublicationCard'
 import { HomeHero } from '../../components/public/HomeHero'
+import { cleanAuthor } from '../../lib/cleanAuthor.js'
 import { displayImage } from '../../lib/initialPageHtml.js'
 import { articleImageSrcSet } from '../../lib/articleImages.js'
 import { getPublicationImage } from '../../lib/structuredData.js'
@@ -11,7 +12,6 @@ import { SEO_TOPICS } from '../../lib/seoTopics.js'
 import { buildLocalizedPath, buildPublicationPath } from '../../lib/navigation'
 import {
   PUBLICATION_CATEGORIES,
-  getCoverObjectPosition,
   getPublicationAbstract,
   getPublicationCategoryLabel,
   getPublicationTitle,
@@ -44,7 +44,7 @@ function computeStats(items: Publication[], language: AppLanguage): SiteStats {
 
   const authors = new Set<string>()
   for (const item of items) {
-    const a = (item.author_ar || item.author_en || '').trim()
+    const a = cleanAuthor(item.author_ar || item.author_en)
     if (a) authors.add(a)
   }
 
@@ -86,8 +86,9 @@ export function ResearchHomePage({ language, initialPublications }: { language: 
 
   const heroFeature = useMemo(() => items.find((item) => item.featured) ?? items[0], [items])
   const spotlight = useMemo(
-    () => items.find((item) => item.featured) ?? items[0],
-    [items],
+    () => items.filter(item => item.featured && item.id !== heroFeature?.id)
+      .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())[0],
+    [items, heroFeature?.id],
   )
   const latest = useMemo(() => items.slice(0, 6), [items])
 
@@ -173,7 +174,7 @@ export function ResearchHomePage({ language, initialPublications }: { language: 
                   sizes="(max-width: 800px) calc(100vw - 58px), 600px"
                   loading="lazy"
                   decoding="async"
-                  style={{ objectPosition: getCoverObjectPosition(spotlight) }}
+                  style={{ objectPosition: 'center top' }}
                 />
               ) : null}
             </div>

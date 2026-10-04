@@ -1,3 +1,4 @@
+import { cleanAuthor } from '../../lib/cleanAuthor.js'
 import { useState } from 'react'
 import { renderPmJson } from '../lib/render-pm-json'
 import type { Publication } from '../../types/publication'
@@ -17,7 +18,7 @@ export function BookReader({ publication, chapters }: BookReaderProps) {
       <aside className="reader-book__toc">
         <div className="reader-book__toc-header">
           <h2 className="reader-book__toc-title">{publication.title_ar}</h2>
-          {publication.author_ar && <p className="reader-book__toc-author">{publication.author_ar}</p>}
+          {publication.author_ar && <p className="reader-book__toc-author">{cleanAuthor(publication.author_ar)}</p>}
         </div>
         <nav className="reader-book__toc-nav">
           <ol className="reader-book__toc-list">

@@ -1,5 +1,6 @@
 import { ARTICLE_COVER_FALLBACKS } from './articleCoverFallbacks.js'
 import { publicationSeo } from './seoMetadata.js'
+import { cleanAuthor } from './cleanAuthor.js'
 
 export const SEO_SITE_URL = 'https://esnads.net'
 export const SEO_SITE_NAME = 'مركز إسناد للدراسات والأبحاث'
@@ -42,7 +43,7 @@ function isoDate(value) {
 
 export function createArticleStructuredData(pub, { url, image = getPublicationImage(pub) }) {
   const organization = createOrganizationStructuredData()
-  const author = pub.author_ar?.trim() || pub.author_en?.trim() || ''
+  const author = cleanAuthor(pub.author_ar?.trim() || pub.author_en?.trim())
   const datePublished = isoDate(pub.published_at) || isoDate(pub.created_at)
   const dateModified = isoDate(pub.updated_at) || datePublished
   const publicationImage = image || getPublicationImage(pub)

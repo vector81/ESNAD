@@ -6,17 +6,22 @@ import { createHash } from 'node:crypto'
 import { ARTICLE_IMAGE_ASSETS } from '../src/lib/articleImageAssets.js'
 import { ARTICLE_COVER_FALLBACKS } from '../src/lib/articleCoverFallbacks.js'
 import { getPublicationImage, createArticleStructuredData } from '../src/lib/structuredData.js'
-import { publicationSeo } from '../src/lib/seoMetadata.js'
+import { publicationSeo, publicationPublicId } from '../src/lib/seoMetadata.js'
+import { cleanAuthor } from '../src/lib/cleanAuthor.js'
 const { chromium } = await import(pathToFileURL(process.env.PLAYWRIGHT_MODULE).href)
 const bytes = await readFile('api/_data/publication-snapshot.json')
 const { publications } = JSON.parse(bytes)
-const directory = 'audit/paper-cleanup-job-c'
+const directory = process.argv[2] || 'audit/paper-cleanup-job-c'
 await mkdir(directory, { recursive: true })
 for (const publication of publications) {
   const expected = publication.cover_image || ARTICLE_COVER_FALLBACKS[publication.id] || ''
   assert.equal(getPublicationImage(publication), expected ? new URL(expected, 'https://esnads.net').href : '')
   assert.equal(createArticleStructuredData(publication, { url: 'https://esnads.net/library/test' }).image[0], getPublicationImage(publication) || undefined)
+  assert.equal(createArticleStructuredData(publication, { url: 'https://esnads.net/library/test' }).author.name, cleanAuthor(publication.author_ar || publication.author_en))
 }
+assert.equal(cleanAuthor('اسم الكاتب [1] [٢] '), 'اسم الكاتب')
+assert.equal(cleanAuthor('Writer [2]'), 'Writer')
+assert.equal(cleanAuthor('Writer [2] and colleague'), 'Writer [2] and colleague')
 const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH })
 const results = [], blockedExternalHosts = new Set()
 try {
@@ -50,6 +55,8 @@ try {
         image: el.querySelector('.card__media > img')?.getAttribute('src'),
         author: el.querySelector('.card__byline > span').textContent,
         date: el.querySelector('time').getAttribute('datetime'),
+        imagePosition: el.querySelector('.card__media > img') ? getComputedStyle(el.querySelector('.card__media > img')).objectPosition : null,
+        tagGap: el.querySelector('.card__meta').getBoundingClientRect().top - el.querySelector('.card__title').getBoundingClientRect().bottom,
       })))
       assert.deepEqual(errors, [])
       assert.ok(Math.max(...cards.map(c => c.height)) - Math.min(...cards.map(c => c.height)) < 1, 'All grid cards have equal height')
@@ -59,7 +66,18 @@ try {
         assert.equal(card.title, publicationSeo(pub).title.replace(/\s*\|\s*إسناد$/, ''))
         assert.equal(card.lines, '3')
         assert.equal(card.date, pub.published_at)
-        assert.equal(card.author, pub.author_ar || pub.author_en)
+        assert.equal(card.author, cleanAuthor(pub.author_ar || pub.author_en))
+        assert.ok(card.tagGap >= 0 && card.tagGap <= 10, 'Tags immediately follow the title')
+        if (card.image) assert.equal(card.imagePosition, '50% 0%')
+      }
+      if (name === 'homepage') {
+        const spotlight = await page.evaluate(() => ({ hero: document.querySelector('.home-hero__card').getAttribute('href'), heroPosition: getComputedStyle(document.querySelector('.home-hero__card-media img')).objectPosition, spotlight: document.querySelector('.spotlight-band__copy a').getAttribute('href'), height: document.querySelector('.spotlight-band__media img').getBoundingClientRect().height, fit: getComputedStyle(document.querySelector('.spotlight-band__media img')).objectFit }))
+        assert.notEqual(spotlight.hero, spotlight.spotlight)
+        const expectedSpotlight = publications.filter(p => p.featured && !spotlight.hero.endsWith('/' + publicationPublicId(p))).sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at))[0]
+        assert.ok(spotlight.spotlight.endsWith('/' + publicationPublicId(expectedSpotlight)))
+        assert.equal(spotlight.heroPosition, '50% 0%')
+        assert.ok(spotlight.height <= 520)
+        assert.equal(spotlight.fit, 'cover')
       }
       assert.ok(cards.slice(0, 6).filter(c => c.fallback).length >= 2)
       assert.ok(cards.slice(0, 6).filter(c => c.image).length >= 2)

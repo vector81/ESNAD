@@ -1,3 +1,4 @@
+import { cleanAuthor } from '../../lib/cleanAuthor.js'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { deletePublication, listAdminPublications } from '../../lib/publications'
@@ -131,7 +132,7 @@ export function AdminDashboardPage() {
                 <h3 className="title-3">{item.title_ar}</h3>
                 <p className="list-abstract">{item.abstract_ar}</p>
                 <div className="admin-list__meta">
-                  <span>{item.author_ar}</span>
+                  <span>{cleanAuthor(item.author_ar)}</span>
                   <span>{formatArabicDate(item.published_at)}</span>
                   <span>{item.pages} صفحة</span>
                 </div>

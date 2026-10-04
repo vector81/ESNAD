@@ -1,4 +1,5 @@
 import { sendPageError } from './_lib/page-error.js'
+import { cleanAuthor } from '../src/lib/cleanAuthor.js'
 import { PUBLICATION_ID_MAP } from './_lib/publication-id-map.js'
 import {
   createOrganizationStructuredData, createWebsiteStructuredData,
@@ -611,7 +612,7 @@ function renderCatalogPublication(pub, language) {
   const abstract = getAbstract(pub, language)
   const path = getCatalogItemPath(pub, language)
   const publishedDate = pub.published_at ? new Date(pub.published_at).toISOString().slice(0, 10) : ''
-  const author = language === 'en' ? pub.author_en || pub.author_ar : pub.author_ar || pub.author_en
+  const author = cleanAuthor(language === 'en' ? pub.author_en || pub.author_ar : pub.author_ar || pub.author_en)
 
   return `<article class="catalog-item" itemscope itemtype="https://schema.org/Article">
     ${getPublicationImage(pub) ? `<a href="${escapeHtml(path)}"><img src="${escapeHtml(optimizeOgImage(getPublicationImage(pub)))}" alt="${escapeHtml(title)}" loading="lazy" itemprop="image" /></a>` : ''}
@@ -847,7 +848,7 @@ export default async function handler(request, response) {
         url: buildAbsoluteUrl(canonicalPath),
         ogType: 'article',
         articleTitle: getTitle(pub, language),
-        articleAuthor: language === 'en' ? pub.author_en || pub.author_ar : pub.author_ar || pub.author_en,
+        articleAuthor: cleanAuthor(language === 'en' ? pub.author_en || pub.author_ar : pub.author_ar || pub.author_en),
         articlePublishedAt: pub.published_at ? new Date(pub.published_at).toISOString().slice(0, 10) : '',
         articleBodyHtml: getArticleBodyHtml(pub, language).replace(/<h1\b/g, '<h2').replace(/<\/h1>/g, '</h2>').replace(/alt=""/g, `alt="${escapeHtml(`صورة توضيحية: ${pub.title_ar}`)}"`),
         breadcrumbJsonLd: publicationBreadcrumbs(pub),

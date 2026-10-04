@@ -1,3 +1,4 @@
+import { cleanAuthor } from '../../lib/cleanAuthor.js'
 import { renderPmJson } from '../lib/render-pm-json'
 import type { Publication } from '../../types/publication'
 
@@ -12,7 +13,7 @@ export function ArticleReader({ publication }: ArticleReaderProps) {
         <h1 className="reader-title">{publication.title_ar}</h1>
         {publication.title_en ? <p className="reader-subtitle">{publication.title_en}</p> : null}
         <div className="reader-meta">
-          {publication.author_ar && <span className="reader-author">{publication.author_ar}</span>}
+          {publication.author_ar && <span className="reader-author">{cleanAuthor(publication.author_ar)}</span>}
           {publication.published_at && (
             <span className="reader-date">
               {new Date(publication.published_at).toLocaleDateString('ar-EG', {
