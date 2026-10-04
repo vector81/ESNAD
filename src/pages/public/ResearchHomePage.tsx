@@ -2,6 +2,7 @@ import type { FormEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PublicSiteShell } from '../../components/public/PublicSiteShell'
+import { PublicationCard } from '../../components/public/PublicationCard'
 import { HomeHero } from '../../components/public/HomeHero'
 import { displayImage } from '../../lib/initialPageHtml.js'
 import { articleImageSrcSet } from '../../lib/articleImages.js'
@@ -88,7 +89,7 @@ export function ResearchHomePage({ language, initialPublications }: { language: 
     () => items.find((item) => item.featured) ?? items[0],
     [items],
   )
-  const latest = useMemo(() => items.slice(0, 4), [items])
+  const latest = useMemo(() => items.slice(0, 6), [items])
 
   const filteredCategories = useMemo(
     () => PUBLICATION_CATEGORIES.filter(category => Boolean(SEO_TOPICS[category.id]) && items.some(item => item.category === category.id)),
@@ -155,35 +156,7 @@ export function ResearchHomePage({ language, initialPublications }: { language: 
         </div>
         <div className="latest-grid">
           {latest.map((publication) => (
-            <Link
-              key={publication.id}
-              className="latest-card"
-              to={buildPublicationPath(publication, language)}
-            >
-              <div className="latest-card__media">
-                {getPublicationImage(publication) ? (
-                  <img width="800" height="450"
-                    alt={getPublicationTitle(publication, language)}
-                    src={displayImage(publication, 800)}
-                    srcSet={articleImageSrcSet(getPublicationImage(publication))}
-                    sizes="(max-width: 800px) calc(100vw - 58px), 360px"
-                    loading="lazy"
-                    decoding="async"
-                    style={{ objectPosition: getCoverObjectPosition(publication) }}
-                  />
-                ) : (
-                  <div className="latest-card__media-placeholder" />
-                )}
-              </div>
-              <div className="latest-card__body">
-                <span className="home-tag">
-                  {getPublicationCategoryLabel(publication.category, language)}
-                </span>
-                <h3 className="latest-card__title">
-                  {getPublicationTitle(publication, language)}
-                </h3>
-              </div>
-            </Link>
+            <PublicationCard key={publication.id} publication={publication} language={language} />
           ))}
         </div>
       </section>

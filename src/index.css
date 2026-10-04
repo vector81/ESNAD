@@ -1,4 +1,6 @@
 
+@import './publication-card.css';
+
 /* =======================================
    STRICT PALETTE: #E63946 (red) + #5BA3E6 (light blue) + #1B3A7B (dark blue)
    ======================================= */
@@ -4117,7 +4119,7 @@ h1, h2, h3, h4, p {
 
 .latest-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 

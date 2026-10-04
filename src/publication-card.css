@@ -1,0 +1,71 @@
+/* One cover colour per publication category; all use white lettering. */
+:root {
+  --cover-studies: #23475e;
+  --cover-policy-paper: #5c405c;
+  --cover-economic-paper: #246254;
+  --cover-analytical-paper: #4a5274;
+  --cover-reports: #596040;
+  --cover-strategic-estimate: #704839;
+  --cover-situation-assessment: #365d66;
+  --cover-legal-paper: #284c75;
+  --cover-opinion-article: #8b343c;
+  --cover-cultural-article: #765337;
+  --cover-cultural-paper: #654469;
+  --cover-foresight: #3c547c;
+  --cover-position-analysis: #37664d;
+  --cover-expert-survey: #6d514d;
+  --cover-periodic-reports: #49633e;
+  --cover-case-monitoring: #3e6473;
+  --cover-media-analysis: #754452;
+  --cover-policy-analysis: #574977;
+  --cover-psychological-studies: #416453;
+  --cover-analysis-summary: #625c37;
+  --cover-information-file: #3b596d;
+  --cover-documents: #6c493e;
+  --cover-translations: #536742;
+  --cover-profile: #69516b;
+  --cover-concept: #366166;
+  --cover-infographic: #725334;
+}
+
+.publication-card { display: flex; height: 100%; }
+.publication-card .card__link { display: flex; flex-direction: column; width: 100%; }
+.publication-card .card__media { aspect-ratio: 16 / 9; overflow: hidden; flex: none; }
+.publication-card .card__media > img { width: 100%; height: 100%; object-fit: cover; }
+.publication-card .card__body { display: flex; flex-direction: column; gap: 16px; height: 230px; flex: none; padding: 20px; }
+.publication-card .card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; text-overflow: ellipsis; height: 81px; flex: none; }
+.publication-card .card__meta { flex-wrap: nowrap; }
+.publication-card .badge { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.card__byline { margin-top: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; font-size: 12px; line-height: 1.5; color: var(--text-muted); }
+.card__byline > span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.card__byline time { white-space: nowrap; }
+.card__fallback { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: clamp(12px, 1.4vw, 20px); color: #fff; background: var(--cover-colour, var(--cover-studies)); }
+.card__fallback-logo { display: grid; place-items: center; flex: none; width: clamp(56px, 5vw, 72px); height: clamp(56px, 5vw, 72px); background: #fff; border-radius: 50%; padding: 6px; }
+.publication-card .card__fallback-logo img { width: 100%; height: 100%; object-fit: contain; }
+.card__fallback-category { font-size: clamp(22px, 2.3vw, 30px); font-weight: 700; line-height: 1.3; text-align: center; }
+.card__fallback[data-category="studies"] { --cover-colour: var(--cover-studies); }
+.card__fallback[data-category="policy-paper"] { --cover-colour: var(--cover-policy-paper); }
+.card__fallback[data-category="economic-paper"] { --cover-colour: var(--cover-economic-paper); }
+.card__fallback[data-category="analytical-paper"] { --cover-colour: var(--cover-analytical-paper); }
+.card__fallback[data-category="reports"] { --cover-colour: var(--cover-reports); }
+.card__fallback[data-category="strategic-estimate"] { --cover-colour: var(--cover-strategic-estimate); }
+.card__fallback[data-category="situation-assessment"] { --cover-colour: var(--cover-situation-assessment); }
+.card__fallback[data-category="legal-paper"] { --cover-colour: var(--cover-legal-paper); }
+.card__fallback[data-category="opinion-article"] { --cover-colour: var(--cover-opinion-article); }
+.card__fallback[data-category="cultural-article"] { --cover-colour: var(--cover-cultural-article); }
+.card__fallback[data-category="cultural-paper"] { --cover-colour: var(--cover-cultural-paper); }
+.card__fallback[data-category="foresight"] { --cover-colour: var(--cover-foresight); }
+.card__fallback[data-category="position-analysis"] { --cover-colour: var(--cover-position-analysis); }
+.card__fallback[data-category="expert-survey"] { --cover-colour: var(--cover-expert-survey); }
+.card__fallback[data-category="periodic-reports"] { --cover-colour: var(--cover-periodic-reports); }
+.card__fallback[data-category="case-monitoring"] { --cover-colour: var(--cover-case-monitoring); }
+.card__fallback[data-category="media-analysis"] { --cover-colour: var(--cover-media-analysis); }
+.card__fallback[data-category="policy-analysis"] { --cover-colour: var(--cover-policy-analysis); }
+.card__fallback[data-category="psychological-studies"] { --cover-colour: var(--cover-psychological-studies); }
+.card__fallback[data-category="analysis-summary"] { --cover-colour: var(--cover-analysis-summary); }
+.card__fallback[data-category="information-file"] { --cover-colour: var(--cover-information-file); }
+.card__fallback[data-category="documents"] { --cover-colour: var(--cover-documents); }
+.card__fallback[data-category="translations"] { --cover-colour: var(--cover-translations); }
+.card__fallback[data-category="profile"] { --cover-colour: var(--cover-profile); }
+.card__fallback[data-category="concept"] { --cover-colour: var(--cover-concept); }
+.card__fallback[data-category="infographic"] { --cover-colour: var(--cover-infographic); }

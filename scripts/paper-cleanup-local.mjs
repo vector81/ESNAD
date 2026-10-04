@@ -9,6 +9,13 @@ const server = await createServer({ configFile: 'vite.public.config.ts', server:
 server.middlewares.use(async (req, res, next) => {
   const path = new URL(req.url, 'http://localhost').pathname
   if (path === '/api/publications') { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ publications })); return }
+  if (['/', '/library'].includes(path)) {
+    let template = await readFile('sites/public/index.html', 'utf8')
+    template = template.replace('src="./main.tsx"', 'src="/main.tsx"').replace('</head>', `<script id="initial-catalog-data" type="application/json">${serializeStructuredData(publications)}</script></head>`)
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    res.end(await server.transformIndexHtml(path, template))
+    return
+  }
   const match = path.match(/^\/(en\/)?library\/([^/]+)$/)
   if (!match) return next()
   const publication = publications.find(p => [p.id, publicationPublicId(p)].includes(match[2]))

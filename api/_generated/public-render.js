@@ -552,10 +552,6 @@ function getPublicationKindLabel(kind, language) {
 function getPublicationTitle(publication, language) {
 	return language === "ar" ? publication.title_ar : publication.title_en || publication.title_ar;
 }
-function getPublicationHeadline(publication, language) {
-	if (language === "ar") return publication.headline_ar?.trim() || publication.headline_en?.trim() || publication.title_ar || publication.title_en || "";
-	return publication.headline_en?.trim() || publication.headline_ar?.trim() || publication.title_en || publication.title_ar || "";
-}
 function getPublicationAbstract(publication, language) {
 	return language === "ar" ? publication.abstract_ar || publication.abstract_en : publication.abstract_en || publication.abstract_ar;
 }
@@ -1679,6 +1675,111 @@ function PublicSiteShell({ language, children, noindex = false }) {
 	});
 }
 //#endregion
+//#region src/lib/cloudinary.ts
+function sanitizeEnvValue(value) {
+	const normalized = value?.trim() ?? "";
+	if (!normalized) return "";
+	const lowered = normalized.toLowerCase();
+	return [
+		"your-",
+		"your_",
+		"placeholder",
+		"example",
+		"changeme",
+		"<",
+		"cloud_name",
+		"upload_preset"
+	].some((fragment) => lowered.includes(fragment)) ? "" : normalized;
+}
+sanitizeEnvValue("di3atf0hx");
+sanitizeEnvValue("ablecare_docs");
+sanitizeEnvValue("esnad");
+function optimizeCloudinaryUrl(url, options = {}) {
+	if (!url) return "";
+	if (!/res\.cloudinary\.com\/.+?\/image\/upload\//.test(url)) return url;
+	const width = options.width && Number.isFinite(options.width) ? Math.round(options.width) : null;
+	if (/\/image\/upload\/[^/]*[fq]_[^/]*\//.test(url)) {
+		if (!width) return url;
+		return url.replace(/\/image\/upload\/([^/]+)\//, `/image/upload/$1/w_${width},c_limit/`);
+	}
+	const parts = ["f_auto", "q_auto"];
+	if (width) parts.push(`w_${width}`, "c_limit");
+	return url.replace("/image/upload/", `/image/upload/${parts.join(",")}/`);
+}
+//#endregion
+//#region src/components/public/PublicationCard.tsx
+function getPublicationPath(publication, language) {
+	return `${language === "en" ? "/en" : ""}/${publication.kind === "book" ? "books" : "library"}/${getShareSlug(publication)}`;
+}
+function PublicationCard({ publication, language }) {
+	const publishedDate = new Intl.DateTimeFormat(language === "ar" ? "ar-EG" : "en-AU", {
+		dateStyle: "medium",
+		timeZone: "UTC"
+	}).format(new Date(publication.published_at));
+	return /* @__PURE__ */ jsx("article", {
+		className: "card publication-card",
+		"data-publication-id": publication.id,
+		children: /* @__PURE__ */ jsxs(Link, {
+			className: "card__link",
+			to: getPublicationPath(publication, language),
+			children: [/* @__PURE__ */ jsx("div", {
+				className: "card__media",
+				children: publication.cover_image?.trim() ? /* @__PURE__ */ jsx("img", {
+					alt: getPublicationTitle(publication, language),
+					src: optimizeCloudinaryUrl(publication.cover_image, { width: 800 }),
+					loading: "lazy",
+					width: "800",
+					height: "450",
+					decoding: "async",
+					style: { objectPosition: getCoverObjectPosition(publication) }
+				}) : /* @__PURE__ */ jsxs("div", {
+					className: "card__fallback",
+					"data-category": publication.category,
+					dir: "rtl",
+					lang: "ar",
+					children: [/* @__PURE__ */ jsx("span", {
+						className: "card__fallback-logo",
+						children: /* @__PURE__ */ jsx("img", {
+							src: "/newlogo.png",
+							alt: "",
+							width: "80",
+							height: "80"
+						})
+					}), /* @__PURE__ */ jsx("span", {
+						className: "card__fallback-category",
+						children: getPublicationCategoryLabel(publication.category, "ar")
+					})]
+				})
+			}), /* @__PURE__ */ jsxs("div", {
+				className: "card__body",
+				children: [
+					/* @__PURE__ */ jsx("h3", {
+						className: "card__title",
+						children: publicationSeo(publication).title.replace(/\s*\|\s*إسناد$/, "")
+					}),
+					/* @__PURE__ */ jsxs("div", {
+						className: "card__meta",
+						children: [/* @__PURE__ */ jsx("span", {
+							className: "badge badge--accent",
+							children: getPublicationCategoryLabel(publication.category, language)
+						}), /* @__PURE__ */ jsx("span", {
+							className: "badge badge--neutral",
+							children: publication.access_tier === "free" ? language === "ar" ? "مجاني" : "Free" : formatCurrency(publication.price_aud, language)
+						})]
+					}),
+					/* @__PURE__ */ jsxs("div", {
+						className: "card__byline",
+						children: [/* @__PURE__ */ jsx("span", { children: getPublicationAuthor(publication, language) }), /* @__PURE__ */ jsx("time", {
+							dateTime: publication.published_at,
+							children: publishedDate
+						})]
+					})
+				]
+			})]
+		})
+	});
+}
+//#endregion
 //#region src/lib/seoTopics.js
 var SEO_TOPICS = {
 	studies: {
@@ -2115,7 +2216,7 @@ function ResearchHomePage({ language, initialPublications }) {
 	const stats = useMemo(() => computeStats(items, language), [items, language]);
 	const heroFeature = useMemo(() => items.find((item) => item.featured) ?? items[0], [items]);
 	const spotlight = useMemo(() => items.find((item) => item.featured) ?? items[0], [items]);
-	const latest = useMemo(() => items.slice(0, 4), [items]);
+	const latest = useMemo(() => items.slice(0, 6), [items]);
 	const filteredCategories = useMemo(() => PUBLICATION_CATEGORIES.filter((category) => Boolean(SEO_TOPICS[category.id]) && items.some((item) => item.category === category.id)), [items]);
 	const statsLabels = getStatsLabels(language);
 	const handleNewsletter = async (event) => {
@@ -2174,32 +2275,9 @@ function ResearchHomePage({ language, initialPublications }) {
 					})]
 				}), /* @__PURE__ */ jsx("div", {
 					className: "latest-grid",
-					children: latest.map((publication) => /* @__PURE__ */ jsxs(Link, {
-						className: "latest-card",
-						to: buildPublicationPath(publication, language),
-						children: [/* @__PURE__ */ jsx("div", {
-							className: "latest-card__media",
-							children: getPublicationImage(publication) ? /* @__PURE__ */ jsx("img", {
-								width: "800",
-								height: "450",
-								alt: getPublicationTitle(publication, language),
-								src: displayImage(publication, 800),
-								srcSet: articleImageSrcSet(getPublicationImage(publication)),
-								sizes: "(max-width: 800px) calc(100vw - 58px), 360px",
-								loading: "lazy",
-								decoding: "async",
-								style: { objectPosition: getCoverObjectPosition(publication) }
-							}) : /* @__PURE__ */ jsx("div", { className: "latest-card__media-placeholder" })
-						}), /* @__PURE__ */ jsxs("div", {
-							className: "latest-card__body",
-							children: [/* @__PURE__ */ jsx("span", {
-								className: "home-tag",
-								children: getPublicationCategoryLabel(publication.category, language)
-							}), /* @__PURE__ */ jsx("h3", {
-								className: "latest-card__title",
-								children: getPublicationTitle(publication, language)
-							})]
-						})]
+					children: latest.map((publication) => /* @__PURE__ */ jsx(PublicationCard, {
+						publication,
+						language
 					}, publication.id))
 				})]
 			}),
@@ -2328,105 +2406,6 @@ function ResearchHomePage({ language, initialPublications }) {
 				]
 			})
 		]
-	});
-}
-//#endregion
-//#region src/lib/cloudinary.ts
-function sanitizeEnvValue(value) {
-	const normalized = value?.trim() ?? "";
-	if (!normalized) return "";
-	const lowered = normalized.toLowerCase();
-	return [
-		"your-",
-		"your_",
-		"placeholder",
-		"example",
-		"changeme",
-		"<",
-		"cloud_name",
-		"upload_preset"
-	].some((fragment) => lowered.includes(fragment)) ? "" : normalized;
-}
-sanitizeEnvValue("di3atf0hx");
-sanitizeEnvValue("ablecare_docs");
-sanitizeEnvValue("esnad");
-function optimizeCloudinaryUrl(url, options = {}) {
-	if (!url) return "";
-	if (!/res\.cloudinary\.com\/.+?\/image\/upload\//.test(url)) return url;
-	const width = options.width && Number.isFinite(options.width) ? Math.round(options.width) : null;
-	if (/\/image\/upload\/[^/]*[fq]_[^/]*\//.test(url)) {
-		if (!width) return url;
-		return url.replace(/\/image\/upload\/([^/]+)\//, `/image/upload/$1/w_${width},c_limit/`);
-	}
-	const parts = ["f_auto", "q_auto"];
-	if (width) parts.push(`w_${width}`, "c_limit");
-	return url.replace("/image/upload/", `/image/upload/${parts.join(",")}/`);
-}
-//#endregion
-//#region src/components/public/PublicationCard.tsx
-function getPublicationPath(publication, language) {
-	return `${language === "en" ? "/en" : ""}/${publication.kind === "book" ? "books" : "library"}/${getShareSlug(publication)}`;
-}
-function PublicationCard({ publication, language }) {
-	const publishedDate = new Intl.DateTimeFormat(language === "ar" ? "ar-EG" : "en-AU", {
-		dateStyle: "medium",
-		timeZone: "UTC"
-	}).format(new Date(publication.published_at));
-	return /* @__PURE__ */ jsx("article", {
-		className: "card",
-		children: /* @__PURE__ */ jsxs(Link, {
-			className: "card__link",
-			to: getPublicationPath(publication, language),
-			children: [/* @__PURE__ */ jsx("div", {
-				className: "card__media",
-				children: getPublicationImage(publication) ? /* @__PURE__ */ jsx("img", {
-					alt: getPublicationTitle(publication, language),
-					src: optimizeCloudinaryUrl(getPublicationImage(publication), { width: 800 }),
-					loading: "lazy",
-					width: "800",
-					height: "450",
-					decoding: "async",
-					style: { objectPosition: getCoverObjectPosition(publication) }
-				}) : /* @__PURE__ */ jsx("div", {
-					style: {
-						aspectRatio: "16 / 10",
-						background: "var(--bg-subtle)",
-						display: "grid",
-						placeItems: "center",
-						color: "var(--text-muted)",
-						fontSize: "14px",
-						fontWeight: 600
-					},
-					children: language === "ar" ? "إسناد" : "Esnad"
-				})
-			}), /* @__PURE__ */ jsxs("div", {
-				className: "card__body",
-				children: [
-					/* @__PURE__ */ jsxs("div", {
-						className: "card__meta",
-						children: [/* @__PURE__ */ jsx("span", { children: getPublicationAuthor(publication, language) }), /* @__PURE__ */ jsx("span", { children: publishedDate })]
-					}),
-					/* @__PURE__ */ jsx("h3", {
-						className: "card__title",
-						children: getPublicationHeadline(publication, language)
-					}),
-					/* @__PURE__ */ jsx("p", {
-						className: "card__text",
-						children: getPublicationAbstract(publication, language)
-					}),
-					/* @__PURE__ */ jsxs("div", {
-						className: "card__meta",
-						children: [/* @__PURE__ */ jsx("span", {
-							className: "badge badge--accent",
-							children: getPublicationCategoryLabel(publication.category, language)
-						}), /* @__PURE__ */ jsx("span", {
-							className: "badge badge--neutral",
-							children: publication.access_tier === "free" ? language === "ar" ? "مجاني" : "Free" : formatCurrency(publication.price_aud, language)
-						})]
-					})
-				]
-			})]
-		})
 	});
 }
 //#endregion
