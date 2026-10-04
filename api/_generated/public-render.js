@@ -565,9 +565,6 @@ function getPublicationDescription(publication, language) {
 function getPublicationAuthor(publication, language) {
 	return language === "ar" ? publication.author_ar || publication.author_en : publication.author_en || publication.author_ar;
 }
-function getPublicationTopic(publication, language) {
-	return language === "ar" ? publication.topic_ar || publication.topic_en : publication.topic_en || publication.topic_ar;
-}
 function formatCurrency(amount, language) {
 	return new Intl.NumberFormat(language === "ar" ? "ar-EG" : "en-AU", {
 		style: "currency",
@@ -870,6 +867,30 @@ var ARTICLE_COVER_FALLBACKS = {
 	"b1c54007-f429-49c0-a19f-0e4fc10ce12a": "/assets/article-covers/b1c54007-f429-49c0-a19f-0e4fc10ce12a.png"
 };
 //#endregion
+//#region src/lib/cleanAbstract.js
+function cleanAbstract(value) {
+	let text = String(value || "").trim();
+	text = text.replace(/^[\p{L}\p{M}.\s]{1,60}\/\s*/u, "");
+	const lines = text.split(/\r?\n/).filter((line) => {
+		const label = line.trim().replace(/[\u064b-\u065f\u0670\u0640]/g, "");
+		return !/^(?:(?:English\s+)?Abstract|الملخص(?: العربي)?|ملخص|المستخلص|مستخلص)(?:\s*[:/—–-]?\s*(?:[0-9٠-٩]+\s*(?:Words?|كلمة|كلمات)))?\s*[:/]?$/iu.test(label) && !/^[0-9٠-٩]+\s*(?:Words?|كلمة|كلمات)\s*$/iu.test(label);
+	}).map((line) => line.replace(/^\s*(?:المستخلص|مستخلص)\s*:\s*/u, ""));
+	const split = lines.findIndex((line) => {
+		const prose = line.replace(/https?:\/\/\S+/g, "");
+		const latin = (prose.match(/\p{Script=Latin}/gu) || []).length;
+		const arabic = (prose.match(/\p{Script=Arabic}/gu) || []).length;
+		return latin >= 3 && latin > arabic;
+	});
+	if (split === -1) return {
+		ar: lines.join("\n").trim(),
+		en: ""
+	};
+	return {
+		ar: lines.slice(0, split).join("\n").trim(),
+		en: lines.slice(split).join("\n").trim()
+	};
+}
+//#endregion
 //#region src/lib/seoMetadata.js
 var HOME_DESCRIPTION = "مركز إسناد للدراسات والأبحاث، المعروف أيضاً باسم مركز اسناد: مكتبة عربية للدراسات السياسية والقانونية والمقالات والكتب.";
 var PAGE_SEO = {
@@ -919,13 +940,33 @@ function shortText(value, limit) {
 	const cut = text.slice(0, limit - 1);
 	return `${cut.slice(0, cut.lastIndexOf(" ") > limit / 2 ? cut.lastIndexOf(" ") : cut.length)}…`;
 }
+var PUBLICATION_TITLE_PHRASES = {
+	"2630263": "الملف القانوني الدولي الموحّد: الجرائم المرتكبة في جنوب لبنان",
+	"2728521": "الحج والوعي السياسي في خطاب السيد مجتبى الخامنئي",
+	"3064572": "ترامب وسيكولوجيا الكذب السلطوي",
+	"4070119": "إسرائيل: تآكل «عقيدة الحسم» وأزمة «الجيش الصغير»",
+	"5143394": "مؤشرات الخراب الثالث في إسرائيل",
+	"7193246": "شهادة قائد سنتكوم أمام الكونغرس",
+	"8541485": "خطاب الشيخ نعيم قاسم: بين آب 2006 وآب 2026",
+	"8629683": "الإحباط يلفّ إسرائيل، وإيران تكرّس مبدأ وحدة الساحات فعلياً",
+	"8866951": "الامتحان الموحد في ظروف تعليمية غير متكافئة",
+	"9534802": "حين يغدو الوفاء لفلسطين حراسةً للبنان: قراءة في خطاب محمد رعد",
+	"9893292": "الشباك لن تنقذهم.. \"الموت بالألياف\" يتسلل من لبنان"
+};
+function completeTitle(value) {
+	const text = String(value || "").replace(/\s+/g, " ").trim();
+	if (text.length <= 50) return text;
+	const breakAt = text.search(/:|\s[-–—]\s|\s(?:دراسة|قراءة|تحليل)(?=\s|$)/u);
+	return breakAt > 0 ? text.slice(0, breakAt).trim() : text;
+}
 function contentText(node) {
 	return node?.text || (node?.content || []).map(contentText).join(" ");
 }
 function publicationSeo(pub) {
-	return PUBLICATION_SEO[publicationPublicId(pub)] || {
-		title: `${shortText(pub.headline_ar || pub.title_ar, 50)} | إسناد`,
-		description: shortText(pub.abstract_ar || pub.description_ar || contentText(pub.content_json) || `قراءة ${pub.title_ar}، من إصدارات مركز إسناد للدراسات والأبحاث.`, 154)
+	const override = PUBLICATION_SEO[publicationPublicId(pub)];
+	return {
+		title: override?.title || `${PUBLICATION_TITLE_PHRASES[publicationPublicId(pub)] || completeTitle(pub.headline_ar || pub.title_ar)} | إسناد`,
+		description: shortText(cleanAbstract(pub.abstract_ar || pub.abstract_en).ar || override?.description || pub.description_ar || contentText(pub.content_json) || `قراءة ${pub.title_ar}، من إصدارات مركز إسناد للدراسات والأبحاث.`, 154)
 	};
 }
 function breadcrumbs(items) {
@@ -2389,6 +2430,23 @@ function PublicationCard({ publication, language }) {
 	});
 }
 //#endregion
+//#region src/components/public/PublicationAbstract.tsx
+function PublicationAbstract({ value }) {
+	const abstract = cleanAbstract(value);
+	return /* @__PURE__ */ jsx("div", {
+		className: "publication-abstract",
+		children: ["ar", "en"].map((language) => abstract[language] ? /* @__PURE__ */ jsxs("section", {
+			className: "publication-abstract__block",
+			dir: language === "ar" ? "rtl" : "ltr",
+			lang: language,
+			children: [/* @__PURE__ */ jsx("span", {
+				className: "publication-abstract__label",
+				children: language === "ar" ? "الملخص" : "Abstract"
+			}), /* @__PURE__ */ jsx("p", { children: abstract[language] })]
+		}, language) : null)
+	});
+}
+//#endregion
 //#region src/lib/payments.ts
 async function createCheckoutSession(publicationId, token, language) {
 	const response = await fetch("/api/checkout-session", {
@@ -3098,11 +3156,7 @@ function PublicationPage({ language, initialPublication }) {
 						className: "title-1",
 						children: getPublicationTitle(publication, language)
 					}),
-					/* @__PURE__ */ jsx("p", {
-						className: "body-muted",
-						style: { fontSize: 17 },
-						children: getPublicationAbstract(publication, language)
-					}),
+					/* @__PURE__ */ jsx(PublicationAbstract, { value: getPublicationAbstract(publication, language) || "" }),
 					/* @__PURE__ */ jsxs("div", {
 						className: "detail-toolbar",
 						children: [
@@ -3322,9 +3376,9 @@ function PublicationPage({ language, initialPublication }) {
 								to: `/topics/${publication.category}`,
 								children: getPublicationCategoryLabel(publication.category, "ar")
 							}) })] }),
-							/* @__PURE__ */ jsxs("div", { children: [/* @__PURE__ */ jsx("dt", { children: language === "ar" ? "الموضوع" : "Topic" }), /* @__PURE__ */ jsx("dd", { children: getPublicationTopic(publication, language) || "—" })] }),
+							publication[`topic_${language}`]?.trim() ? /* @__PURE__ */ jsxs("div", { children: [/* @__PURE__ */ jsx("dt", { children: language === "ar" ? "الموضوع" : "Topic" }), /* @__PURE__ */ jsx("dd", { children: publication[`topic_${language}`] })] }) : null,
 							/* @__PURE__ */ jsxs("div", { children: [/* @__PURE__ */ jsx("dt", { children: language === "ar" ? "الكاتب" : "Author" }), /* @__PURE__ */ jsx("dd", { children: getPublicationAuthor(publication, language) })] }),
-							/* @__PURE__ */ jsxs("div", { children: [/* @__PURE__ */ jsx("dt", { children: language === "ar" ? "الصفحات" : "Pages" }), /* @__PURE__ */ jsx("dd", { children: publication.pages })] })
+							publication.pages > 1 ? /* @__PURE__ */ jsxs("div", { children: [/* @__PURE__ */ jsx("dt", { children: language === "ar" ? "الصفحات" : "Pages" }), /* @__PURE__ */ jsx("dd", { children: publication.pages })] }) : null
 						]
 					})
 				]

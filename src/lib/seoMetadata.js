@@ -1,4 +1,5 @@
 // Metadata only: editorial titles and article bodies remain in the publication store.
+import { cleanAbstract } from './cleanAbstract.js'
 export const SEO_UPDATED_AT = '2026-10-04T07:30:00.000Z'
 export const HOME_DESCRIPTION = 'مركز إسناد للدراسات والأبحاث، المعروف أيضاً باسم مركز اسناد: مكتبة عربية للدراسات السياسية والقانونية والمقالات والكتب.'
 export const PAGE_SEO = {
@@ -45,9 +46,9 @@ function completeTitle(value) {
 function contentText(node) { return node?.text || (node?.content || []).map(contentText).join(' ') }
 export function publicationSeo(pub) {
   const override = PUBLICATION_SEO[publicationPublicId(pub)]
-  return override || {
-    title: `${PUBLICATION_TITLE_PHRASES[publicationPublicId(pub)] || completeTitle(pub.headline_ar || pub.title_ar)} | إسناد`,
-    description: shortText(pub.abstract_ar || pub.description_ar || contentText(pub.content_json) || `قراءة ${pub.title_ar}، من إصدارات مركز إسناد للدراسات والأبحاث.`, 154),
+  return {
+    title: override?.title || `${PUBLICATION_TITLE_PHRASES[publicationPublicId(pub)] || completeTitle(pub.headline_ar || pub.title_ar)} | إسناد`,
+    description: shortText(cleanAbstract(pub.abstract_ar || pub.abstract_en).ar || override?.description || pub.description_ar || contentText(pub.content_json) || `قراءة ${pub.title_ar}، من إصدارات مركز إسناد للدراسات والأبحاث.`, 154),
   }
 }
 export function breadcrumbs(items) {

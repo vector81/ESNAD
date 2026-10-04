@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { PublicationCard } from '../../components/public/PublicationCard'
+import { PublicationAbstract } from '../../components/public/PublicationAbstract'
 import { PublicSiteShell } from '../../components/public/PublicSiteShell'
 import { usePublicSession } from '../../contexts/PublicSessionContext'
 import { auth } from '../../lib/publicAuth'
@@ -19,7 +20,6 @@ import {
   getPublicationDescription,
   getPublicationKindLabel,
   getPublicationTitle,
-  getPublicationTopic,
   getShareSlug,
   listPublications,
 } from '../../lib/publications'
@@ -510,9 +510,7 @@ export function PublicationPage({ language, initialPublication }: { language: Ap
         <div className="detail-content">
           <span className={`badge kind-badge kind-badge--${publication.kind}`}>{getPublicationKindLabel(publication.kind, language)}</span>
           <h1 className="title-1">{getPublicationTitle(publication, language)}</h1>
-          <p className="body-muted" style={{ fontSize: 17 }}>
-            {getPublicationAbstract(publication, language)}
-          </p>
+          <PublicationAbstract value={getPublicationAbstract(publication, language) || ''} />
 
           <div className="detail-toolbar">
             <span>{publishedDate}</span>
@@ -747,18 +745,18 @@ export function PublicationPage({ language, initialPublication }: { language: Ap
               <dt>{language === 'ar' ? 'التصنيف' : 'Category'}</dt>
               <dd><Link to={`/topics/${publication.category}`}>{getPublicationCategoryLabel(publication.category, 'ar')}</Link></dd>
             </div>
-            <div>
+            {publication[`topic_${language}`]?.trim() ? <div>
               <dt>{language === 'ar' ? 'الموضوع' : 'Topic'}</dt>
-              <dd>{getPublicationTopic(publication, language) || '—'}</dd>
-            </div>
+              <dd>{publication[`topic_${language}`]}</dd>
+            </div> : null}
             <div>
               <dt>{language === 'ar' ? 'الكاتب' : 'Author'}</dt>
               <dd>{getPublicationAuthor(publication, language)}</dd>
             </div>
-            <div>
+            {publication.pages > 1 ? <div>
               <dt>{language === 'ar' ? 'الصفحات' : 'Pages'}</dt>
               <dd>{publication.pages}</dd>
-            </div>
+            </div> : null}
           </dl>
         </aside>
       </div>

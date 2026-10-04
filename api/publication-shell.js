@@ -724,7 +724,7 @@ function renderArticleJsonLd({ pub, url, image }) {
   return serializeStructuredData(createArticleStructuredData(pub, { url, image }))
 }
 
-function renderHtml({ lang, title, description, image, url, ogType, articleTitle, articleAuthor, articlePublishedAt, articleBodyHtml, jsonLd, breadcrumbJsonLd, relatedHtml }) {
+function renderHtml({ lang, title, description, image, url, ogType, articleTitle, articleAuthor, articlePublishedAt, articleBodyHtml, jsonLd, breadcrumbJsonLd, relatedHtml, initialHtml }) {
   const pageTitle =
     title && title !== DEFAULT_SITE_TITLE ? (title.includes(' | ') ? title : `${title} | ${DEFAULT_SITE_NAME}`) : DEFAULT_SITE_TITLE
   const pageDescription = description || DEFAULT_SITE_DESCRIPTION
@@ -766,7 +766,7 @@ ${imageMetadata}
     ${breadcrumbJsonLd ? `<script id="publication-breadcrumb-jsonld" type="application/ld+json">${serializeStructuredData(breadcrumbJsonLd)}</script>` : ''}
   </head>
   <body>
-    <main>
+    ${initialHtml || `<main>
       <article>
         <h1>${escapeHtml(articleTitle || title || DEFAULT_SITE_TITLE)}</h1>
         ${
@@ -777,7 +777,7 @@ ${imageMetadata}
         ${articleBodyHtml || ''}
       </article>
       ${relatedHtml || ''}
-    </main>
+    </main>`}
     <div id="root" hidden></div>
 
   </body>
@@ -842,6 +842,7 @@ export default async function handler(request, response) {
         // uses the headline.
         title: publicationSeo(pub).title,
         description: publicationSeo(pub).description,
+        initialHtml: renderPublicPage({ path: language === 'en' ? `/en${canonicalPath}` : canonicalPath, language, publication: sanitizePublication(pub, false) }),
         image: optimizeOgImage(getPublicationImage(pub)),
         url: buildAbsoluteUrl(canonicalPath),
         ogType: 'article',

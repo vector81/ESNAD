@@ -3054,6 +3054,13 @@ h1, h2, h3, h4, p {
   min-width: 0;
 }
 
+.publication-abstract { color: var(--text); font-size: 17px; line-height: 1.85; }
+.publication-abstract__block { margin-bottom: 1em; unicode-bidi: isolate; }
+.publication-abstract__block[lang="ar"] { text-align: right; }
+.publication-abstract__block[lang="en"] { text-align: left; }
+.publication-abstract__label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 0.3em; }
+.publication-abstract__block p { margin: 0; white-space: pre-line; color: var(--text); }
+
 .pdf-frame {
   width: 100%;
   min-height: 720px;
