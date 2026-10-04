@@ -1740,9 +1740,13 @@ function PublicationCard({ publication, language }) {
 				}) : /* @__PURE__ */ jsxs("div", {
 					className: "card__fallback",
 					"data-category": publication.category,
+					"data-kind": publication.kind,
 					dir: "rtl",
 					lang: "ar",
-					children: [/* @__PURE__ */ jsx("span", {
+					children: [publication.kind === "article" ? /* @__PURE__ */ jsx("span", {
+						className: "card__fallback-masthead",
+						children: "مركز إسناد للدراسات والأبحاث"
+					}) : /* @__PURE__ */ jsx("span", {
 						className: "card__fallback-logo",
 						children: /* @__PURE__ */ jsx("img", {
 							src: "/newlogo.png",

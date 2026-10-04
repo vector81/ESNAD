@@ -43,8 +43,10 @@ export function PublicationCard({
               style={{ objectPosition: 'center top' }}
             />
           ) : (
-            <div className="card__fallback" data-category={publication.category} dir="rtl" lang="ar">
-              <span className="card__fallback-logo"><img src="/newlogo.png" alt="" width="80" height="80" /></span>
+            <div className="card__fallback" data-category={publication.category} data-kind={publication.kind} dir="rtl" lang="ar">
+              {publication.kind === 'article'
+                ? <span className="card__fallback-masthead">مركز إسناد للدراسات والأبحاث</span>
+                : <span className="card__fallback-logo"><img src="/newlogo.png" alt="" width="80" height="80" /></span>}
               <span className="card__fallback-category">{getPublicationCategoryLabel(publication.category, 'ar')}</span>
             </div>
           )}

@@ -12,6 +12,7 @@ const { chromium } = await import(pathToFileURL(process.env.PLAYWRIGHT_MODULE).h
 const bytes = await readFile('api/_data/publication-snapshot.json')
 const { publications } = JSON.parse(bytes)
 const directory = process.argv[2] || 'audit/paper-cleanup-job-c'
+const articleCoverCheck = process.argv.includes('--article-cover')
 await mkdir(directory, { recursive: true })
 for (const publication of publications) {
   const expected = publication.cover_image || ARTICLE_COVER_FALLBACKS[publication.id] || ''
@@ -39,7 +40,7 @@ try {
       blockedExternalHosts.add(url.hostname)
       return route.abort()
     })
-    for (const [name, path, expectedCount] of [['homepage', '/', 6], ['library', '/library', 34]]) {
+    for (const [name, path, expectedCount] of (articleCoverCheck ? [['library', '/library', 34]] : [['homepage', '/', 6], ['library', '/library', 34]])) {
       const page = await context.newPage(), errors = []
       page.on('pageerror', error => errors.push(error.message))
       await page.goto(`http://localhost:4178${path}`, { waitUntil: 'networkidle' })
@@ -57,6 +58,9 @@ try {
         date: el.querySelector('time').getAttribute('datetime'),
         imagePosition: el.querySelector('.card__media > img') ? getComputedStyle(el.querySelector('.card__media > img')).objectPosition : null,
         tagGap: el.querySelector('.card__meta').getBoundingClientRect().top - el.querySelector('.card__title').getBoundingClientRect().bottom,
+        masthead: el.querySelector('.card__fallback-masthead')?.textContent,
+        fallbackLogo: !!el.querySelector('.card__fallback-logo'),
+        stripe: el.querySelector('.card__fallback') ? getComputedStyle(el.querySelector('.card__fallback')).borderRightWidth : null,
       })))
       assert.deepEqual(errors, [])
       assert.ok(Math.max(...cards.map(c => c.height)) - Math.min(...cards.map(c => c.height)) < 1, 'All grid cards have equal height')
@@ -69,6 +73,16 @@ try {
         assert.equal(card.author, cleanAuthor(pub.author_ar || pub.author_en))
         assert.ok(card.tagGap >= 0 && card.tagGap <= 10, 'Tags immediately follow the title')
         if (card.image) assert.equal(card.imagePosition, '50% 0%')
+        if (card.fallback && pub.kind === 'article') {
+          assert.equal(card.colour, 'rgb(247, 241, 229)')
+          assert.equal(card.masthead, 'مركز إسناد للدراسات والأبحاث')
+          assert.equal(card.fallbackLogo, false)
+          assert.equal(card.stripe, '4px')
+        } else if (card.fallback) {
+          assert.equal(card.fallbackLogo, true)
+          assert.equal(card.masthead, undefined)
+          assert.notEqual(card.colour, 'rgb(247, 241, 229)')
+        }
       }
       if (name === 'homepage') {
         const spotlight = await page.evaluate(() => ({ hero: document.querySelector('.home-hero__card').getAttribute('href'), heroPosition: getComputedStyle(document.querySelector('.home-hero__card-media img')).objectPosition, spotlight: document.querySelector('.spotlight-band__copy a').getAttribute('href'), height: document.querySelector('.spotlight-band__media img').getBoundingClientRect().height, fit: getComputedStyle(document.querySelector('.spotlight-band__media img')).objectFit }))
@@ -82,12 +96,13 @@ try {
       assert.ok(cards.slice(0, 6).filter(c => c.fallback).length >= 2)
       assert.ok(cards.slice(0, 6).filter(c => c.image).length >= 2)
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'No horizontal overflow')
-      for (let i = 0; i < 6; i++) await page.locator('.publication-card').nth(i).scrollIntoViewIfNeeded()
-      await page.waitForFunction(() => [...document.querySelectorAll('.publication-card')].slice(0, 6).every(el => { const img = el.querySelector('.card__media > img'); return !img || (img.complete && img.naturalWidth > 0) }))
+      const screenshotCount = articleCoverCheck ? Math.max(6, cards.findIndex(c => c.fallback && publications.find(p => p.id === c.id).kind === 'article') + 1) : 6
+      for (let i = 0; i < screenshotCount; i++) await page.locator('.publication-card').nth(i).scrollIntoViewIfNeeded()
+      await page.waitForFunction(count => [...document.querySelectorAll('.publication-card')].slice(0, count).every(el => { const img = el.querySelector('.card__media > img'); return !img || (img.complete && img.naturalWidth > 0) }), screenshotCount)
       await page.evaluate(() => scrollTo(0, 0))
       if (name === 'homepage') await page.screenshot({ path: `${directory}/${name}-${device}.png`, fullPage: true })
       else {
-        const bottom = await page.locator('.publication-card').nth(5).evaluate(el => el.getBoundingClientRect().bottom)
+        const bottom = await page.locator('.publication-card').nth(screenshotCount - 1).evaluate(el => el.getBoundingClientRect().bottom)
         await page.screenshot({ path: `${directory}/${name}-${device}.png`, fullPage: true, clip: { x: 0, y: 0, width: viewport.width, height: Math.ceil(bottom + 24) } })
       }
       results.push({ name, device, viewport, cards, errors })
