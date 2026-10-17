@@ -94,6 +94,10 @@ const config = {
       destination: '/favicon.svg',
     },
     {
+      source: '/favicon.ico',
+      destination: '/favicon.ico',
+    },
+    {
       source: '/logo.png',
       destination: '/logo.png',
     },

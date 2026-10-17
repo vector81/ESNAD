@@ -17,13 +17,13 @@ function loadPublicAuth() {
 //#endregion
 //#region src/lib/firebaseConfig.ts
 var firebaseConfig = {
-	apiKey: "AIzaSyA6I1fo0uGqrjBHdJXb3Wmav4E6pySLolI",
-	authDomain: "esnad-ebc17.firebaseapp.com",
-	projectId: "esnad-ebc17",
-	storageBucket: "esnad-ebc17.firebasestorage.app",
-	messagingSenderId: "140153770891",
-	appId: "1:140153770891:web:e75dfdf946ba4adf1d558e",
-	measurementId: "G-0T4N51814R"
+	apiKey: void 0,
+	authDomain: void 0,
+	projectId: void 0,
+	storageBucket: void 0,
+	messagingSenderId: void 0,
+	appId: void 0,
+	measurementId: void 0
 };
 var isFirebaseConfigured = Object.values(firebaseConfig).every(Boolean);
 //#endregion
@@ -667,8 +667,8 @@ async function getPublicationBySlugFromFirestore(trimmedSlug) {
 }
 //#endregion
 //#region src/lib/analytics.ts
-var POSTHOG_TOKEN = "".trim();
-var POSTHOG_HOST = ("".trim(), "https://us.i.posthog.com");
+var POSTHOG_TOKEN = void 0;
+var POSTHOG_HOST = "https://us.i.posthog.com";
 var isPostHogEnabled = Boolean(POSTHOG_TOKEN);
 var ANONYMOUS_ID_KEY = "esnad_analytics_distinct_id";
 var CONSENT_KEY = "esnad_analytics_consent_v2";
@@ -902,6 +902,10 @@ var PAGE_SEO = {
 	"/about": {
 		title: "مركز اسناد الإلكتروني للدراسات والأبحاث | إسناد",
 		description: "تعرّف إلى مركز إسناد للدراسات والأبحاث، المعروف باسم مركز اسناد الالكتروني، ورسالته في نشر الدراسات والأوراق البحثية والمقالات باللغة العربية."
+	},
+	"/contact": {
+		title: "تواصل مع مركز إسناد للدراسات والأبحاث | إسناد",
+		description: "راسل مركز إسناد للدراسات والأبحاث للاستفسارات البحثية أو التعاون المؤسسي أو طلبات الاشتراك عبر نموذج التواصل."
 	}
 };
 var PUBLICATION_SEO = {
@@ -1020,10 +1024,16 @@ var SEO_ALTERNATE_NAMES = [
 	"اسناد",
 	"مركز اسناد",
 	"مركز إسناد",
+	"مكتبة اسناد",
+	"مكتبة إسناد",
+	"مركز اسناد الالكتروني",
+	"مركز إسناد الإلكتروني",
+	"Esnad Center for Studies and Research",
 	"Esnads",
 	"Esnad",
 	"esnads.net"
 ];
+var SEO_ORGANIZATION_DESCRIPTION = "مركز إسناد للدراسات والأبحاث منصة بحثية عربية متخصصة في إنتاج ونشر وأرشفة الدراسات والأوراق السياسية والاقتصادية والتحليلية، ومكتبة رقمية تجمع بين الإتاحة المجانية والإصدارات المدفوعة.";
 function createOrganizationStructuredData() {
 	return {
 		"@type": "Organization",
@@ -1032,6 +1042,15 @@ function createOrganizationStructuredData() {
 		alternateName: [...SEO_ALTERNATE_NAMES],
 		url: SEO_SITE_URL,
 		logo: `${SEO_SITE_URL}/newlogo.png`,
+		description: SEO_ORGANIZATION_DESCRIPTION,
+		knowsAbout: [
+			"الدراسات السياسية",
+			"الدراسات القانونية",
+			"تحليل السياسات",
+			"الأوراق البحثية",
+			"Policy research",
+			"Political studies"
+		],
 		sameAs: []
 	};
 }
@@ -1696,9 +1715,9 @@ function sanitizeEnvValue(value) {
 		"upload_preset"
 	].some((fragment) => lowered.includes(fragment)) ? "" : normalized;
 }
-sanitizeEnvValue("di3atf0hx");
-sanitizeEnvValue("ablecare_docs");
-sanitizeEnvValue("esnad");
+sanitizeEnvValue(void 0);
+sanitizeEnvValue(void 0);
+sanitizeEnvValue(void 0);
 function optimizeCloudinaryUrl(url, options = {}) {
 	if (!url) return "";
 	if (!/res\.cloudinary\.com\/.+?\/image\/upload\//.test(url)) return url;
@@ -3372,6 +3391,265 @@ function PublicationPage({ language, initialPublication }) {
 	});
 }
 //#endregion
+//#region src/pages/public/AboutCenterPage.tsx
+function AboutCenterPage({ language }) {
+	const [name, setName] = useState("");
+	const [email, setEmail] = useState("");
+	const [message, setMessage] = useState("");
+	const [notice, setNotice] = useState("");
+	const [submitting, setSubmitting] = useState(false);
+	const handleContactSubmit = async (event) => {
+		event.preventDefault();
+		setSubmitting(true);
+		setNotice("");
+		try {
+			const response = await fetch("/api/contact", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({
+					name,
+					email,
+					message
+				})
+			});
+			const payload = await response.json().catch(() => null);
+			if (!response.ok) throw new Error(payload?.error || "تعذر إرسال الرسالة حالياً.");
+			setName("");
+			setEmail("");
+			setMessage("");
+			setNotice(language === "ar" ? "تم إرسال رسالتك بنجاح." : "Your message has been sent.");
+		} catch (error) {
+			setNotice(error instanceof Error ? error.message : language === "ar" ? "تعذر إرسال الرسالة." : "Failed to send message.");
+		} finally {
+			setSubmitting(false);
+		}
+	};
+	return /* @__PURE__ */ jsxs(PublicSiteShell, {
+		language,
+		children: [/* @__PURE__ */ jsxs("section", {
+			className: "panel",
+			children: [
+				/* @__PURE__ */ jsx("span", {
+					className: "eyebrow",
+					children: language === "ar" ? "من نحن" : "About"
+				}),
+				/* @__PURE__ */ jsx("h1", {
+					className: "title-1 mb-2",
+					children: language === "ar" ? "مركز إسناد للدراسات والأبحاث" : "Esnad Center for Studies and Research"
+				}),
+				/* @__PURE__ */ jsx("p", {
+					className: "body-muted",
+					style: { maxWidth: 720 },
+					children: language === "ar" ? "إسناد منصة بحثية عربية متخصصة في إنتاج ونشر وأرشفة الدراسات والأوراق السياسية والاقتصادية والتحليلية. نركز على بناء مكتبة رقمية متخصصة تجمع بين الإتاحة المجانية والإصدارات المدفوعة." : "Esnad is an Arabic-first research platform focused on producing, publishing, and archiving studies, policy papers, and analytical outputs. We are building a structured digital library that combines open access and paid releases."
+				}),
+				/* @__PURE__ */ jsxs("div", {
+					className: "grid-3",
+					style: { marginTop: 32 },
+					children: [
+						/* @__PURE__ */ jsxs("div", {
+							className: "card",
+							style: { padding: 24 },
+							children: [/* @__PURE__ */ jsx("h2", {
+								className: "title-3 mb-2",
+								children: language === "ar" ? "الرؤية" : "Vision"
+							}), /* @__PURE__ */ jsx("p", {
+								className: "body-muted",
+								style: { fontSize: 14 },
+								children: language === "ar" ? "بناء مرجع بحثي عربي منظم وموثوق يربط المعرفة المتخصصة بالمجال العام." : "Build a trusted Arabic research reference that connects specialized knowledge to the public sphere."
+							})]
+						}),
+						/* @__PURE__ */ jsxs("div", {
+							className: "card",
+							style: { padding: 24 },
+							children: [/* @__PURE__ */ jsx("h2", {
+								className: "title-3 mb-2",
+								children: language === "ar" ? "المهمة" : "Mission"
+							}), /* @__PURE__ */ jsx("p", {
+								className: "body-muted",
+								style: { fontSize: 14 },
+								children: language === "ar" ? "إنتاج أوراق ودراسات وكتب قابلة للأرشفة والشراء والاستخدام المؤسسي." : "Produce research papers, studies, and books built for archiving, purchase, and institutional use."
+							})]
+						}),
+						/* @__PURE__ */ jsxs("div", {
+							className: "card",
+							style: { padding: 24 },
+							children: [/* @__PURE__ */ jsx("h2", {
+								className: "title-3 mb-2",
+								children: language === "ar" ? "القيم" : "Values"
+							}), /* @__PURE__ */ jsx("p", {
+								className: "body-muted",
+								style: { fontSize: 14 },
+								children: language === "ar" ? "الدقة، الوضوح، الوصول المفتوح، والجودة التحريرية في كل إصدار." : "Accuracy, clarity, open access, and editorial quality in every publication."
+							})]
+						})
+					]
+				})
+			]
+		}), /* @__PURE__ */ jsxs("section", {
+			className: "panel",
+			style: { marginTop: 24 },
+			children: [
+				/* @__PURE__ */ jsx("span", {
+					className: "eyebrow",
+					children: language === "ar" ? "تواصل معنا" : "Contact"
+				}),
+				/* @__PURE__ */ jsx("h2", {
+					className: "title-2 mb-2",
+					children: language === "ar" ? "راسل المركز" : "Contact the center"
+				}),
+				/* @__PURE__ */ jsx("p", {
+					className: "body-muted",
+					style: {
+						maxWidth: 560,
+						marginBottom: 24
+					},
+					children: language === "ar" ? "للاستفسارات البحثية، التعاون المؤسسي، أو طلبات الاشتراك." : "For research inquiries, institutional collaboration, or subscription requests."
+				}),
+				/* @__PURE__ */ jsxs("form", {
+					className: "about-contact-form",
+					onSubmit: handleContactSubmit,
+					children: [
+						/* @__PURE__ */ jsxs("label", {
+							className: "field",
+							children: [/* @__PURE__ */ jsx("span", { children: language === "ar" ? "الاسم" : "Name" }), /* @__PURE__ */ jsx("input", {
+								onChange: (event) => setName(event.target.value),
+								required: true,
+								value: name
+							})]
+						}),
+						/* @__PURE__ */ jsxs("label", {
+							className: "field",
+							children: [/* @__PURE__ */ jsx("span", { children: language === "ar" ? "البريد الإلكتروني" : "Email" }), /* @__PURE__ */ jsx("input", {
+								onChange: (event) => setEmail(event.target.value),
+								required: true,
+								type: "email",
+								value: email
+							})]
+						}),
+						/* @__PURE__ */ jsxs("label", {
+							className: "field about-contact-form__message",
+							children: [/* @__PURE__ */ jsx("span", { children: language === "ar" ? "الرسالة" : "Message" }), /* @__PURE__ */ jsx("textarea", {
+								onChange: (event) => setMessage(event.target.value),
+								required: true,
+								rows: 6,
+								value: message
+							})]
+						}),
+						/* @__PURE__ */ jsx("button", {
+							className: "btn btn--brand",
+							disabled: submitting,
+							type: "submit",
+							children: submitting ? language === "ar" ? "جار الإرسال..." : "Sending..." : language === "ar" ? "إرسال" : "Send"
+						}),
+						notice ? /* @__PURE__ */ jsx("div", {
+							className: "notice notice--success",
+							style: { gridColumn: "1 / -1" },
+							children: notice
+						}) : null
+					]
+				})
+			]
+		})]
+	});
+}
+//#endregion
+//#region src/pages/public/ContactCenterPage.tsx
+function ContactCenterPage({ language }) {
+	const [name, setName] = useState("");
+	const [email, setEmail] = useState("");
+	const [message, setMessage] = useState("");
+	const [notice, setNotice] = useState("");
+	const [submitting, setSubmitting] = useState(false);
+	const handleSubmit = async (event) => {
+		event.preventDefault();
+		setSubmitting(true);
+		setNotice("");
+		try {
+			const response = await fetch("/api/contact", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({
+					name,
+					email,
+					message
+				})
+			});
+			const payload = await response.json().catch(() => null);
+			if (!response.ok) throw new Error(payload?.error || "تعذر إرسال الرسالة حالياً.");
+			setName("");
+			setEmail("");
+			setMessage("");
+			setNotice(language === "ar" ? "تم إرسال رسالتك بنجاح." : "Your message has been sent.");
+		} catch (error) {
+			setNotice(error instanceof Error ? error.message : language === "ar" ? "تعذر إرسال الرسالة." : "Failed to send message.");
+		} finally {
+			setSubmitting(false);
+		}
+	};
+	return /* @__PURE__ */ jsx(PublicSiteShell, {
+		language,
+		children: /* @__PURE__ */ jsxs("div", {
+			className: "auth-layout",
+			children: [/* @__PURE__ */ jsxs("div", { children: [
+				/* @__PURE__ */ jsx("span", {
+					className: "eyebrow",
+					children: language === "ar" ? "تواصل معنا" : "Contact"
+				}),
+				/* @__PURE__ */ jsx("h1", {
+					className: "title-1 mb-2",
+					children: language === "ar" ? "راسل المركز" : "Contact the center"
+				}),
+				/* @__PURE__ */ jsx("p", {
+					className: "body-muted",
+					style: { maxWidth: 480 },
+					children: language === "ar" ? "للاستفسارات البحثية، التعاون المؤسسي، أو طلبات الاشتراك." : "For research inquiries, institutional collaboration, or subscription requests."
+				})
+			] }), /* @__PURE__ */ jsxs("form", {
+				className: "auth-form",
+				onSubmit: handleSubmit,
+				children: [
+					/* @__PURE__ */ jsxs("label", {
+						className: "field",
+						children: [/* @__PURE__ */ jsx("span", { children: language === "ar" ? "الاسم" : "Name" }), /* @__PURE__ */ jsx("input", {
+							onChange: (event) => setName(event.target.value),
+							required: true,
+							value: name
+						})]
+					}),
+					/* @__PURE__ */ jsxs("label", {
+						className: "field",
+						children: [/* @__PURE__ */ jsx("span", { children: language === "ar" ? "البريد الإلكتروني" : "Email" }), /* @__PURE__ */ jsx("input", {
+							onChange: (event) => setEmail(event.target.value),
+							required: true,
+							type: "email",
+							value: email
+						})]
+					}),
+					/* @__PURE__ */ jsxs("label", {
+						className: "field",
+						children: [/* @__PURE__ */ jsx("span", { children: language === "ar" ? "الرسالة" : "Message" }), /* @__PURE__ */ jsx("textarea", {
+							onChange: (event) => setMessage(event.target.value),
+							required: true,
+							rows: 6,
+							value: message
+						})]
+					}),
+					/* @__PURE__ */ jsx("button", {
+						className: "btn btn--primary",
+						disabled: submitting,
+						type: "submit",
+						children: submitting ? language === "ar" ? "جار الإرسال..." : "Sending..." : language === "ar" ? "إرسال" : "Send"
+					}),
+					notice ? /* @__PURE__ */ jsx("div", {
+						className: "notice notice--success",
+						children: notice
+					}) : null
+				]
+			})]
+		})
+	});
+}
+//#endregion
 //#region src/server/renderPublicPage.tsx
 function renderPublicPage({ path, language, publications, publication }) {
 	return renderToString(/* @__PURE__ */ jsx(MemoryRouter, {
@@ -3425,6 +3703,22 @@ function renderPublicPage({ path, language, publications, publication }) {
 						language,
 						initialPublication: publication
 					})
+				}),
+				/* @__PURE__ */ jsx(Route, {
+					path: "/about",
+					element: /* @__PURE__ */ jsx(AboutCenterPage, { language })
+				}),
+				/* @__PURE__ */ jsx(Route, {
+					path: "/en/about",
+					element: /* @__PURE__ */ jsx(AboutCenterPage, { language })
+				}),
+				/* @__PURE__ */ jsx(Route, {
+					path: "/contact",
+					element: /* @__PURE__ */ jsx(ContactCenterPage, { language })
+				}),
+				/* @__PURE__ */ jsx(Route, {
+					path: "/en/contact",
+					element: /* @__PURE__ */ jsx(ContactCenterPage, { language })
 				})
 			] })
 		}), /* @__PURE__ */ jsx(CookieConsentBanner, {})] })

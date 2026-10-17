@@ -113,6 +113,7 @@ const middleware = vm.runInNewContext(`${middlewareSource}\n;middleware`, {
   ...articleImages,
   URL, Response, AbortSignal, process: { env: {} }, renderPageError,
   serializeStructuredData: structuredData.serializeStructuredData,
+  createStaticPageStructuredData: structuredData.createStaticPageStructuredData,
   PAGE_SEO: seoMetadata.PAGE_SEO,
   fetch: async url => {
     if (new URL(url).pathname === '/api/publication-shell') {

@@ -1,6 +1,6 @@
 import { next, rewrite } from '@vercel/functions'
 import { renderPageError } from './api/_lib/page-error.js'
-import { serializeStructuredData, getPublicationImage } from './src/lib/structuredData.js'
+import { serializeStructuredData, getPublicationImage, createStaticPageStructuredData } from './src/lib/structuredData.js'
 import { PAGE_SEO } from './src/lib/seoMetadata.js'
 import { articleImageUrl, priorityArticleImage, articleImageSrcSet, ARTICLE_IMAGE_SIZES } from './src/lib/articleImages.js'
 
@@ -123,7 +123,7 @@ export default async function middleware(request: Request) {
 
   const requestUrl = new URL(request.url)
   if (/^\/(?:api|assets|data|_vercel)(?:\/|$)/.test(requestUrl.pathname) ||
-      /^\/(?:index\.html|favicon\.svg|logo\.png|newlogo\.png|robots\.txt|sitemap\.xml|feed\.xml|[a-f0-9]{32}\.txt|llms?\.(?:txt|text))$/.test(requestUrl.pathname)) return next()
+      /^\/(?:index\.html|favicon\.svg|favicon\.ico|logo\.png|newlogo\.png|robots\.txt|sitemap\.xml|feed\.xml|[a-f0-9]{32}\.txt|llms?\.(?:txt|text))$/.test(requestUrl.pathname)) return next()
   const isEnglishRoute = /^\/en(?:\/|$)/.test(requestUrl.pathname)
   const isExplicitCrawler = CRAWLER_USER_AGENT_TOKENS.some((token) => normalizedUserAgent.includes(token))
   const isKnownRealBrowser = REAL_BROWSER_USER_AGENT_PATTERN.test(userAgent)
@@ -157,6 +157,24 @@ export default async function middleware(request: Request) {
       return renderAppShell(request, result.canonicalPath, isEnglishRoute ? 'en' : 'ar', result.articleJsonLd, result)
     } else if (!catalogMatch && !/^\/(?:en\/)?(?:about|contact|login|register|dashboard)\/?$/.test(requestUrl.pathname)) {
       return pageError(404, isEnglishRoute ? 'en' : 'ar')
+    }
+    const staticPage = requestUrl.pathname.match(/^\/(?:en\/)?(about|contact)\/?$/)
+    if (staticPage) {
+      // Server-render the same React page (as the homepage does) plus AboutPage/ContactPage JSON-LD.
+      const language = isEnglishRoute ? 'en' : 'ar'
+      const path = `/${staticPage[1]}`
+      let initialHtml = ''
+      try {
+        const pageUrl = new URL('/api/publication-shell', request.url)
+        pageUrl.searchParams.set('mode', 'page')
+        pageUrl.searchParams.set('page', staticPage[1])
+        pageUrl.searchParams.set('lang', language)
+        const page = await fetch(pageUrl, { signal: AbortSignal.timeout(8000) })
+        if (page.ok) initialHtml = ((await page.json()) as { initialHtml?: string }).initialHtml || ''
+      } catch {
+        initialHtml = ''
+      }
+      return renderAppShell(request, requestUrl.pathname, language, undefined, { ...PAGE_SEO[path], image: 'https://esnads.net/logo.png', jsonLd: createStaticPageStructuredData(path), initialHtml })
     }
     return renderAppShell(request, requestUrl.pathname, isEnglishRoute ? 'en' : 'ar')
   }

@@ -673,10 +673,13 @@ function renderCatalogHtml({ lang, section, publications }) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeHtml(meta.description)}" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="${publications.length ? 'index, follow' : 'noindex, follow'}" />
     <link rel="canonical" href="${escapeHtml(buildAbsoluteUrl(meta.path))}" />
     ${section === 'home' ? '<link rel="alternate" hreflang="ar" href="https://esnads.net" /><link rel="alternate" hreflang="en" href="https://esnads.net/en" /><link rel="alternate" hreflang="x-default" href="https://esnads.net" />' : ''}
     <link rel="alternate" type="application/rss+xml" title="إصدارات مركز إسناد" href="https://esnads.net/feed.xml" />
+    <link rel="icon" type="image/png" href="/newlogo.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/newlogo.png" />
     <link rel="stylesheet" href="${ENTRY_CSS}" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="${escapeHtml(SEO_SITE_NAME)}" />
@@ -746,9 +749,9 @@ function renderHtml({ lang, title, description, image, url, ogType, articleTitle
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="${escapeHtml(url)}" />
     <link rel="alternate" type="application/rss+xml" title="إصدارات مركز إسناد" href="https://esnads.net/feed.xml" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="icon" type="image/png" href="/newlogo.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/newlogo.png" />
     <link rel="stylesheet" href="${ENTRY_CSS}" />
     <meta property="og:type" content="${ogType}" />
     <meta property="og:site_name" content="${escapeHtml(SEO_SITE_NAME)}" />
@@ -795,6 +798,20 @@ export default async function handler(request, response) {
   )
   const wantsCatalog = request.query.mode === 'catalog'
   const wantsJson = request.query.format === 'json'
+
+  if (request.query.mode === 'page') {
+    const page = typeof request.query.page === 'string' ? request.query.page : ''
+    if (!['about', 'contact'].includes(page)) { response.status(404).json({ error: 'not_found' }); return }
+    try {
+      response.setHeader('cache-control', 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400')
+      response.status(200).json({ initialHtml: renderPublicPage({ path: language === 'en' ? `/en/${page}` : `/${page}`, language }) })
+    } catch (error) {
+      console.error('[esnad/publication-shell] failed to render static page', error)
+      response.setHeader('cache-control', 'no-store')
+      response.status(503).json({ error: 'temporarily_unavailable' })
+    }
+    return
+  }
 
   if (wantsCatalog) {
     try {

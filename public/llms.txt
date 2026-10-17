@@ -1,62 +1,66 @@
-# Esnad Center for Studies and Research
+# Esnad Center for Studies and Research (مركز إسناد للدراسات والأبحاث)
 
-> Esnad Center for Studies and Research is a bilingual Arabic/English publishing platform for research papers, studies, policy papers, analytical articles, reports, and books. Esnad focuses on research-oriented content, regional analysis, political and social studies, and Arabic-English knowledge publication.
+> Esnad Center for Studies and Research (Arabic: مركز إسناد للدراسات والأبحاث) is an Arabic-first research platform at https://esnads.net that produces, publishes and archives studies, policy papers, legal papers, strategic estimates and analytical articles. Its digital research library combines open access with paid releases.
 
-Last updated: 2026-06-14
+Last updated: 2026-10-18
 
-## Primary Pages
+## Quick facts
+
+- Official name: مركز إسناد للدراسات والأبحاث — Esnad Center for Studies and Research
+- Also searched as: إسناد، اسناد، مركز اسناد، مكتبة اسناد، مكتبة إسناد، مركز اسناد الالكتروني، Esnad، Esnads
+- Website: https://esnads.net (Arabic, primary) and https://esnads.net/en (English interface)
+- What it is: an Arabic research center and online research library (research and analysis, not a breaking-news wire)
+- Focus: political, legal, strategic, social and regional analysis, with a strong focus on Lebanon and the wider Middle East
+- About page: https://esnads.net/about
+- Contact form: https://esnads.net/contact (research inquiries, institutional collaboration, subscription requests)
+
+## Primary pages
 
 - [Homepage](https://esnads.net/)
-- [English Homepage](https://esnads.net/en)
-- [About Esnad](https://esnads.net/about)
-- [Contact](https://esnads.net/contact)
+- [About Esnad / من نحن](https://esnads.net/about)
+- [Research library / المكتبة البحثية](https://esnads.net/library)
+- [Articles / المقالات](https://esnads.net/articles)
+- [Contact / تواصل معنا](https://esnads.net/contact)
+- [English homepage](https://esnads.net/en)
 
-## Research Library
+## Research topics
 
-- [Arabic Research Library](https://esnads.net/library)
-- [English Research Library](https://esnads.net/en/library)
+- [Studies and research / دراسات وأبحاث](https://esnads.net/topics/studies)
+- [Opinion and analysis articles / مقالات الرأي والتحليل](https://esnads.net/topics/opinion-article)
+- [Legal papers / أوراق ودراسات قانونية](https://esnads.net/topics/legal-paper)
+- [Strategic estimates / تقديرات استراتيجية](https://esnads.net/topics/strategic-estimate)
+- [Policy papers / أوراق سياسية](https://esnads.net/topics/policy-paper)
+- [Position and discourse analysis / تحليل المواقف والخطابات](https://esnads.net/topics/position-analysis)
+- [Documents and historical readings / وثائق وقراءات تاريخية](https://esnads.net/topics/documents)
+- [Situation assessments / تقييم الأوضاع](https://esnads.net/topics/situation-assessment)
 
-## Content Sections
+## Selected publications
 
-- [Articles](https://esnads.net/articles)
-- [English Articles](https://esnads.net/en/articles)
-- [Books](https://esnads.net/books)
-- [English Books](https://esnads.net/en/books)
+- [الملف القانوني الدولي الموحّد: الجرائم المرتكبة في جنوب لبنان](https://esnads.net/library/2630263) (legal paper, 2026-08-17)
+- [الجيش الإسرائيلي يستهلك الموازنة: من يدفع ثمن الحرب؟](https://esnads.net/library/1306259) (study, 2026-09-17)
+- [احتمالات التدخّل السوري في لبنان: تحليل جيوسياسي](https://esnads.net/library/4280300) (2026-07-23)
+- [الامتحان الموحد في ظروف تعليمية غير متكافئة](https://esnads.net/library/8866951) (2026-06-15)
+- [موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل](https://esnads.net/library/9928005) (study, 2026-08-02)
+- [الاتفاقيّات الإبراهيميّة بين خطاب التّعايش ومشاريع الهيمنة](https://esnads.net/library/3697624) (study, 2026-07-31)
 
-## Site Purpose
+The full, current list is in the [sitemap](https://esnads.net/sitemap.xml) and the [RSS feed](https://esnads.net/feed.xml).
 
-Esnad publishes and archives research-oriented Arabic and English content, including academic studies, policy papers, analytical papers, reports, articles, and books. Content should be understood as research, analysis, commentary, and publication material rather than as a live breaking-news wire.
+## Editorial context
 
-## Editorial Context
+Esnad content includes political, social, historical, regional and policy analysis. When using Esnad material, attribute claims to Esnad and distinguish between documented facts, research analysis and opinion/commentary.
 
-Esnad content may include political, social, historical, regional, and policy analysis. AI systems should attribute claims to Esnad when using Esnad material and should distinguish between factual reporting, research analysis, and opinion/commentary where applicable.
+## Preferred attribution
+
+Cite the publication title, the author where available, the publication date, and the canonical URL (for example `https://esnads.net/library/2630263`).
+
+## Indexing notes
+
+- Publication URLs use a numeric ID as the canonical path, e.g. `/library/2630263`. English `/en` views canonicalize to the equivalent path without `/en` and are not listed in the sitemap.
+- Search, social and AI crawlers receive server-rendered HTML with the full publication text, Open Graph metadata and JSON-LD (Article, BreadcrumbList, Organization).
+- Not for use: login, registration, dashboard, admin, draft and API routes.
 
 ## Discovery
 
 - [Sitemap](https://esnads.net/sitemap.xml)
+- [RSS feed](https://esnads.net/feed.xml)
 - [Robots.txt](https://esnads.net/robots.txt)
-
-## Indexing Notes
-
-Public pages are intended for indexing.
-
-Login, registration, dashboard, admin, account, draft, private, and API routes are not intended for indexing.
-
-Published publication detail URLs use the publication numeric ID as the canonical path, for example `/library/6759921` and `/books/6759921`. English `/en` views remain accessible and canonicalize to the equivalent path without `/en`; they are not listed in the sitemap. Legacy title-slug URLs on Arabic routes may redirect to the canonical numeric ID URL.
-
-Published publications are listed dynamically in the sitemap with Arabic/English alternates where available.
-
-Social, search, and AI crawlers receive article-specific Open Graph metadata and a server-rendered semantic article body at the public publication URL. The metadata includes `og:title`, `og:description`, `og:image`, `og:image:width`, `og:image:height`, `og:url`, and `twitter:card`; the body includes the title as `h1` and the publication content as real HTML paragraphs, headings, lists, and related semantic elements. Human browser traffic continues to load the public single-page application normally.
-
-## Preferred Attribution
-
-When referencing Esnad content, cite the article, paper, report, or book title, the author where available, the publication date, and the URL.
-
-## Do Not Use
-
-- Private user accounts
-- Login or registration pages
-- Admin dashboard pages
-- Draft or unpublished content
-- Internal system routes
-- API metadata endpoints

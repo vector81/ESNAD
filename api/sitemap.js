@@ -11,10 +11,8 @@ const STATIC_URLS = [
   { path: '/library', language: 'ar', alternateGroup: 'library', changefreq: 'daily', priority: '0.9', lastmod: SITE_LASTMOD },
   { path: '/books', language: 'ar', alternateGroup: 'books', changefreq: 'daily', priority: '0.8', lastmod: SITE_LASTMOD },
   { path: '/articles', language: 'ar', alternateGroup: 'articles', changefreq: 'daily', priority: '0.8', lastmod: SITE_LASTMOD },
-  { path: '/about', language: 'ar', alternateGroup: 'about', changefreq: 'monthly', priority: '0.8', lastmod: SITE_LASTMOD },
-  { path: '/contact', language: 'ar', alternateGroup: 'contact', changefreq: 'monthly', priority: '0.7', lastmod: SITE_LASTMOD },
-  // Last commit modifying this static file; SEO HTML changes do not modify it.
-  { path: '/llms.txt', changefreq: 'monthly', priority: '0.3', lastmod: '2026-09-26T11:04:30.000Z' },
+  { path: '/about', language: 'ar', alternateGroup: 'about', changefreq: 'monthly', priority: '0.8', lastmod: '2026-10-18T00:00:00.000Z' },
+  { path: '/contact', language: 'ar', alternateGroup: 'contact', changefreq: 'monthly', priority: '0.7', lastmod: '2026-10-18T00:00:00.000Z' },
 ]
 
 function escapeXml(value = '') {
@@ -129,7 +127,9 @@ export default async function handler(_request, response) {
     const publications = await listPublishedPublications()
     const latest = [SEO_UPDATED_AT, ...publications.map(pub => getLastModified(pub.updated_at || pub.published_at))].filter(Boolean).sort().at(-1)
     const categories = [...new Set(publications.map(pub => pub.category))].filter(category => SEO_TOPICS[category]).map(category => ({ path: `/topics/${category}`, lastmod: [SEO_UPDATED_AT, ...publications.filter(pub => pub.category === category).map(pub => getLastModified(pub.updated_at || pub.published_at))].filter(Boolean).sort().at(-1), changefreq: 'weekly', priority: '0.7' }))
-    const urls = [...STATIC_URLS.map(url => ['/', '/en', '/library', '/articles', '/books'].includes(url.path) ? { ...url, lastmod: latest } : url), ...categories, ...buildPublicationUrls(publications)]
+    // Keep empty sections (e.g. /books before any book is published) out of the sitemap.
+    const hasBooks = publications.some(pub => pub.kind === 'book')
+    const urls = [...STATIC_URLS.filter(url => url.path !== '/books' || hasBooks).map(url => ['/', '/en', '/library', '/articles', '/books'].includes(url.path) ? { ...url, lastmod: latest } : url), ...categories, ...buildPublicationUrls(publications)]
 
     response.setHeader('content-type', 'application/xml; charset=utf-8')
     response.setHeader('cache-control', 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400')
