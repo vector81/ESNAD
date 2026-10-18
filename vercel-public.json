@@ -33,6 +33,18 @@
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
+    },
+    {
+      "source": "/favicon.ico",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
+      ]
+    },
+    {
+      "source": "/llms.txt",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex" }
+      ]
     }
   ],
   "redirects": [
@@ -62,6 +74,10 @@
     {
       "source": "/favicon.svg",
       "destination": "/favicon.svg"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/favicon.ico"
     },
     {
       "source": "/logo.png",
