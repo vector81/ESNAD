@@ -2,6 +2,11 @@
   "framework": "vite",
   "buildCommand": "npm run build:public",
   "outputDirectory": "dist/public",
+  "functions": {
+    "api/publication-shell.js": {
+      "includeFiles": "node_modules/{react-router-dom,react-router}/dist/**"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
