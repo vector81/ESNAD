@@ -17,13 +17,13 @@ function loadPublicAuth() {
 //#endregion
 //#region src/lib/firebaseConfig.ts
 var firebaseConfig = {
-	apiKey: void 0,
-	authDomain: void 0,
-	projectId: void 0,
-	storageBucket: void 0,
-	messagingSenderId: void 0,
-	appId: void 0,
-	measurementId: void 0
+	apiKey: "AIzaSyA6I1fo0uGqrjBHdJXb3Wmav4E6pySLolI",
+	authDomain: "esnad-ebc17.firebaseapp.com",
+	projectId: "esnad-ebc17",
+	storageBucket: "esnad-ebc17.firebasestorage.app",
+	messagingSenderId: "140153770891",
+	appId: "1:140153770891:web:e75dfdf946ba4adf1d558e",
+	measurementId: "G-0T4N51814R"
 };
 var isFirebaseConfigured = Object.values(firebaseConfig).every(Boolean);
 //#endregion
@@ -667,8 +667,8 @@ async function getPublicationBySlugFromFirestore(trimmedSlug) {
 }
 //#endregion
 //#region src/lib/analytics.ts
-var POSTHOG_TOKEN = void 0;
-var POSTHOG_HOST = "https://us.i.posthog.com";
+var POSTHOG_TOKEN = "[SENSITIVE]".trim();
+var POSTHOG_HOST = "[SENSITIVE]".trim();
 var isPostHogEnabled = Boolean(POSTHOG_TOKEN);
 var ANONYMOUS_ID_KEY = "esnad_analytics_distinct_id";
 var CONSENT_KEY = "esnad_analytics_consent_v2";
@@ -1715,9 +1715,9 @@ function sanitizeEnvValue(value) {
 		"upload_preset"
 	].some((fragment) => lowered.includes(fragment)) ? "" : normalized;
 }
-sanitizeEnvValue(void 0);
-sanitizeEnvValue(void 0);
-sanitizeEnvValue(void 0);
+sanitizeEnvValue("di3atf0hx");
+sanitizeEnvValue("ablecare_docs");
+sanitizeEnvValue("esnad");
 function optimizeCloudinaryUrl(url, options = {}) {
 	if (!url) return "";
 	if (!/res\.cloudinary\.com\/.+?\/image\/upload\//.test(url)) return url;
@@ -2194,6 +2194,97 @@ function HomeHero({ publication, language }) {
 	});
 }
 //#endregion
+//#region src/components/public/NewsletterChallenge.tsx
+var scriptPromise;
+function loadTurnstile() {
+	if (window.turnstile) return Promise.resolve(window.turnstile);
+	if (!scriptPromise) scriptPromise = new Promise((resolve, reject) => {
+		const script = document.createElement("script");
+		script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+		script.async = true;
+		script.onload = () => window.turnstile ? resolve(window.turnstile) : reject(/* @__PURE__ */ new Error("Verification unavailable"));
+		script.onerror = () => {
+			script.remove();
+			reject(/* @__PURE__ */ new Error("Verification unavailable"));
+		};
+		document.head.appendChild(script);
+	}).catch((error) => {
+		scriptPromise = void 0;
+		throw error;
+	});
+	return scriptPromise;
+}
+function NewsletterChallenge({ language, onToken }) {
+	const container = useRef(null);
+	const [failed, setFailed] = useState(false);
+	const [attempt, setAttempt] = useState(0);
+	const sitekey = "0x4AAAAAAFgerYbfwBYwL68B";
+	useEffect(() => {
+		let cancelled = false;
+		let widgetId;
+		let api;
+		loadTurnstile().then((loaded) => {
+			if (cancelled || !container.current) return;
+			api = loaded;
+			widgetId = loaded.render(container.current, {
+				sitekey,
+				action: "newsletter",
+				language,
+				size: "flexible",
+				callback: (token) => {
+					if (!cancelled) {
+						setFailed(false);
+						onToken(token);
+					}
+				},
+				"expired-callback": () => {
+					if (!cancelled) onToken("");
+				},
+				"error-callback": () => {
+					if (!cancelled) {
+						onToken("");
+						setFailed(true);
+					}
+				}
+			});
+		}).catch(() => {
+			if (!cancelled) {
+				onToken("");
+				setFailed(true);
+			}
+		});
+		return () => {
+			cancelled = true;
+			if (api && widgetId !== void 0) api.remove(widgetId);
+		};
+	}, [
+		sitekey,
+		language,
+		onToken,
+		attempt
+	]);
+	return /* @__PURE__ */ jsxs("div", {
+		style: {
+			width: "100%",
+			maxWidth: 360,
+			margin: "1rem auto"
+		},
+		children: [/* @__PURE__ */ jsx("div", { ref: container }), failed && /* @__PURE__ */ jsxs("p", {
+			role: "alert",
+			children: [language === "ar" ? "تعذر تحميل التحقق الأمني. يرجى المحاولة مجدداً." : "The security check could not load. Please try again.", /* @__PURE__ */ jsx("button", {
+				type: "button",
+				className: "btn btn--brand",
+				onClick: () => {
+					setFailed(false);
+					onToken("");
+					setAttempt((value) => value + 1);
+				},
+				children: language === "ar" ? "إعادة المحاولة" : "Retry"
+			})]
+		})]
+	});
+}
+//#endregion
 //#region src/pages/public/ResearchHomePage.tsx
 function formatNumber(value, language) {
 	return new Intl.NumberFormat(language === "ar" ? "ar-EG" : "en-AU").format(value);
@@ -2234,6 +2325,8 @@ function ResearchHomePage({ language, initialPublications }) {
 	const [items, setItems] = useState(() => initialPublications || (typeof document !== "undefined" ? JSON.parse(document.getElementById("initial-catalog-data")?.textContent || "[]") : []));
 	const [activeCategory, setActiveCategory] = useState("all");
 	const [email, setEmail] = useState("");
+	const [turnstileToken, setTurnstileToken] = useState("");
+	const [challengeAttempt, setChallengeAttempt] = useState(0);
 	const [newsletterStatus, setNewsletterStatus] = useState("idle");
 	useEffect(() => {
 		listPublications({ kind: "all" }).then(setItems).catch(() => setItems([]));
@@ -2247,7 +2340,7 @@ function ResearchHomePage({ language, initialPublications }) {
 	const handleNewsletter = async (event) => {
 		event.preventDefault();
 		const value = email.trim();
-		if (!value) return;
+		if (!value || !turnstileToken || newsletterStatus === "submitting") return;
 		setNewsletterStatus("submitting");
 		try {
 			if (!(await fetch("/api/subscribe", {
@@ -2255,13 +2348,17 @@ function ResearchHomePage({ language, initialPublications }) {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					email: value,
-					language
+					language,
+					turnstileToken
 				})
 			})).ok) throw new Error("subscribe request failed");
 			setNewsletterStatus("success");
 			setEmail("");
 		} catch {
 			setNewsletterStatus("error");
+		} finally {
+			setTurnstileToken("");
+			setChallengeAttempt((value) => value + 1);
 		}
 	};
 	return /* @__PURE__ */ jsxs(PublicSiteShell, {
@@ -2403,6 +2500,10 @@ function ResearchHomePage({ language, initialPublications }) {
 						className: "newsletter-strip__sub",
 						children: language === "ar" ? "احصل على أحدث الإصدارات والتقارير مباشرة إلى بريدك." : "Receive the latest releases and reports straight to your inbox."
 					}),
+					/* @__PURE__ */ jsx(NewsletterChallenge, {
+						language,
+						onToken: setTurnstileToken
+					}, `${language}:${challengeAttempt}`),
 					/* @__PURE__ */ jsxs("form", {
 						className: "newsletter-strip__form",
 						onSubmit: handleNewsletter,
@@ -2416,7 +2517,7 @@ function ResearchHomePage({ language, initialPublications }) {
 						}), /* @__PURE__ */ jsx("button", {
 							className: "btn btn--brand",
 							type: "submit",
-							disabled: newsletterStatus === "submitting",
+							disabled: newsletterStatus === "submitting" || !turnstileToken,
 							children: language === "ar" ? "اشترك" : "Subscribe"
 						})]
 					}),

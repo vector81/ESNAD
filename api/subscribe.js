@@ -2,6 +2,7 @@ import { FieldValue, getAdminDb } from './_lib/firebase-admin.js'
 import { readJsonBody, sendJson, setCorsHeaders } from './_lib/http.js'
 import { rateLimit } from './_lib/rate-limit.js'
 import { sendSubscriberNotification } from './_lib/resend.js'
+import { verifyNewsletterChallenge } from './_lib/turnstile.js'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -51,6 +52,16 @@ export default async function handler(request, response) {
     validateInput(email)
     if (name.length > 120) {
       throw new Error('الاسم طويل جداً.')
+    }
+
+    const challenge = await verifyNewsletterChallenge(body.turnstileToken)
+    if (!challenge.ok) {
+      sendJson(response, challenge.status, {
+        error: language === 'en'
+          ? 'Please complete the security check and try again.'
+          : 'يرجى إكمال التحقق الأمني والمحاولة مجدداً.',
+      })
+      return
     }
 
     const createdAt = new Date()

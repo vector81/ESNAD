@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { PublicSiteShell } from '../../components/public/PublicSiteShell'
 import { PublicationCard } from '../../components/public/PublicationCard'
 import { HomeHero } from '../../components/public/HomeHero'
+import { NewsletterChallenge } from '../../components/public/NewsletterChallenge'
 import { cleanAuthor } from '../../lib/cleanAuthor.js'
 import { displayImage } from '../../lib/initialPageHtml.js'
 import { articleImageSrcSet } from '../../lib/articleImages.js'
@@ -76,6 +77,8 @@ export function ResearchHomePage({ language, initialPublications }: { language: 
   const [items, setItems] = useState<Publication[]>(() => initialPublications || (typeof document !== 'undefined' ? JSON.parse(document.getElementById('initial-catalog-data')?.textContent || '[]') as Publication[] : []))
   const [activeCategory, setActiveCategory] = useState<PublicationCategory | 'all'>('all')
   const [email, setEmail] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const [challengeAttempt, setChallengeAttempt] = useState(0)
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
 
   useEffect(() => {
@@ -102,7 +105,7 @@ export function ResearchHomePage({ language, initialPublications }: { language: 
   const handleNewsletter = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const value = email.trim()
-    if (!value) {
+    if (!value || !turnstileToken || newsletterStatus === 'submitting') {
       return
     }
     setNewsletterStatus('submitting')
@@ -110,7 +113,7 @@ export function ResearchHomePage({ language, initialPublications }: { language: 
       const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: value, language }),
+        body: JSON.stringify({ email: value, language, turnstileToken }),
       })
       if (!response.ok) {
         throw new Error('subscribe request failed')
@@ -119,6 +122,10 @@ export function ResearchHomePage({ language, initialPublications }: { language: 
       setEmail('')
     } catch {
       setNewsletterStatus('error')
+    } finally {
+      // Tokens are single-use, including submissions that fail after verification.
+      setTurnstileToken('')
+      setChallengeAttempt(value => value + 1)
     }
   }
 
@@ -230,6 +237,7 @@ export function ResearchHomePage({ language, initialPublications }: { language: 
             ? 'احصل على أحدث الإصدارات والتقارير مباشرة إلى بريدك.'
             : 'Receive the latest releases and reports straight to your inbox.'}
         </p>
+        <NewsletterChallenge key={`${language}:${challengeAttempt}`} language={language} onToken={setTurnstileToken} />
         <form className="newsletter-strip__form" onSubmit={handleNewsletter}>
           <input
             className="newsletter-strip__input"
@@ -242,7 +250,7 @@ export function ResearchHomePage({ language, initialPublications }: { language: 
           <button
             className="btn btn--brand"
             type="submit"
-            disabled={newsletterStatus === 'submitting'}
+            disabled={newsletterStatus === 'submitting' || !turnstileToken}
           >
             {language === 'ar' ? 'اشترك' : 'Subscribe'}
           </button>
