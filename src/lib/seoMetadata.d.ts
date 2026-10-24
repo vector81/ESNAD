@@ -10,3 +10,6 @@ export function publicationSeo(pub: Partial<Publication>): {title:string; descri
 export function breadcrumbs(items: string[][]): Record<string, unknown>
 export function publicationBreadcrumbs(pub: Partial<Publication>): Record<string, unknown>
 export function relatedPublications(pub: Publication, items: Publication[], limit?: number): Publication[]
+export const LIBRARY_TITLE_AR: string
+export const LIBRARY_HEADING_AR: string
+export const LIBRARY_DESCRIPTION_AR: string

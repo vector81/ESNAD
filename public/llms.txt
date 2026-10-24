@@ -2,7 +2,7 @@
 
 > Esnad Center for Studies and Research (Arabic: مركز إسناد للدراسات والأبحاث) is an Arabic-first research platform at https://esnads.net that produces, publishes and archives studies, policy papers, legal papers, strategic estimates and analytical articles. Its digital research library combines open access with paid releases.
 
-Last updated: 2026-10-18
+Last updated: 2026-10-25
 
 ## Quick facts
 
@@ -18,10 +18,18 @@ Last updated: 2026-10-18
 
 - [Homepage](https://esnads.net/)
 - [About Esnad / من نحن](https://esnads.net/about)
-- [Research library / المكتبة البحثية](https://esnads.net/library)
+- [Esnad research library / مكتبة إسناد البحثية](https://esnads.net/library)
 - [Articles / المقالات](https://esnads.net/articles)
 - [Contact / تواصل معنا](https://esnads.net/contact)
 - [English homepage](https://esnads.net/en)
+
+## Common questions
+
+- **What is مكتبة إسناد (Esnad library)?** It is the online research library of Esnad Center for Studies and Research at https://esnads.net/library. It collects Esnad's published studies, policy papers, legal papers, strategic estimates and analytical articles, with a strong focus on Lebanon and the wider Middle East.
+- **What is مركز اسناد / مركز اسناد الالكتروني?** Both are common spellings for مركز إسناد للدراسات والأبحاث (Esnad Center for Studies and Research), an Arabic-first research platform at https://esnads.net. See https://esnads.net/about.
+- **Is Esnad a news site?** No. It publishes research and analysis, not breaking news.
+- **How do I contact Esnad?** Use the contact form at https://esnads.net/contact for research inquiries, institutional collaboration or subscription requests.
+- **Not to be confused with:** other organisations that also use the name إسناد / Esnad (for example esnad.sa, a Saudi legal-consultancy website). The research center and library described here are at esnads.net.
 
 ## Research topics
 

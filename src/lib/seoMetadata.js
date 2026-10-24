@@ -2,9 +2,13 @@
 import { cleanAbstract } from './cleanAbstract.js'
 export const SEO_UPDATED_AT = '2026-10-04T07:30:00.000Z'
 export const HOME_DESCRIPTION = 'مركز إسناد للدراسات والأبحاث، المعروف أيضاً باسم مركز اسناد: مكتبة عربية للدراسات السياسية والقانونية والمقالات والكتب.'
+export const LIBRARY_TITLE_AR = 'مكتبة إسناد البحثية: دراسات وأوراق بحثية'
+export const LIBRARY_HEADING_AR = 'مكتبة إسناد البحثية'
+export const LIBRARY_DESCRIPTION_AR = 'مكتبة إسناد (مكتبة اسناد) البحثية من مركز إسناد للدراسات والأبحاث: دراسات وأوراق سياسية وقانونية وتقديرات استراتيجية ومقالات تحليلية عن لبنان والمنطقة.'
 export const PAGE_SEO = {
   '/': { title: 'مركز إسناد للدراسات والأبحاث', description: HOME_DESCRIPTION },
   '/about': { title: 'مركز اسناد الإلكتروني للدراسات والأبحاث | إسناد', description: 'تعرّف إلى مركز إسناد للدراسات والأبحاث، المعروف باسم مركز اسناد الالكتروني، ورسالته في نشر الدراسات والأوراق البحثية والمقالات باللغة العربية.' },
+  '/library': { title: LIBRARY_TITLE_AR, description: LIBRARY_DESCRIPTION_AR },
   '/contact': { title: 'تواصل مع مركز إسناد للدراسات والأبحاث | إسناد', description: 'راسل مركز إسناد للدراسات والأبحاث للاستفسارات البحثية أو التعاون المؤسسي أو طلبات الاشتراك عبر نموذج التواصل.' },
 }
 export const PUBLICATION_SEO = {
@@ -55,7 +59,7 @@ export function publicationSeo(pub) {
 export function breadcrumbs(items) {
   return { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items.map(([name, path], index) => ({ '@type': 'ListItem', position: index + 1, name, item: `https://esnads.net${path === '/' ? '' : path}` })) }
 }
-export function publicationBreadcrumbs(pub) { return breadcrumbs([['الرئيسية', '/'], ['المكتبة البحثية', '/library'], [pub.title_ar, publicationPath(pub)]]) }
+export function publicationBreadcrumbs(pub) { return breadcrumbs([['الرئيسية', '/'], [LIBRARY_HEADING_AR, '/library'], [pub.title_ar, publicationPath(pub)]]) }
 function normalize(text) { return String(text || '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/[\u064b-\u065f\u0670\u0640]/g, '').toLowerCase() }
 const topicPatterns = [/لبنان|لبناني|سلاح|مقاوم|مسيرات|رماة|نعيم قاسم/, /اسراييل|اسرائيل|ايران|حرب|عدوان|سنتكوم|اباده|تجريم الصمت|هيمنه/, /دين|ديني|كنيس|كاثوليك|لاهوت|يهود|ابراهيم|حج|خامني|خامنئي|قيم/, /قياد|ثقه|نفسي|نرجسي|كذب|وعي/, /تعليم|امتحان|تقييم/, /مطر|هطول|سحب/, /يمن|سعود|قطر|عراق|سوري|واشنطن|خليج|اردن/]
 export function relatedPublications(pub, items, limit = 4) {

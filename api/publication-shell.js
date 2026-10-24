@@ -10,7 +10,7 @@ import {
   listPublishedPublications,
   sanitizePublication,
 } from './_lib/publications.js'
-import { publicationSeo, publicationBreadcrumbs, breadcrumbs, relatedPublications, HOME_DESCRIPTION, shortText } from '../src/lib/seoMetadata.js'
+import { publicationSeo, publicationBreadcrumbs, breadcrumbs, relatedPublications, HOME_DESCRIPTION, shortText, LIBRARY_TITLE_AR, LIBRARY_HEADING_AR, LIBRARY_DESCRIPTION_AR } from '../src/lib/seoMetadata.js'
 import { SEO_TOPICS } from '../src/lib/seoTopics.js'
 import { renderPublicPage } from './_generated/public-render.js'
 
@@ -551,11 +551,11 @@ function getCatalogMeta(section, language) {
   }
   if (section === 'library') {
     return {
-      title: isEnglish ? 'Research library' : 'المكتبة البحثية',
-      heading: isEnglish ? 'Research library' : 'المكتبة البحثية',
+      title: isEnglish ? 'Research library' : LIBRARY_TITLE_AR,
+      heading: isEnglish ? 'Research library' : LIBRARY_HEADING_AR,
       description: isEnglish
         ? 'Published Esnad research papers, studies, reports, and articles.'
-        : 'أرشيف إسناد المنشور من الدراسات والأوراق البحثية والتقارير والمقالات.',
+        : LIBRARY_DESCRIPTION_AR,
       path: isEnglish ? '/en/library' : '/library',
     }
   }
@@ -635,6 +635,7 @@ function renderCatalogJsonLd(items, meta, language) {
   const page = {
     '@type': 'CollectionPage',
     name: meta.heading,
+    ...(meta.path === '/library' ? { alternateName: ['مكتبة إسناد', 'مكتبة اسناد', 'المكتبة البحثية لمركز إسناد'] } : {}),
     description: meta.description,
     url: buildAbsoluteUrl(meta.path),
     inLanguage: language,
