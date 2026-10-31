@@ -49,11 +49,33 @@ function completeTitle(value) {
   return breakAt > 0 ? text.slice(0, breakAt).trim() : text
 }
 function contentText(node) { return node?.text || (node?.content || []).map(contentText).join(' ') }
+// Republished pieces open with a source label and URL ("الأخبار" + al-akhbar link).
+// Skip those leading attribution blocks so snippets start with the article's own prose.
+const URL_ONLY = /^\s*https?:\/\/\S+\s*$/u
+function isAttributionBlock(text, pub) {
+  const t = String(text || '').replace(/\s+/g, ' ').trim()
+  if (!t || URL_ONLY.test(t)) return true
+  const title = normalize(String(pub?.title_ar || '').replace(/\s+/g, ' ').trim())
+  return t.length <= 40 || Boolean(title && normalize(t) === title)
+}
+export function publicationLeadText(pub) {
+  const blocks = (pub?.content_json?.content || []).map(contentText)
+  const start = blocks.findIndex(text => !isAttributionBlock(text, pub))
+  return start === -1 ? contentText(pub?.content_json) : blocks.slice(start).join(' ')
+}
+export function publicationSourceUrl(pub) {
+  for (const text of (pub?.content_json?.content || []).slice(0, 4).map(contentText)) {
+    const url = String(text || '').trim()
+    if (URL_ONLY.test(url) && !/esnads\.net/i.test(url)) return url
+    if (!isAttributionBlock(text, pub)) break
+  }
+  return ''
+}
 export function publicationSeo(pub) {
   const override = PUBLICATION_SEO[publicationPublicId(pub)]
   return {
     title: override?.title || `${PUBLICATION_TITLE_PHRASES[publicationPublicId(pub)] || completeTitle(pub.headline_ar || pub.title_ar)} | إسناد`,
-    description: shortText(cleanAbstract(pub.abstract_ar || pub.abstract_en).ar || override?.description || pub.description_ar || contentText(pub.content_json) || `قراءة ${pub.title_ar}، من إصدارات مركز إسناد للدراسات والأبحاث.`, 154),
+    description: shortText(cleanAbstract(pub.abstract_ar || pub.abstract_en).ar || override?.description || pub.description_ar || publicationLeadText(pub) || `قراءة ${pub.title_ar}، من إصدارات مركز إسناد للدراسات والأبحاث.`, 154),
   }
 }
 export function breadcrumbs(items) {

@@ -13,3 +13,5 @@ export function relatedPublications(pub: Publication, items: Publication[], limi
 export const LIBRARY_TITLE_AR: string
 export const LIBRARY_HEADING_AR: string
 export const LIBRARY_DESCRIPTION_AR: string
+export function publicationLeadText(pub: Partial<Publication>): string
+export function publicationSourceUrl(pub: Partial<Publication>): string
