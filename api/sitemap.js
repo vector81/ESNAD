@@ -1,6 +1,6 @@
 import { listPublishedPublications, getPublicPublicationId } from './_lib/publications.js'
 const SITE_URL = 'https://esnads.net'
-import { SEO_UPDATED_AT } from '../src/lib/seoMetadata.js'
+import { SEO_UPDATED_AT, publicationSeoUpdatedAt } from '../src/lib/seoMetadata.js'
 import { SEO_TOPICS } from '../src/lib/seoTopics.js'
 import { getPublicationImage } from '../src/lib/structuredData.js'
 const SITE_LASTMOD = SEO_UPDATED_AT
@@ -71,7 +71,7 @@ function buildPublicationUrls(publications) {
       alternateGroup: `${section}:${id}`,
       changefreq: 'weekly',
       priority: section === 'books' ? '0.7' : '0.8',
-      lastmod: [getLastModified(publication.updated_at || publication.published_at), SEO_UPDATED_AT].filter(Boolean).sort().at(-1),
+      lastmod: [getLastModified(publication.updated_at || publication.published_at), SEO_UPDATED_AT, publicationSeoUpdatedAt(publication)].filter(Boolean).sort().at(-1),
       image: getPublicationImage(publication),
       imageTitle: publication.title_ar,
     }]

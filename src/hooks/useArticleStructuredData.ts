@@ -3,7 +3,7 @@ import { getShareSlug } from '../lib/publications'
 import { optimizeCloudinaryUrl } from '../lib/cloudinary'
 import { createArticleStructuredData, serializeStructuredData, SEO_SITE_URL } from '../lib/structuredData.js'
 import type { Publication } from '../types/publication'
-import { publicationBreadcrumbs } from '../lib/seoMetadata.js'
+import { publicationBreadcrumbs, publicationFaqStructuredData } from '../lib/seoMetadata.js'
 
 export function useArticleStructuredData(publication: Publication | null) {
   useEffect(() => {
@@ -23,6 +23,12 @@ export function useArticleStructuredData(publication: Publication | null) {
     let breadcrumb = document.getElementById('publication-breadcrumb-jsonld') as HTMLScriptElement | null
     if (!breadcrumb) { breadcrumb = document.createElement('script'); breadcrumb.id = 'publication-breadcrumb-jsonld'; breadcrumb.type = 'application/ld+json'; document.head.appendChild(breadcrumb) }
     breadcrumb.textContent = serializeStructuredData(publicationBreadcrumbs(publication))
-    return () => { script.remove(); breadcrumb.remove() }
+    const faqData = publicationFaqStructuredData(publication)
+    let faq = document.getElementById('publication-faq-jsonld') as HTMLScriptElement | null
+    if (faqData) {
+      if (!faq) { faq = document.createElement('script'); faq.id = 'publication-faq-jsonld'; faq.type = 'application/ld+json'; document.head.appendChild(faq) }
+      faq.textContent = serializeStructuredData(faqData)
+    } else faq?.remove()
+    return () => { script.remove(); breadcrumb.remove(); document.getElementById('publication-faq-jsonld')?.remove() }
   }, [publication])
 }

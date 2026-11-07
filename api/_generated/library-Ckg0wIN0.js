@@ -1,7 +1,7 @@
 import { n as isFirebaseConfigured } from "./public-render.js";
-import { db } from "./firebase-CDYWQsgv.js";
+import { db } from "./firebase-0q7o8ehP.js";
 import { arrayRemove, arrayUnion, doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-//#region src/lib/library.ts
+// src/lib/library.ts
 var DEMO_LIBRARY_PREFIX = "esnad_library_";
 function getLocalStorageKey(user) {
 	return `${DEMO_LIBRARY_PREFIX}${user.uid}`;
@@ -59,11 +59,11 @@ async function toggleSavedItem(user, publicationId, saved) {
 		writeLocalSnapshot(user, next);
 		return next;
 	}
-	await setDoc(doc(db, "user_libraries", user.uid), {
+	const ref = doc(db, "user_libraries", user.uid);
+	await setDoc(ref, {
 		saved_item_ids: saved ? arrayUnion(publicationId) : arrayRemove(publicationId),
 		updated_at: serverTimestamp()
 	}, { merge: true });
 	return getLibrarySnapshot(user);
 }
-//#endregion
 export { getLibrarySnapshot, toggleSavedItem };

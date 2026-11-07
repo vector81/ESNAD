@@ -10,7 +10,7 @@ import {
   listPublishedPublications,
   sanitizePublication,
 } from './_lib/publications.js'
-import { publicationSeo, publicationBreadcrumbs, breadcrumbs, relatedPublications, HOME_DESCRIPTION, shortText, LIBRARY_TITLE_AR, LIBRARY_HEADING_AR, LIBRARY_DESCRIPTION_AR } from '../src/lib/seoMetadata.js'
+import { publicationSeo, publicationBreadcrumbs, publicationFaqStructuredData, breadcrumbs, relatedPublications, HOME_DESCRIPTION, shortText, LIBRARY_TITLE_AR, LIBRARY_HEADING_AR, LIBRARY_DESCRIPTION_AR } from '../src/lib/seoMetadata.js'
 import { SEO_TOPICS } from '../src/lib/seoTopics.js'
 import { renderPublicPage } from './_generated/public-render.js'
 
@@ -496,7 +496,17 @@ function getCanonicalPath(pub) {
   return `/${section}/${getPublicPublicationId(pub)}`
 }
 
-function sendPublicationJson(response, pub, language, requestedSection) {
+// Related items are rendered server-side too, so crawlers get the same "ذات صلة" links users see after load.
+async function getRelatedForRender(pub) {
+  if (!pub || pub.kind === 'book') return []
+  try {
+    return relatedPublications(pub, await listPublishedPublications()).map(item => sanitizePublication(item, false, { includeContent: false }))
+  } catch {
+    return []
+  }
+}
+
+function sendPublicationJson(response, pub, language, requestedSection, related = []) {
   if (!pub) {
     response.setHeader('cache-control', 'no-store')
     response.setHeader('x-robots-tag', 'noindex, follow')
@@ -517,8 +527,9 @@ function sendPublicationJson(response, pub, language, requestedSection) {
     title: publicationSeo(pub).title,
     description: publicationSeo(pub).description,
     breadcrumbJsonLd: publicationBreadcrumbs(pub),
+    faqJsonLd: publicationFaqStructuredData(pub, buildAbsoluteUrl(canonicalPath)),
     publication: sanitizePublication(pub, false),
-    initialHtml: renderPublicPage({path: language === 'en' ? `/en${canonicalPath}` : canonicalPath, language, publication: sanitizePublication(pub, false)}),
+    initialHtml: renderPublicPage({path: language === 'en' ? `/en${canonicalPath}` : canonicalPath, language, publication: sanitizePublication(pub, false), related}),
     image: optimizeOgImage(getPublicationImage(pub)),
     articleJsonLd: createArticleStructuredData(pub, {
       url: buildAbsoluteUrl(canonicalPath), image: optimizeOgImage(getPublicationImage(pub)),
@@ -729,7 +740,7 @@ function renderArticleJsonLd({ pub, url, image }) {
   return serializeStructuredData(createArticleStructuredData(pub, { url, image }))
 }
 
-function renderHtml({ lang, title, description, image, url, ogType, articleTitle, articleAuthor, articlePublishedAt, articleBodyHtml, jsonLd, breadcrumbJsonLd, relatedHtml, initialHtml }) {
+function renderHtml({ lang, title, description, image, url, ogType, articleTitle, articleAuthor, articlePublishedAt, articleBodyHtml, jsonLd, breadcrumbJsonLd, faqJsonLd, relatedHtml, initialHtml }) {
   const pageTitle =
     title && title !== DEFAULT_SITE_TITLE ? (title.includes(' | ') ? title : `${title} | ${DEFAULT_SITE_NAME}`) : DEFAULT_SITE_TITLE
   const pageDescription = description || DEFAULT_SITE_DESCRIPTION
@@ -769,6 +780,7 @@ ${imageMetadata}
     <meta name="theme-color" content="#c4302b" />
     ${jsonLd ? `<script id="publication-jsonld" type="application/ld+json">${jsonLd}</script>` : ''}
     ${breadcrumbJsonLd ? `<script id="publication-breadcrumb-jsonld" type="application/ld+json">${serializeStructuredData(breadcrumbJsonLd)}</script>` : ''}
+    ${faqJsonLd ? `<script id="publication-faq-jsonld" type="application/ld+json">${serializeStructuredData(faqJsonLd)}</script>` : ''}
   </head>
   <body>
     ${initialHtml || `<main>
@@ -839,8 +851,10 @@ export default async function handler(request, response) {
   try {
     const pub = await getPublicationByReference(slug)
 
+    const related = await getRelatedForRender(pub)
+
     if (wantsJson) {
-      sendPublicationJson(response, pub, language, section)
+      sendPublicationJson(response, pub, language, section, related)
       return
     }
 
@@ -861,7 +875,7 @@ export default async function handler(request, response) {
         // uses the headline.
         title: publicationSeo(pub).title,
         description: publicationSeo(pub).description,
-        initialHtml: renderPublicPage({ path: language === 'en' ? `/en${canonicalPath}` : canonicalPath, language, publication: sanitizePublication(pub, false) }),
+        initialHtml: renderPublicPage({ path: language === 'en' ? `/en${canonicalPath}` : canonicalPath, language, publication: sanitizePublication(pub, false), related }),
         image: optimizeOgImage(getPublicationImage(pub)),
         url: buildAbsoluteUrl(canonicalPath),
         ogType: 'article',
@@ -870,7 +884,8 @@ export default async function handler(request, response) {
         articlePublishedAt: pub.published_at ? new Date(pub.published_at).toISOString().slice(0, 10) : '',
         articleBodyHtml: getArticleBodyHtml(pub, language).replace(/<h1\b/g, '<h2').replace(/<\/h1>/g, '</h2>').replace(/alt=""/g, `alt="${escapeHtml(`صورة توضيحية: ${pub.title_ar}`)}"`),
         breadcrumbJsonLd: publicationBreadcrumbs(pub),
-        relatedHtml: `<section aria-label="مقالات ذات صلة"><h2>مقالات ذات صلة</h2>${relatedPublications(pub, await listPublishedPublications()).map(item => `<p><a href="${escapeHtml(getCanonicalPath(item))}">${escapeHtml(item.title_ar)}</a></p>`).join('')}</section>`,
+        faqJsonLd: publicationFaqStructuredData(pub, buildAbsoluteUrl(canonicalPath)),
+        relatedHtml: `<section aria-label="مقالات ذات صلة"><h2>مقالات ذات صلة</h2>${related.map(item => `<p><a href="${escapeHtml(getCanonicalPath(item))}">${escapeHtml(item.title_ar)}</a></p>`).join('')}</section>`,
         jsonLd: renderArticleJsonLd({
           pub,
           language,

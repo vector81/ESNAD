@@ -56,12 +56,12 @@ function getCurrentScrollDepth() {
   return Math.max(0, Math.min(100, ((scrollTop + viewportHeight) / scrollHeight) * 100))
 }
 
-export function PublicationPage({ language, initialPublication }: { language: AppLanguage; initialPublication?: Publication }) {
+export function PublicationPage({ language, initialPublication, initialRelated }: { language: AppLanguage; initialPublication?: Publication; initialRelated?: Publication[] }) {
   const { slug } = useParams()
   const navigate = useNavigate()
   const { user, library, refreshLibrary, loading: sessionLoading } = usePublicSession()
   const [publication, setPublication] = useState<Publication | null>(() => initialPublication || (typeof document !== 'undefined' ? JSON.parse(document.getElementById('initial-publication-data')?.textContent || 'null') as Publication | null : null))
-  const [related, setRelated] = useState<Publication[]>([])
+  const [related, setRelated] = useState<Publication[]>(() => initialRelated || [])
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(() => !initialPublication && (typeof document === 'undefined' || !document.getElementById('initial-publication-data')))
   const [loadFailed, setLoadFailed] = useState(false)

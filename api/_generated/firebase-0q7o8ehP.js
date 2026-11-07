@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { browserLocalPersistence, browserSessionPersistence, indexedDBLocalPersistence, initializeAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-//#region src/lib/firebase.ts
+// src/lib/firebase.ts
 function parseAdminEmails(value) {
 	if (!value) return [];
 	return value.split(",").map((entry) => entry.trim().toLowerCase()).filter(Boolean);
@@ -11,7 +11,7 @@ function parseAdminEmails(value) {
 (() => {
 	const fromEnv = parseAdminEmails(void 0);
 	const baseline = ["abuali882005@gmail.com", "info@esnad.com.lb"];
-	return [...new Set([...fromEnv, ...baseline])];
+	return [.../* @__PURE__ */ new Set([...fromEnv, ...baseline])];
 })()[0];
 var firebaseProjectId = firebaseConfig.projectId?.trim() ?? "";
 var app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
@@ -61,5 +61,4 @@ async function waitForAuthenticatedUser() {
 	logFirebaseDebug("waitForAuthenticatedUser:ready");
 	return currentUser;
 }
-//#endregion
 export { auth, db, logFirebaseDebug, waitForAuthenticatedUser };

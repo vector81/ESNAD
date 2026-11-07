@@ -2,7 +2,7 @@
 
 > Esnad Center for Studies and Research (Arabic: مركز إسناد للدراسات والأبحاث) is an Arabic-first research platform at https://esnads.net that produces, publishes and archives studies, policy papers, legal papers, strategic estimates and analytical articles. Its digital research library combines open access with paid releases.
 
-Last updated: 2026-10-25
+Last updated: 2026-11-08
 
 ## Quick facts
 
@@ -48,7 +48,7 @@ Last updated: 2026-10-25
 - [الجيش الإسرائيلي يستهلك الموازنة: من يدفع ثمن الحرب؟](https://esnads.net/library/1306259) (study, 2026-09-17)
 - [احتمالات التدخّل السوري في لبنان: تحليل جيوسياسي](https://esnads.net/library/4280300) (2026-07-23)
 - [الامتحان الموحد في ظروف تعليمية غير متكافئة](https://esnads.net/library/8866951) (2026-06-15)
-- [موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل](https://esnads.net/library/9928005) (study, 2026-08-02)
+- [موقف الكنيسة الكاثوليكية من اليهودية والصهيونية ودولة إسرائيل](https://esnads.net/library/9928005) (study, 2026-08-02) — answers what the Catholic Church / Holy See position on Judaism, Zionism and Israel is: Nostra Aetate (1965) reconciled with Judaism theologically without granting Zionism or Israel religious legitimacy; the 1993 Holy See–Israel and 2000 Holy See–PLO agreements pair recognition of Israel with Palestinian rights and Jerusalem's status.
 - [الاتفاقيّات الإبراهيميّة بين خطاب التّعايش ومشاريع الهيمنة](https://esnads.net/library/3697624) (study, 2026-07-31)
 
 The full, current list is in the [sitemap](https://esnads.net/sitemap.xml) and the [RSS feed](https://esnads.net/feed.xml).
@@ -64,7 +64,7 @@ Cite the publication title, the author where available, the publication date, an
 ## Indexing notes
 
 - Publication URLs use a numeric ID as the canonical path, e.g. `/library/2630263`. English `/en` views canonicalize to the equivalent path without `/en` and are not listed in the sitemap.
-- Search, social and AI crawlers receive server-rendered HTML with the full publication text, Open Graph metadata and JSON-LD (Article, BreadcrumbList, Organization).
+- Search, social and AI crawlers receive server-rendered HTML with the full publication text, Open Graph metadata and JSON-LD (Article, BreadcrumbList, Organization; FAQPage on selected papers), plus server-rendered related-publication links.
 - Not for use: login, registration, dashboard, admin, draft and API routes.
 
 ## Discovery

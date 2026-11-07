@@ -8,15 +8,15 @@ import { PublicationPage } from '../pages/public/PublicationPage'
 import { AboutCenterPage } from '../pages/public/AboutCenterPage'
 import { ContactCenterPage } from '../pages/public/ContactCenterPage'
 import type { AppLanguage, Publication } from '../types/publication'
-export function renderPublicPage({path, language, publications, publication}: {path:string; language:AppLanguage; publications?:Publication[]; publication?:Publication}) {
+export function renderPublicPage({path, language, publications, publication, related}: {path:string; language:AppLanguage; publications?:Publication[]; publication?:Publication; related?:Publication[]}) {
   return renderToString(<MemoryRouter initialEntries={[path]}><PublicSessionProvider>
     <Suspense fallback={<div className="container" style={{ minHeight: '100vh' }} aria-busy="true">جار التحميل…</div>}><Routes>
       <Route path="/" element={<ResearchHomePage language={language} initialPublications={publications} />} />
       <Route path="/en" element={<ResearchHomePage language={language} initialPublications={publications} />} />
-      <Route path="/library/:slug" element={<PublicationPage language={language} initialPublication={publication} />} />
-      <Route path="/en/library/:slug" element={<PublicationPage language={language} initialPublication={publication} />} />
-      <Route path="/books/:slug" element={<PublicationPage language={language} initialPublication={publication} />} />
-      <Route path="/en/books/:slug" element={<PublicationPage language={language} initialPublication={publication} />} />
+      <Route path="/library/:slug" element={<PublicationPage language={language} initialPublication={publication} initialRelated={related} />} />
+      <Route path="/en/library/:slug" element={<PublicationPage language={language} initialPublication={publication} initialRelated={related} />} />
+      <Route path="/books/:slug" element={<PublicationPage language={language} initialPublication={publication} initialRelated={related} />} />
+      <Route path="/en/books/:slug" element={<PublicationPage language={language} initialPublication={publication} initialRelated={related} />} />
       <Route path="/about" element={<AboutCenterPage language={language} />} />
       <Route path="/en/about" element={<AboutCenterPage language={language} />} />
       <Route path="/contact" element={<ContactCenterPage language={language} />} />

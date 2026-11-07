@@ -1,5 +1,5 @@
 import { ARTICLE_COVER_FALLBACKS } from './articleCoverFallbacks.js'
-import { publicationSeo, publicationSourceUrl } from './seoMetadata.js'
+import { publicationSeo, publicationSourceUrl, publicationAbout } from './seoMetadata.js'
 import { cleanAuthor } from './cleanAuthor.js'
 
 export const SEO_SITE_URL = 'https://esnads.net'
@@ -83,6 +83,7 @@ export function createArticleStructuredData(pub, { url, image = getPublicationIm
   const dateModified = isoDate(pub.updated_at) || datePublished
   const publicationImage = image || getPublicationImage(pub)
   const sourceUrl = publicationSourceUrl(pub)
+  const about = publicationAbout(pub)
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -101,6 +102,7 @@ export function createArticleStructuredData(pub, { url, image = getPublicationIm
     ...(datePublished ? { datePublished } : {}),
     ...(dateModified ? { dateModified } : {}),
     ...(sourceUrl ? { isBasedOn: sourceUrl } : {}),
+    ...(about.length ? { about } : {}),
   }
 }
 

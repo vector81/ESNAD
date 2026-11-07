@@ -2,7 +2,7 @@ import type { Publication } from '../types/publication'
 export const SEO_UPDATED_AT: string
 export const HOME_DESCRIPTION: string
 export const PAGE_SEO: Record<string, {title:string; description:string}>
-export const PUBLICATION_SEO: Record<string, {title:string; description:string}>
+export const PUBLICATION_SEO: Record<string, {title:string; description:string; seoUpdatedAt?: string; about?: string[]; faq?: string[][]}>
 export function publicationPublicId(pub: Partial<Publication>): string
 export function publicationPath(pub: Partial<Publication>): string
 export function shortText(value: unknown, limit: number): string
@@ -15,3 +15,6 @@ export const LIBRARY_HEADING_AR: string
 export const LIBRARY_DESCRIPTION_AR: string
 export function publicationLeadText(pub: Partial<Publication>): string
 export function publicationSourceUrl(pub: Partial<Publication>): string
+export function publicationSeoUpdatedAt(pub: Partial<Publication>): string
+export function publicationAbout(pub: Partial<Publication>): Array<{'@type': string; name: string}>
+export function publicationFaqStructuredData(pub: Partial<Publication>, url?: string): Record<string, unknown> | null

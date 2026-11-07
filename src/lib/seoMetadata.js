@@ -12,7 +12,20 @@ export const PAGE_SEO = {
   '/contact': { title: 'تواصل مع مركز إسناد للدراسات والأبحاث | إسناد', description: 'راسل مركز إسناد للدراسات والأبحاث للاستفسارات البحثية أو التعاون المؤسسي أو طلبات الاشتراك عبر نموذج التواصل.' },
 }
 export const PUBLICATION_SEO = {
-  '9928005': { title: 'موقف الكنيسة الكاثوليكية من إسرائيل والصهيونية | إسناد', description: 'دراسة في موقف الكنيسة الكاثوليكية من اليهودية والصهيونية وإسرائيل، والمصالحة اللاهوتية والنقد السياسي، مع مراجع بينها أعمال ماسيمو فاجيولي.' },
+  '9928005': {
+    title: 'موقف الكنيسة الكاثوليكية من اليهودية والصهيونية وإسرائيل | إسناد',
+    description: 'موقف الكنيسة الكاثوليكية من إسرائيل: وثيقة «في عصرنا» (1965) صالحت اليهودية لاهوتيًا دون منح الصهيونية أو إسرائيل شرعية دينية، مع تأكيد الحقوق الفلسطينية.',
+    seoUpdatedAt: '2026-11-08T00:00:00.000Z',
+    about: ['الكنيسة الكاثوليكية', 'الكرسي الرسولي (الفاتيكان)', 'وثيقة في عصرنا (Nostra Aetate)', 'الصهيونية', 'إسرائيل', 'العلاقات الكاثوليكية اليهودية'],
+    // Answers are condensed from the paper's own text (sections 1-4 and conclusion); no new claims.
+    faq: [
+      ['ما موقف الكنيسة الكاثوليكية من اليهودية؟', 'منذ وثيقة «في عصرنا» (Nostra Aetate) سنة 1965 تعترف الكنيسة الكاثوليكية بالجذور اليهودية للمسيحية، وترفض تحميل اليهود جماعيًا مسؤولية موت المسيح، وتدين معاداة السامية، وتدعو إلى الحوار والاحترام بدل منطق الاتهام.'],
+      ['هل تمنح الكنيسة الكاثوليكية الصهيونية أو دولة إسرائيل شرعية دينية؟', 'لا. تخلص الورقة إلى أن المصالحة اللاهوتية مع اليهودية لم تمنح الصهيونية أو دولة إسرائيل شرعية دينية مطلقة، ولم تجعل وعد الأرض تفويضًا سياسيًا مطلقًا، فيما تبقى علاقة العهد بالأرض موضوعًا لاجتهادات أكاديمية غير ملزمة.'],
+      ['هل يعترف الفاتيكان (الكرسي الرسولي) بإسرائيل؟', 'نعم. أقام الاتفاق الأساسي بين الكرسي الرسولي ودولة إسرائيل سنة 1993 علاقات دبلوماسية، لكنه احتفظ بحق الكرسي الرسولي في أداء رسالته الأخلاقية والروحية وبقائه خارج النزاعات على الأراضي والحدود غير المحسومة، فالاعتراف الدبلوماسي لا يساوي إقرارًا لاهوتيًا بجميع دعاوى الدولة.'],
+      ['ما موقف الكرسي الرسولي من الحقوق الفلسطينية والقدس؟', 'دعا الاتفاق الأساسي بين الكرسي الرسولي ومنظمة التحرير الفلسطينية سنة 2000 إلى حل سلمي يحقق الحقوق الوطنية المشروعة للشعب الفلسطيني استنادًا إلى القانون الدولي وقرارات الأمم المتحدة، وعدّ الإجراءات الأحادية التي تغيّر طابع القدس ووضعها غير مقبولة أخلاقيًا وقانونيًا.'],
+      ['هل يُعدّ نقد السياسات الإسرائيلية معاداةً للسامية في الموقف الكاثوليكي؟', 'لا. بحسب الورقة يمكن نقد الاستيطان أو التهجير أو انتهاك الحقوق الفلسطينية من غير أن يكون ذلك عداءً لليهود؛ فلا يجوز استخدام القضية الفلسطينية لتبرير كراهية اليهود، ولا استخدام المصالحة الكاثوليكية اليهودية لمنح السياسات الإسرائيلية حصانة من النقد.'],
+    ],
+  },
   '7230859': { title: 'رماة ماهرون: المسيّرات وتغيّر معادلات حرب لبنان | إسناد', description: 'رماة ماهرون على جبهة لبنان: دراسة في دور مشغّلي المسيّرات وكيف تتحول الأداة الصغيرة إلى سلاح استراتيجي يغيّر معادلات الحرب.' },
 }
 export function publicationPublicId(pub) {
@@ -77,6 +90,14 @@ export function publicationSeo(pub) {
     title: override?.title || `${PUBLICATION_TITLE_PHRASES[publicationPublicId(pub)] || completeTitle(pub.headline_ar || pub.title_ar)} | إسناد`,
     description: shortText(cleanAbstract(pub.abstract_ar || pub.abstract_en).ar || override?.description || pub.description_ar || publicationLeadText(pub) || `قراءة ${pub.title_ar}، من إصدارات مركز إسناد للدراسات والأبحاث.`, 154),
   }
+}
+export function publicationSeoUpdatedAt(pub) { return PUBLICATION_SEO[publicationPublicId(pub)]?.seoUpdatedAt || '' }
+export function publicationAbout(pub) { return (PUBLICATION_SEO[publicationPublicId(pub)]?.about || []).map(name => ({ '@type': 'Thing', name })) }
+// FAQPage JSON-LD for papers with editor-checked Q&A drawn from the paper itself.
+export function publicationFaqStructuredData(pub, url = `https://esnads.net${publicationPath(pub)}`) {
+  const faq = PUBLICATION_SEO[publicationPublicId(pub)]?.faq
+  if (!faq?.length) return null
+  return { '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${url}#faq`, url, inLanguage: 'ar', isPartOf: { '@id': `${url}#article` }, mainEntity: faq.map(([name, text]) => ({ '@type': 'Question', name, acceptedAnswer: { '@type': 'Answer', text } })) }
 }
 export function breadcrumbs(items) {
   return { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items.map(([name, path], index) => ({ '@type': 'ListItem', position: index + 1, name, item: `https://esnads.net${path === '/' ? '' : path}` })) }

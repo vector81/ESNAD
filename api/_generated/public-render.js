@@ -4,30 +4,28 @@ import { Link, MemoryRouter, Route, Routes, useLocation, useNavigate, useParams 
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import { geoGraticule, geoOrthographic, geoPath } from "d3-geo";
 import katex from "katex";
-//#region src/lib/publicAuth.ts
+// src/lib/publicAuth.ts
 var auth = null;
 var ready = null;
 function loadPublicAuth() {
-	ready ??= import("./firebase-CDYWQsgv.js").then((module) => {
+	ready ??= import("./firebase-0q7o8ehP.js").then((module) => {
 		auth = module.auth;
 		return auth;
 	});
 	return ready;
 }
-//#endregion
-//#region src/lib/firebaseConfig.ts
+// src/lib/firebaseConfig.ts
 var firebaseConfig = {
-	apiKey: "AIzaSyA6I1fo0uGqrjBHdJXb3Wmav4E6pySLolI",
-	authDomain: "esnad-ebc17.firebaseapp.com",
-	projectId: "esnad-ebc17",
-	storageBucket: "esnad-ebc17.firebasestorage.app",
-	messagingSenderId: "140153770891",
-	appId: "1:140153770891:web:e75dfdf946ba4adf1d558e",
-	measurementId: "G-0T4N51814R"
+	apiKey: void 0,
+	authDomain: void 0,
+	projectId: void 0,
+	storageBucket: void 0,
+	messagingSenderId: void 0,
+	appId: void 0,
+	measurementId: void 0
 };
 var isFirebaseConfigured = Object.values(firebaseConfig).every(Boolean);
-//#endregion
-//#region src/contexts/PublicSessionContext.tsx
+// src/contexts/PublicSessionContext.tsx
 var DEMO_USER_STORAGE_KEY = "esnad_demo_public_user";
 var PublicSessionContext = createContext(void 0);
 function emptyLibrarySnapshot() {
@@ -65,8 +63,9 @@ function PublicSessionProvider({ children }) {
 	const [library, setLibrary] = useState(() => emptyLibrarySnapshot());
 	const [loading, setLoading] = useState(() => Boolean(isFirebaseConfigured));
 	const refreshLibrary = useCallback(async () => {
-		const { getLibrarySnapshot } = await import("./library-Cx5LdTvZ.js");
-		setLibrary(user ? await getLibrarySnapshot(user) : emptyLibrarySnapshot());
+		const { getLibrarySnapshot } = await import("./library-Ckg0wIN0.js");
+		const snapshot = user ? await getLibrarySnapshot(user) : emptyLibrarySnapshot();
+		setLibrary(snapshot);
 	}, [user]);
 	useEffect(() => {
 		if (!isFirebaseConfigured) return;
@@ -107,7 +106,7 @@ function PublicSessionProvider({ children }) {
 	useEffect(() => {
 		if (!user) return void 0;
 		let cancelled = false;
-		import("./library-Cx5LdTvZ.js").then(({ getLibrarySnapshot }) => getLibrarySnapshot(user)).then((snapshot) => {
+		import("./library-Ckg0wIN0.js").then(({ getLibrarySnapshot }) => getLibrarySnapshot(user)).then((snapshot) => {
 			if (!cancelled) setLibrary(snapshot);
 		}).catch(() => {
 			if (!cancelled) setLibrary(emptyLibrarySnapshot());
@@ -129,7 +128,8 @@ function PublicSessionProvider({ children }) {
 		}
 		const [instance, { signInWithEmailAndPassword }] = await Promise.all([loadPublicAuth(), import("firebase/auth")]);
 		if (!instance) throw new Error("تعذر تحميل تسجيل الدخول.");
-		setUser(mapFirebaseUser((await signInWithEmailAndPassword(instance, email, password)).user));
+		const credentials = await signInWithEmailAndPassword(instance, email, password);
+		setUser(mapFirebaseUser(credentials.user));
 	}, []);
 	const registerUser = useCallback(async (name, email, password) => {
 		if (!isFirebaseConfigured) {
@@ -187,13 +187,11 @@ function usePublicSession() {
 	if (!context) throw new Error("usePublicSession must be used inside PublicSessionProvider");
 	return context;
 }
-//#endregion
-//#region src/lib/cleanAuthor.js
+// src/lib/cleanAuthor.js
 function cleanAuthor(value) {
 	return String(value || "").replace(/(?:\s*\[[0-9٠-٩۰-۹]+\])+\s*$/u, "").trim();
 }
-//#endregion
-//#region src/lib/publicationIdMap.ts
+// src/lib/publicationIdMap.ts
 var PUBLICATION_ID_MAP = {
 	"5143394": "0c4524af-b0c3-4677-98d6-afd0784505e8",
 	"3938615": "0d9cec73-34ce-40f7-9810-bc00fd37e761",
@@ -219,8 +217,7 @@ var PUBLICATION_ID_MAP = {
 	"2728521": "e532cf7f-92fb-4b7a-a0b9-95ea2ca1496d",
 	"8866951": "f6c73482-7e7f-40e4-a28e-86269793456d"
 };
-//#endregion
-//#region src/lib/publications.ts
+// src/lib/publications.ts
 var PUBLICATION_CATEGORIES = [
 	{
 		id: "studies",
@@ -487,7 +484,7 @@ function filterPublication(publication, filters) {
 	return matchesSearch(publication, filters.search ?? "");
 }
 async function listPublishedPublicationsFromFirestore() {
-	const { db } = await import("./firebase-CDYWQsgv.js");
+	const { db } = await import("./firebase-0q7o8ehP.js");
 	const { collection, getDocs, query, where } = await import("firebase/firestore");
 	await loadTransliteration();
 	if (!db || !isFirebaseConfigured) return sortByPublished(readLocalPublications()).filter(isPublicationPublic);
@@ -582,7 +579,7 @@ async function listPublications(filters = {}) {
 	return (await listPublishedPublicationsFromFirestore()).filter((item) => filterPublication(item, filters));
 }
 async function getPublishedPublicationDocumentById(id) {
-	const { db } = await import("./firebase-CDYWQsgv.js");
+	const { db } = await import("./firebase-0q7o8ehP.js");
 	const { doc, getDoc } = await import("firebase/firestore");
 	await loadTransliteration();
 	if (!db) return null;
@@ -620,7 +617,7 @@ async function getPublicationBySlug(slug) {
 	return getPublicationBySlugFromFirestore(trimmedSlug);
 }
 async function getPublicationBySlugFromFirestore(trimmedSlug) {
-	const { db, logFirebaseDebug } = await import("./firebase-CDYWQsgv.js");
+	const { db, logFirebaseDebug } = await import("./firebase-0q7o8ehP.js");
 	const { collection, getDocs, query, where } = await import("firebase/firestore");
 	await loadTransliteration();
 	if (!db) return null;
@@ -665,10 +662,9 @@ async function getPublicationBySlugFromFirestore(trimmedSlug) {
 		throw error;
 	}
 }
-//#endregion
-//#region src/lib/analytics.ts
-var POSTHOG_TOKEN = "[SENSITIVE]".trim();
-var POSTHOG_HOST = "[SENSITIVE]".trim();
+// src/lib/analytics.ts
+var POSTHOG_TOKEN = void 0;
+var POSTHOG_HOST = "https://us.i.posthog.com";
 var isPostHogEnabled = Boolean(POSTHOG_TOKEN);
 var ANONYMOUS_ID_KEY = "esnad_analytics_distinct_id";
 var CONSENT_KEY = "esnad_analytics_consent_v2";
@@ -804,8 +800,7 @@ function trackPublicationReadTime(publication, language, readingSeconds, maxScro
 	});
 }
 startPostHog();
-//#endregion
-//#region src/components/public/CookieConsentBanner.tsx
+// src/components/public/CookieConsentBanner.tsx
 function CookieConsentBanner() {
 	const location = useLocation();
 	const [status, setStatus] = useState(() => getAnalyticsConsentStatus());
@@ -848,8 +843,7 @@ function CookieConsentBanner() {
 		})
 	});
 }
-//#endregion
-//#region src/lib/articleCoverFallbacks.js
+// src/lib/articleCoverFallbacks.js
 var ARTICLE_COVER_FALLBACKS = {
 	"01899275-a950-45b7-922a-0e71a5e35b7a": "/assets/article-covers/01899275-a950-45b7-922a-0e71a5e35b7a.png",
 	"fd7a55a3-7964-4c9f-82c5-2a741e3e278d": "/assets/article-covers/fd7a55a3-7964-4c9f-82c5-2a741e3e278d.png",
@@ -867,8 +861,7 @@ var ARTICLE_COVER_FALLBACKS = {
 	"c668f12a-49f3-4548-8672-d7f02f26f558": "/assets/article-covers/c668f12a-49f3-4548-8672-d7f02f26f558.png",
 	"b1c54007-f429-49c0-a19f-0e4fc10ce12a": "/assets/article-covers/b1c54007-f429-49c0-a19f-0e4fc10ce12a.png"
 };
-//#endregion
-//#region src/lib/cleanAbstract.js
+// src/lib/cleanAbstract.js
 function cleanAbstract(value) {
 	let text = String(value || "").trim();
 	text = text.replace(/^[\p{L}\p{M}.\s]{1,60}\/\s*/u, "");
@@ -891,9 +884,10 @@ function cleanAbstract(value) {
 		en: lines.slice(split).join("\n").trim()
 	};
 }
-//#endregion
-//#region src/lib/seoMetadata.js
+// src/lib/seoMetadata.js
 var HOME_DESCRIPTION = "مركز إسناد للدراسات والأبحاث، المعروف أيضاً باسم مركز اسناد: مكتبة عربية للدراسات السياسية والقانونية والمقالات والكتب.";
+var LIBRARY_TITLE_AR = "مكتبة إسناد البحثية: دراسات وأوراق بحثية";
+var LIBRARY_HEADING_AR = "مكتبة إسناد البحثية";
 var PAGE_SEO = {
 	"/": {
 		title: "مركز إسناد للدراسات والأبحاث",
@@ -903,6 +897,10 @@ var PAGE_SEO = {
 		title: "مركز اسناد الإلكتروني للدراسات والأبحاث | إسناد",
 		description: "تعرّف إلى مركز إسناد للدراسات والأبحاث، المعروف باسم مركز اسناد الالكتروني، ورسالته في نشر الدراسات والأوراق البحثية والمقالات باللغة العربية."
 	},
+	"/library": {
+		title: LIBRARY_TITLE_AR,
+		description: "مكتبة إسناد (مكتبة اسناد) البحثية من مركز إسناد للدراسات والأبحاث: دراسات وأوراق سياسية وقانونية وتقديرات استراتيجية ومقالات تحليلية عن لبنان والمنطقة."
+	},
 	"/contact": {
 		title: "تواصل مع مركز إسناد للدراسات والأبحاث | إسناد",
 		description: "راسل مركز إسناد للدراسات والأبحاث للاستفسارات البحثية أو التعاون المؤسسي أو طلبات الاشتراك عبر نموذج التواصل."
@@ -910,8 +908,24 @@ var PAGE_SEO = {
 };
 var PUBLICATION_SEO = {
 	"9928005": {
-		title: "موقف الكنيسة الكاثوليكية من إسرائيل والصهيونية | إسناد",
-		description: "دراسة في موقف الكنيسة الكاثوليكية من اليهودية والصهيونية وإسرائيل، والمصالحة اللاهوتية والنقد السياسي، مع مراجع بينها أعمال ماسيمو فاجيولي."
+		title: "موقف الكنيسة الكاثوليكية من اليهودية والصهيونية وإسرائيل | إسناد",
+		description: "موقف الكنيسة الكاثوليكية من إسرائيل: وثيقة «في عصرنا» (1965) صالحت اليهودية لاهوتيًا دون منح الصهيونية أو إسرائيل شرعية دينية، مع تأكيد الحقوق الفلسطينية.",
+		seoUpdatedAt: "2026-11-08T00:00:00.000Z",
+		about: [
+			"الكنيسة الكاثوليكية",
+			"الكرسي الرسولي (الفاتيكان)",
+			"وثيقة في عصرنا (Nostra Aetate)",
+			"الصهيونية",
+			"إسرائيل",
+			"العلاقات الكاثوليكية اليهودية"
+		],
+		faq: [
+			["ما موقف الكنيسة الكاثوليكية من اليهودية؟", "منذ وثيقة «في عصرنا» (Nostra Aetate) سنة 1965 تعترف الكنيسة الكاثوليكية بالجذور اليهودية للمسيحية، وترفض تحميل اليهود جماعيًا مسؤولية موت المسيح، وتدين معاداة السامية، وتدعو إلى الحوار والاحترام بدل منطق الاتهام."],
+			["هل تمنح الكنيسة الكاثوليكية الصهيونية أو دولة إسرائيل شرعية دينية؟", "لا. تخلص الورقة إلى أن المصالحة اللاهوتية مع اليهودية لم تمنح الصهيونية أو دولة إسرائيل شرعية دينية مطلقة، ولم تجعل وعد الأرض تفويضًا سياسيًا مطلقًا، فيما تبقى علاقة العهد بالأرض موضوعًا لاجتهادات أكاديمية غير ملزمة."],
+			["هل يعترف الفاتيكان (الكرسي الرسولي) بإسرائيل؟", "نعم. أقام الاتفاق الأساسي بين الكرسي الرسولي ودولة إسرائيل سنة 1993 علاقات دبلوماسية، لكنه احتفظ بحق الكرسي الرسولي في أداء رسالته الأخلاقية والروحية وبقائه خارج النزاعات على الأراضي والحدود غير المحسومة، فالاعتراف الدبلوماسي لا يساوي إقرارًا لاهوتيًا بجميع دعاوى الدولة."],
+			["ما موقف الكرسي الرسولي من الحقوق الفلسطينية والقدس؟", "دعا الاتفاق الأساسي بين الكرسي الرسولي ومنظمة التحرير الفلسطينية سنة 2000 إلى حل سلمي يحقق الحقوق الوطنية المشروعة للشعب الفلسطيني استنادًا إلى القانون الدولي وقرارات الأمم المتحدة، وعدّ الإجراءات الأحادية التي تغيّر طابع القدس ووضعها غير مقبولة أخلاقيًا وقانونيًا."],
+			["هل يُعدّ نقد السياسات الإسرائيلية معاداةً للسامية في الموقف الكاثوليكي؟", "لا. بحسب الورقة يمكن نقد الاستيطان أو التهجير أو انتهاك الحقوق الفلسطينية من غير أن يكون ذلك عداءً لليهود؛ فلا يجوز استخدام القضية الفلسطينية لتبرير كراهية اليهود، ولا استخدام المصالحة الكاثوليكية اليهودية لمنح السياسات الإسرائيلية حصانة من النقد."]
+		]
 	},
 	"7230859": {
 		title: "رماة ماهرون: المسيّرات وتغيّر معادلات حرب لبنان | إسناد",
@@ -967,11 +981,57 @@ function completeTitle(value) {
 function contentText(node) {
 	return node?.text || (node?.content || []).map(contentText).join(" ");
 }
+var URL_ONLY = /^\s*https?:\/\/\S+\s*$/u;
+function isAttributionBlock(text, pub) {
+	const t = String(text || "").replace(/\s+/g, " ").trim();
+	if (!t || URL_ONLY.test(t)) return true;
+	const title = normalize(String(pub?.title_ar || "").replace(/\s+/g, " ").trim());
+	return t.length <= 40 || Boolean(title && normalize(t) === title);
+}
+function publicationLeadText(pub) {
+	const blocks = (pub?.content_json?.content || []).map(contentText);
+	const start = blocks.findIndex((text) => !isAttributionBlock(text, pub));
+	return start === -1 ? contentText(pub?.content_json) : blocks.slice(start).join(" ");
+}
+function publicationSourceUrl(pub) {
+	for (const text of (pub?.content_json?.content || []).slice(0, 4).map(contentText)) {
+		const url = String(text || "").trim();
+		if (URL_ONLY.test(url) && !/esnads\.net/i.test(url)) return url;
+		if (!isAttributionBlock(text, pub)) break;
+	}
+	return "";
+}
 function publicationSeo(pub) {
 	const override = PUBLICATION_SEO[publicationPublicId(pub)];
 	return {
 		title: override?.title || `${PUBLICATION_TITLE_PHRASES[publicationPublicId(pub)] || completeTitle(pub.headline_ar || pub.title_ar)} | إسناد`,
-		description: shortText(cleanAbstract(pub.abstract_ar || pub.abstract_en).ar || override?.description || pub.description_ar || contentText(pub.content_json) || `قراءة ${pub.title_ar}، من إصدارات مركز إسناد للدراسات والأبحاث.`, 154)
+		description: shortText(cleanAbstract(pub.abstract_ar || pub.abstract_en).ar || override?.description || pub.description_ar || publicationLeadText(pub) || `قراءة ${pub.title_ar}، من إصدارات مركز إسناد للدراسات والأبحاث.`, 154)
+	};
+}
+function publicationAbout(pub) {
+	return (PUBLICATION_SEO[publicationPublicId(pub)]?.about || []).map((name) => ({
+		"@type": "Thing",
+		name
+	}));
+}
+function publicationFaqStructuredData(pub, url = `https://esnads.net${publicationPath(pub)}`) {
+	const faq = PUBLICATION_SEO[publicationPublicId(pub)]?.faq;
+	if (!faq?.length) return null;
+	return {
+		"@context": "https://schema.org",
+		"@type": "FAQPage",
+		"@id": `${url}#faq`,
+		url,
+		inLanguage: "ar",
+		isPartOf: { "@id": `${url}#article` },
+		mainEntity: faq.map(([name, text]) => ({
+			"@type": "Question",
+			name,
+			acceptedAnswer: {
+				"@type": "Answer",
+				text
+			}
+		}))
 	};
 }
 function breadcrumbs(items) {
@@ -989,7 +1049,7 @@ function breadcrumbs(items) {
 function publicationBreadcrumbs(pub) {
 	return breadcrumbs([
 		["الرئيسية", "/"],
-		["المكتبة البحثية", "/library"],
+		[LIBRARY_HEADING_AR, "/library"],
 		[pub.title_ar, publicationPath(pub)]
 	]);
 }
@@ -1016,8 +1076,7 @@ function relatedPublications(pub, items, limit = 4) {
 		};
 	}).filter((entry) => entry.score > 1).sort((a, b) => b.score - a.score || String(b.item.published_at).localeCompare(String(a.item.published_at))).slice(0, limit).map((entry) => entry.item);
 }
-//#endregion
-//#region src/lib/structuredData.js
+// src/lib/structuredData.js
 var SEO_SITE_URL = "https://esnads.net";
 var SEO_SITE_NAME = "مركز إسناد للدراسات والأبحاث";
 var SEO_ALTERNATE_NAMES = [
@@ -1069,12 +1128,14 @@ function createArticleStructuredData(pub, { url, image = getPublicationImage(pub
 	const datePublished = isoDate(pub.published_at) || isoDate(pub.created_at);
 	const dateModified = isoDate(pub.updated_at) || datePublished;
 	const publicationImage = image || getPublicationImage(pub);
+	const sourceUrl = publicationSourceUrl(pub);
+	const about = publicationAbout(pub);
 	return {
 		"@context": "https://schema.org",
 		"@type": "Article",
 		"@id": `${url}#article`,
-		headline: pub.headline_ar?.trim() || pub.title_ar?.trim() || "",
-		name: pub.title_ar?.trim() || "",
+		headline: (pub.headline_ar || pub.title_ar || "").replace(/\s+/g, " ").trim(),
+		name: (pub.title_ar || "").replace(/\s+/g, " ").trim(),
 		description: publicationSeo(pub).description,
 		inLanguage: "ar",
 		url,
@@ -1093,14 +1154,15 @@ function createArticleStructuredData(pub, { url, image = getPublicationImage(pub
 		},
 		image: publicationImage ? [new URL(publicationImage, SEO_SITE_URL).href] : [],
 		...datePublished ? { datePublished } : {},
-		...dateModified ? { dateModified } : {}
+		...dateModified ? { dateModified } : {},
+		...sourceUrl ? { isBasedOn: sourceUrl } : {},
+		...about.length ? { about } : {}
 	};
 }
 function serializeStructuredData(data) {
 	return JSON.stringify(data).replace(/</g, "\\u003c");
 }
-//#endregion
-//#region src/hooks/usePageMeta.ts
+// src/hooks/usePageMeta.ts
 var SITE_NAME = "إسناد";
 var SITE_URL = "https://esnads.net";
 var DEFAULT_TITLE_AR = "مركز إسناد للدراسات والأبحاث";
@@ -1211,8 +1273,7 @@ function usePageMeta(language, meta) {
 		hasMeta
 	]);
 }
-//#endregion
-//#region src/components/ui/wireframe-dotted-globe.tsx
+// src/components/ui/wireframe-dotted-globe.tsx
 var COUNTRIES_DATA_URL = "/data/countries.json";
 var DEFAULT_RED_COUNTRIES = [
 	"Algeria",
@@ -1344,7 +1405,8 @@ function WireframeDottedGlobe({ size = 144, className = "", spinDurationMs = 140
 			const step = (now) => {
 				if (disposed) return;
 				const t = Math.min(1, (now - start) / spinDurationMs);
-				rotation[0] = startLambda + 360 * (t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+				const eased = t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+				rotation[0] = startLambda + 360 * eased;
 				if (t < 1) {
 					applyRotation();
 					frame = requestAnimationFrame(step);
@@ -1460,8 +1522,7 @@ function WireframeDottedGlobe({ size = 144, className = "", spinDurationMs = 140
 		})
 	});
 }
-//#endregion
-//#region src/lib/navigation.ts
+// src/lib/navigation.ts
 function buildLocalizedPath(language, path) {
 	if (language === "ar") return path;
 	if (path === "/") return "/en";
@@ -1470,8 +1531,7 @@ function buildLocalizedPath(language, path) {
 function buildPublicationPath(publication, language) {
 	return buildLocalizedPath(language, `${publication.kind === "book" ? "/books" : "/library"}/${getShareSlug(publication)}`);
 }
-//#endregion
-//#region src/components/public/PublicSiteShell.tsx
+// src/components/public/PublicSiteShell.tsx
 function getNavItems(language) {
 	return [
 		{
@@ -1555,8 +1615,9 @@ function PublicSiteShell({ language, children, noindex = false }) {
 							className: "nav",
 							children: navItems.map((item) => {
 								const href = buildLocalizedPath(language, item.path);
+								const active = href === buildLocalizedPath(language, "/") ? location.pathname === href : location.pathname === href || location.pathname.startsWith(`${href}/`);
 								return /* @__PURE__ */ jsx(Link, {
-									className: `nav__link${(href === buildLocalizedPath(language, "/") ? location.pathname === href : location.pathname === href || location.pathname.startsWith(`${href}/`)) ? " nav__link--active" : ""}`,
+									className: `nav__link${active ? " nav__link--active" : ""}`,
 									to: href,
 									children: item.label
 								}, item.path);
@@ -1625,8 +1686,9 @@ function PublicSiteShell({ language, children, noindex = false }) {
 					className: "mobile-drawer__nav",
 					children: navItems.map((item) => {
 						const href = buildLocalizedPath(language, item.path);
+						const active = href === buildLocalizedPath(language, "/") ? location.pathname === href : location.pathname === href || location.pathname.startsWith(`${href}/`);
 						return /* @__PURE__ */ jsx(Link, {
-							className: `mobile-drawer__link${(href === buildLocalizedPath(language, "/") ? location.pathname === href : location.pathname === href || location.pathname.startsWith(`${href}/`)) ? " mobile-drawer__link--active" : ""}`,
+							className: `mobile-drawer__link${active ? " mobile-drawer__link--active" : ""}`,
 							onClick: () => setMobileNavOpen(false),
 							to: href,
 							children: item.label
@@ -1698,8 +1760,7 @@ function PublicSiteShell({ language, children, noindex = false }) {
 		]
 	});
 }
-//#endregion
-//#region src/lib/cloudinary.ts
+// src/lib/cloudinary.ts
 function sanitizeEnvValue(value) {
 	const normalized = value?.trim() ?? "";
 	if (!normalized) return "";
@@ -1715,9 +1776,9 @@ function sanitizeEnvValue(value) {
 		"upload_preset"
 	].some((fragment) => lowered.includes(fragment)) ? "" : normalized;
 }
-sanitizeEnvValue("di3atf0hx");
-sanitizeEnvValue("ablecare_docs");
-sanitizeEnvValue("esnad");
+sanitizeEnvValue(void 0);
+sanitizeEnvValue(void 0);
+sanitizeEnvValue(void 0);
 function optimizeCloudinaryUrl(url, options = {}) {
 	if (!url) return "";
 	if (!/res\.cloudinary\.com\/.+?\/image\/upload\//.test(url)) return url;
@@ -1730,8 +1791,7 @@ function optimizeCloudinaryUrl(url, options = {}) {
 	if (width) parts.push(`w_${width}`, "c_limit");
 	return url.replace("/image/upload/", `/image/upload/${parts.join(",")}/`);
 }
-//#endregion
-//#region src/components/public/PublicationCard.tsx
+// src/components/public/PublicationCard.tsx
 function getPublicationPath(publication, language) {
 	return `${language === "en" ? "/en" : ""}/${publication.kind === "book" ? "books" : "library"}/${getShareSlug(publication)}`;
 }
@@ -1807,8 +1867,7 @@ function PublicationCard({ publication, language }) {
 		})
 	});
 }
-//#endregion
-//#region src/lib/seoTopics.js
+// src/lib/seoTopics.js
 var SEO_TOPICS = {
 	studies: {
 		title: "دراسات وأبحاث",
@@ -1915,8 +1974,7 @@ var SEO_TOPICS = {
 		intro: "مواد تعرض المعلومات والمعطيات البحثية بصورة بصرية تسهّل قراءتها ومقارنتها."
 	}
 };
-//#endregion
-//#region src/lib/articleImageAssets.js
+// src/lib/articleImageAssets.js
 var ARTICLE_IMAGE_ASSETS = {
 	"https://res.cloudinary.com/di3atf0hx/image/upload/f_auto,q_auto,w_2400,c_limit/v1779253360/esnad/yvala3gtudaycedcmo9w.jpg": {
 		"480": "/assets/article-images/b80f2b7fd6fc-480.webp",
@@ -2039,8 +2097,7 @@ var ARTICLE_IMAGE_ASSETS = {
 		"1200": "/assets/article-images/d909335b9d67-1200.webp"
 	}
 };
-//#endregion
-//#region src/lib/articleImageDimensions.js
+// src/lib/articleImageDimensions.js
 var ARTICLE_IMAGE_DIMENSIONS = {
 	"https://media.al-akhbar.com/store/archive/image/2025/9/2/bb9a2c92-1e36-4ec2-81ad-526dd7e1be6a.jpg?width=1000": {
 		"width": 1e3,
@@ -2123,8 +2180,7 @@ var ARTICLE_IMAGE_DIMENSIONS = {
 		"height": 1455
 	}
 };
-//#endregion
-//#region src/lib/articleImages.js
+// src/lib/articleImages.js
 function priorityArticleImage(content) {
 	const find = (node) => {
 		if (node?.type === "image" || node?.type === "figure") return String(node.attrs?.src || "");
@@ -2161,8 +2217,7 @@ function articleImageSize(src) {
 		height: 675
 	};
 }
-//#endregion
-//#region src/lib/initialPageHtml.js
+// src/lib/initialPageHtml.js
 var escapeHtml = (value) => String(value || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;");
 function displayImage(pub, width) {
 	const image = getPublicationImage(pub);
@@ -2185,79 +2240,20 @@ function homeHeroInnerHtml(pub, language = "ar") {
 	const title = pub ? ar ? pub.title_ar : pub.title_en || pub.title_ar : "";
 	return `<div class="home-hero__copy"><span class="home-badge">${ar ? SEO_SITE_NAME : "Esnad Center for Studies and Research"}</span><h1 class="home-hero__title">${ar ? "مكتبة بحثية عربية للدراسات والأوراق والكتب" : "An Arabic research library for studies, papers, and books"}</h1><p class="home-hero__sub">${ar ? "منصة متخصصة في نشر وأرشفة وبيع الإصدارات البحثية. تجمع بين الوصول المفتوح والمحتوى المدفوع في تجربة تصفح نظيفة ومركزة." : "A specialized platform for publishing, archiving, and selling research publications."}</p><div class="home-hero__actions"><a class="btn btn--brand" href="${prefix}/library">${ar ? "تصفح المكتبة" : "Browse library"}</a><a class="btn btn--brand-outline" href="${prefix}/articles">${ar ? "استكشف المقالات" : "Explore articles"}</a></div></div>${pub ? `<a class="home-hero__card" href="${prefix}${publicationPath(pub)}"><div class="home-hero__card-media">${getPublicationImage(pub) ? `<img alt="${escapeHtml(pub.title_ar)}" src="${escapeHtml(displayImage(pub, 800))}" srcset="${escapeHtml(articleImageSrcSet(getPublicationImage(pub)))}" sizes="(max-width: 800px) calc(100vw - 58px), 480px" width="800" height="450" decoding="async" fetchpriority="high" style="object-position:center top"/>` : "<div class=\"home-hero__card-media-placeholder\"></div>"}</div><div class="home-hero__card-body"><span class="home-tag">${escapeHtml(categoryLabels[pub.category] || SEO_TOPICS[pub.category]?.title || pub.category)}</span><h2 class="home-hero__card-title">${escapeHtml(title)}</h2></div></a>` : "<div class=\"home-hero__card home-hero__card--empty\"></div>"}`;
 }
-//#endregion
-//#region src/components/public/HomeHero.tsx
+// src/components/public/HomeHero.tsx
 function HomeHero({ publication, language }) {
 	return /* @__PURE__ */ jsx("section", {
 		className: "home-hero",
 		dangerouslySetInnerHTML: { __html: homeHeroInnerHtml(publication, language) }
 	});
 }
-//#endregion
-//#region src/components/public/NewsletterChallenge.tsx
-var scriptPromise;
-function loadTurnstile() {
-	if (window.turnstile) return Promise.resolve(window.turnstile);
-	if (!scriptPromise) scriptPromise = new Promise((resolve, reject) => {
-		const script = document.createElement("script");
-		script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-		script.async = true;
-		script.onload = () => window.turnstile ? resolve(window.turnstile) : reject(/* @__PURE__ */ new Error("Verification unavailable"));
-		script.onerror = () => {
-			script.remove();
-			reject(/* @__PURE__ */ new Error("Verification unavailable"));
-		};
-		document.head.appendChild(script);
-	}).catch((error) => {
-		scriptPromise = void 0;
-		throw error;
-	});
-	return scriptPromise;
-}
+// src/components/public/NewsletterChallenge.tsx
 function NewsletterChallenge({ language, onToken }) {
 	const container = useRef(null);
 	const [failed, setFailed] = useState(false);
 	const [attempt, setAttempt] = useState(0);
-	const sitekey = "0x4AAAAAAFgerYbfwBYwL68B";
-	useEffect(() => {
-		let cancelled = false;
-		let widgetId;
-		let api;
-		loadTurnstile().then((loaded) => {
-			if (cancelled || !container.current) return;
-			api = loaded;
-			widgetId = loaded.render(container.current, {
-				sitekey,
-				action: "newsletter",
-				language,
-				size: "flexible",
-				callback: (token) => {
-					if (!cancelled) {
-						setFailed(false);
-						onToken(token);
-					}
-				},
-				"expired-callback": () => {
-					if (!cancelled) onToken("");
-				},
-				"error-callback": () => {
-					if (!cancelled) {
-						onToken("");
-						setFailed(true);
-					}
-				}
-			});
-		}).catch(() => {
-			if (!cancelled) {
-				onToken("");
-				setFailed(true);
-			}
-		});
-		return () => {
-			cancelled = true;
-			if (api && widgetId !== void 0) api.remove(widgetId);
-		};
-	}, [
+	const sitekey = void 0;
+	useEffect(() => {}, [
 		sitekey,
 		language,
 		onToken,
@@ -2269,23 +2265,13 @@ function NewsletterChallenge({ language, onToken }) {
 			maxWidth: 360,
 			margin: "1rem auto"
 		},
-		children: [/* @__PURE__ */ jsx("div", { ref: container }), failed && /* @__PURE__ */ jsxs("p", {
+		children: [/* @__PURE__ */ jsx("div", { ref: container }), /* @__PURE__ */ jsxs("p", {
 			role: "alert",
-			children: [language === "ar" ? "تعذر تحميل التحقق الأمني. يرجى المحاولة مجدداً." : "The security check could not load. Please try again.", /* @__PURE__ */ jsx("button", {
-				type: "button",
-				className: "btn btn--brand",
-				onClick: () => {
-					setFailed(false);
-					onToken("");
-					setAttempt((value) => value + 1);
-				},
-				children: language === "ar" ? "إعادة المحاولة" : "Retry"
-			})]
+			children: [language === "ar" ? "تعذر تحميل التحقق الأمني. يرجى المحاولة مجدداً." : "The security check could not load. Please try again.", sitekey]
 		})]
 	});
 }
-//#endregion
-//#region src/pages/public/ResearchHomePage.tsx
+// src/pages/public/ResearchHomePage.tsx
 function formatNumber(value, language) {
 	return new Intl.NumberFormat(language === "ar" ? "ar-EG" : "en-AU").format(value);
 }
@@ -2534,8 +2520,7 @@ function ResearchHomePage({ language, initialPublications }) {
 		]
 	});
 }
-//#endregion
-//#region src/components/public/PublicationAbstract.tsx
+// src/components/public/PublicationAbstract.tsx
 function PublicationAbstract({ value }) {
 	const abstract = cleanAbstract(value);
 	return /* @__PURE__ */ jsx("div", {
@@ -2551,8 +2536,7 @@ function PublicationAbstract({ value }) {
 		}, language) : null)
 	});
 }
-//#endregion
-//#region src/lib/payments.ts
+// src/lib/payments.ts
 async function createCheckoutSession(publicationId, token, language) {
 	const response = await fetch("/api/checkout-session", {
 		method: "POST",
@@ -2584,14 +2568,14 @@ async function downloadPurchasedPublicationPdf(publicationId, token) {
 	}
 	return response.blob();
 }
-//#endregion
-//#region src/reader/lib/render-pm-json.tsx
+// src/reader/lib/render-pm-json.tsx
 function renderEquation(expression, displayMode) {
 	try {
-		return /* @__PURE__ */ jsx("span", { dangerouslySetInnerHTML: { __html: katex.renderToString(expression, {
+		const html = katex.renderToString(expression, {
 			throwOnError: false,
 			displayMode
-		}) } });
+		});
+		return /* @__PURE__ */ jsx("span", { dangerouslySetInnerHTML: { __html: html } });
 	} catch {
 		return /* @__PURE__ */ jsx("span", { children: expression });
 	}
@@ -2782,8 +2766,7 @@ function renderPmJson(content) {
 	const priorityImage = priorityArticleImage(doc);
 	return /* @__PURE__ */ jsx(Fragment, { children: doc.content.map((node, index) => renderNode(node, index, priorityImage)) });
 }
-//#endregion
-//#region src/lib/siteLinks.ts
+// src/lib/siteLinks.ts
 function normalizeUrl(value) {
 	return value?.trim().replace(/\/+$/, "") ?? "";
 }
@@ -2801,8 +2784,7 @@ normalizeUrl(void 0);
 function getPublicSiteUrl(path = "/") {
 	return joinPath(publicSiteUrl || runtimeOrigin() || "https://esnads.net", path);
 }
-//#endregion
-//#region src/hooks/useArticleStructuredData.ts
+// src/hooks/useArticleStructuredData.ts
 function useArticleStructuredData(publication) {
 	useEffect(() => {
 		if (!publication || publication.kind === "book") return;
@@ -2826,14 +2808,25 @@ function useArticleStructuredData(publication) {
 			document.head.appendChild(breadcrumb);
 		}
 		breadcrumb.textContent = serializeStructuredData(publicationBreadcrumbs(publication));
+		const faqData = publicationFaqStructuredData(publication);
+		let faq = document.getElementById("publication-faq-jsonld");
+		if (faqData) {
+			if (!faq) {
+				faq = document.createElement("script");
+				faq.id = "publication-faq-jsonld";
+				faq.type = "application/ld+json";
+				document.head.appendChild(faq);
+			}
+			faq.textContent = serializeStructuredData(faqData);
+		} else faq?.remove();
 		return () => {
 			script.remove();
 			breadcrumb.remove();
+			document.getElementById("publication-faq-jsonld")?.remove();
 		};
 	}, [publication]);
 }
-//#endregion
-//#region src/pages/public/PublicationPage.tsx
+// src/pages/public/PublicationPage.tsx
 function createReadSessionId() {
 	if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
 	return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -2847,12 +2840,12 @@ function getCurrentScrollDepth() {
 	if (scrollHeight <= viewportHeight) return 100;
 	return Math.max(0, Math.min(100, (scrollTop + viewportHeight) / scrollHeight * 100));
 }
-function PublicationPage({ language, initialPublication }) {
+function PublicationPage({ language, initialPublication, initialRelated }) {
 	const { slug } = useParams();
 	const navigate = useNavigate();
 	const { user, library, refreshLibrary, loading: sessionLoading } = usePublicSession();
 	const [publication, setPublication] = useState(() => initialPublication || (typeof document !== "undefined" ? JSON.parse(document.getElementById("initial-publication-data")?.textContent || "null") : null));
-	const [related, setRelated] = useState([]);
+	const [related, setRelated] = useState(() => initialRelated || []);
 	const [message, setMessage] = useState("");
 	const [loading, setLoading] = useState(() => !initialPublication && (typeof document === "undefined" || !document.getElementById("initial-publication-data")));
 	const [loadFailed, setLoadFailed] = useState(false);
@@ -3006,7 +2999,7 @@ function PublicationPage({ language, initialPublication }) {
 			navigate(buildLocalizedPath(language, "/login"));
 			return;
 		}
-		const { toggleSavedItem } = await import("./library-Cx5LdTvZ.js");
+		const { toggleSavedItem } = await import("./library-Ckg0wIN0.js");
 		await toggleSavedItem(user, publication.id, !isSaved);
 		await refreshLibrary();
 		setMessage(!isSaved ? language === "ar" ? "تمت إضافة الإصدار إلى المحفوظات." : "Saved to your library." : language === "ar" ? "تمت إزالة الإصدار من المحفوظات." : "Removed from saved items.");
@@ -3491,8 +3484,7 @@ function PublicationPage({ language, initialPublication }) {
 		})
 	});
 }
-//#endregion
-//#region src/pages/public/AboutCenterPage.tsx
+// src/pages/public/AboutCenterPage.tsx
 function AboutCenterPage({ language }) {
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
@@ -3653,8 +3645,7 @@ function AboutCenterPage({ language }) {
 		})]
 	});
 }
-//#endregion
-//#region src/pages/public/ContactCenterPage.tsx
+// src/pages/public/ContactCenterPage.tsx
 function ContactCenterPage({ language }) {
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
@@ -3750,9 +3741,8 @@ function ContactCenterPage({ language }) {
 		})
 	});
 }
-//#endregion
-//#region src/server/renderPublicPage.tsx
-function renderPublicPage({ path, language, publications, publication }) {
+// src/server/renderPublicPage.tsx
+function renderPublicPage({ path, language, publications, publication, related }) {
 	return renderToString(/* @__PURE__ */ jsx(MemoryRouter, {
 		initialEntries: [path],
 		children: /* @__PURE__ */ jsxs(PublicSessionProvider, { children: [/* @__PURE__ */ jsx(Suspense, {
@@ -3781,28 +3771,32 @@ function renderPublicPage({ path, language, publications, publication }) {
 					path: "/library/:slug",
 					element: /* @__PURE__ */ jsx(PublicationPage, {
 						language,
-						initialPublication: publication
+						initialPublication: publication,
+						initialRelated: related
 					})
 				}),
 				/* @__PURE__ */ jsx(Route, {
 					path: "/en/library/:slug",
 					element: /* @__PURE__ */ jsx(PublicationPage, {
 						language,
-						initialPublication: publication
+						initialPublication: publication,
+						initialRelated: related
 					})
 				}),
 				/* @__PURE__ */ jsx(Route, {
 					path: "/books/:slug",
 					element: /* @__PURE__ */ jsx(PublicationPage, {
 						language,
-						initialPublication: publication
+						initialPublication: publication,
+						initialRelated: related
 					})
 				}),
 				/* @__PURE__ */ jsx(Route, {
 					path: "/en/books/:slug",
 					element: /* @__PURE__ */ jsx(PublicationPage, {
 						language,
-						initialPublication: publication
+						initialPublication: publication,
+						initialRelated: related
 					})
 				}),
 				/* @__PURE__ */ jsx(Route, {
@@ -3825,5 +3819,4 @@ function renderPublicPage({ path, language, publications, publication }) {
 		}), /* @__PURE__ */ jsx(CookieConsentBanner, {})] })
 	}));
 }
-//#endregion
 export { isFirebaseConfigured as n, renderPublicPage, firebaseConfig as t };
